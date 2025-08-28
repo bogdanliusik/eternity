@@ -1,0 +1,104 @@
+@for (menu of menuService.pagesMenu; track menu) {
+  <div>
+    @if (menuService.showSideBar) {
+      <div class="mx-1 flex items-center justify-between py-3">
+        <small [class.hidden]="!menuService.showSideBar" class="text-muted-foreground/50 text-sm font-semibold">
+          {{ menu.group }}
+        </small>
+      </div>
+    }
+    <ul class="flex flex-col">
+      @for (item of menu.items; track item) {
+        <li class="relative">
+          @if (item.children) {
+            <div
+              (click)="toggleMenu(item)"
+              [ngClass]="{
+                'hover:bg-primary/10': !menuService.showSideBar && item.active,
+                'hover:bg-card/50': !menuService.showSideBar
+              }"
+              class="group relative flex grow items-center gap-4 rounded-lg px-2 cursor-pointer text-muted-foreground"
+              data-dropdown-trigger
+              [attr.title]="!menuService.showSideBar ? item.label : null"
+              [attr.aria-label]="!menuService.showSideBar ? item.label : null"
+            >
+              <div class="group-hover:text-primary">
+                <lucide-icon [img]="item.icon" class="h-5 w-5"></lucide-icon>
+              </div>
+              <div class="flex h-9 grow items-center justify-start rounded-sm">
+                <span
+                  [class.hidden]="!menuService.showSideBar"
+                  class="truncate text-sm font-semibold tracking-wide group-hover:text-primary"
+                >
+                  {{ item.label }}
+                </span>
+              </div>
+              <button
+                [class.hidden]="!menuService.showSideBar"
+                class="text-foreground/50 flex items-center justify-end p-0 right-0 cursor-pointer"
+                (click)="$event.stopPropagation(); item.expanded = !item.expanded"
+                type="button">
+                @if (!item.expanded){
+                  <lucide-icon [img]="plusIcon" class="h-4 w-4"></lucide-icon>
+                } @else {
+                  <lucide-icon [img]="minusIcon" class="h-4 w-4"></lucide-icon>
+                }
+              </button>
+            </div>
+            @if (!menuService.showSideBar && item.expanded) {
+              <div class="absolute left-full top-0 z-50 ml-2 w-48 bg-card border border-border rounded-lg shadow-lg sidebar-dropdown">
+                <div>
+                  <div class="px-3 py-2 border-b border-border">
+                    <span class="text-sm font-semibold text-foreground">{{ item.label }}</span>
+                  </div>
+                  @for (child of item.children; track child) {
+                    <a
+                      routerLink="{{ child.route }}"
+                      routerLinkActive="text-primary bg-primary/10"
+                      class="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors"
+                      (click)="menuService.closeAllDropdowns()">
+                      @if (child.icon) {
+                        <lucide-icon [img]="child.icon" class="h-4 w-4"></lucide-icon>
+                      }
+                      <span>{{ child.label }}</span>
+                    </a>
+                  }
+                </div>
+              </div>
+            }
+            @if (menuService.showSideBar) {
+              <app-sidebar-submenu [submenu]="item"></app-sidebar-submenu>
+            }
+          } @else {
+            <a
+              routerLink="{{ item.route }}"
+              routerLinkActive="text-primary"
+              class="group relative flex grow items-center gap-4 rounded-lg
+              px-2 h-[36px] text-muted-foreground hover:text-primary cursor-pointer"
+              [ngClass]="{
+                'hover:bg-primary/10': !menuService.showSideBar && item.active,
+                'hover:bg-card/50': !menuService.showSideBar
+              }"
+              [attr.title]="!menuService.showSideBar ? item.label : null"
+              [attr.aria-label]="!menuService.showSideBar ? item.label : null"
+            >
+              <div class="group-hover:text-primary">
+                <lucide-icon [img]="item.icon" class="h-5 w-5"></lucide-icon>
+              </div>
+              <span
+                [class.hidden]="!menuService.showSideBar"
+                class="truncate text-sm font-semibold tracking-wide group-hover:text-primary">
+                {{ item.label }}
+              </span>
+            </a>
+          }
+        </li>
+      }
+    </ul>
+    @if (menu.separator) {
+      <div class="py-3">
+        <hr class="border-border border-dashed" />
+      </div>
+    }
+  </div>
+}
