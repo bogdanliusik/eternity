@@ -5,9 +5,8 @@ import { MenuItem } from '../types/menu-item';
 import { SubMenuItem } from '../types/sub-menu-item';
 import { Menu } from '../constants/menu';
 
-
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class MenuService implements OnDestroy {
   private _showSidebar = signal(true);
@@ -66,9 +65,9 @@ export class MenuService implements OnDestroy {
         items: menuGroup.items.map((item) => {
           return {
             ...item,
-            expanded: item === menu ? !item.expanded : false,
+            expanded: item === menu ? !item.expanded : false
           };
-        }),
+        })
       };
     });
     this._pagesMenu.set(updatedMenu);
@@ -85,7 +84,7 @@ export class MenuService implements OnDestroy {
             return { ...item, expanded: false };
           }
           return item;
-        }),
+        })
       };
     });
     this._pagesMenu.set(updatedMenu);
@@ -100,7 +99,7 @@ export class MenuService implements OnDestroy {
             return { ...item, expanded: false };
           }
           return item;
-        }),
+        })
       };
     });
     this._pagesMenu.set(updatedMenu);
@@ -122,7 +121,7 @@ export class MenuService implements OnDestroy {
       paths: 'subset',
       queryParams: 'subset',
       fragment: 'ignored',
-      matrixParams: 'ignored',
+      matrixParams: 'ignored'
     });
   }
 

@@ -35,7 +35,7 @@
               </div>
               <button
                 [class.hidden]="!menuService.showSideBar"
-                class="text-foreground/50 flex items-center justify-end p-0 right-0 cursor-pointer"
+                class="text-color/50 flex items-center justify-end p-0 right-0 cursor-pointer"
                 (click)="$event.stopPropagation(); item.expanded = !item.expanded"
                 type="button">
                 @if (!item.expanded){
@@ -46,10 +46,10 @@
               </button>
             </div>
             @if (!menuService.showSideBar && item.expanded) {
-              <div class="absolute left-full top-0 z-50 ml-2 w-48 bg-card border border-border rounded-lg shadow-lg sidebar-dropdown">
+              <div class="absolute left-full top-0 z-50 ml-2 w-48 bg-card border border-surface rounded-lg shadow-lg sidebar-dropdown">
                 <div>
-                  <div class="px-3 py-2 border-b border-border">
-                    <span class="text-sm font-semibold text-foreground">{{ item.label }}</span>
+                  <div class="px-3 py-2 border-b border-surface">
+                    <span class="text-sm font-semibold text-color">{{ item.label }}</span>
                   </div>
                   @for (child of item.children; track child) {
                     <a
@@ -97,7 +97,7 @@
     </ul>
     @if (menu.separator) {
       <div class="py-3">
-        <hr class="border-border border-dashed" />
+        <hr class="border-surface border-dashed" />
       </div>
     }
   </div>

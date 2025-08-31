@@ -1,29 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 
-@import "tailwindcss";
+@import 'tailwindcss';
+@plugin "tailwindcss-primeui";
 @plugin "tailwind-scrollbar";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --default-font-family: "Manrope", sans-serif;
+  --default-font-family: 'Manrope', sans-serif;
   --shadow-custom: 0px 0px 50px 0px rgb(82 63 105 / 15%);
 
-  --color-border: var(--border);
+  --color-primary: var(--primary);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
 
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
 
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card-background);
 }
 
 @layer base {
@@ -38,26 +32,29 @@
 
 @layer base {
   :root {
-    --background: #FFFFFF;
-    --foreground: #0C1420;
-    --card: #F1F5F9;
-    --card-foreground: #000000;
-    --primary: #E11D48;
-    --primary-foreground: #FFFFFF;
-    --muted: #CFD9E5;
-    --muted-foreground: #64748B;
-    --destructive: #CC0033;
-    --destructive-foreground: #FAFAFA;
-    --border: #E2E8F0;
+    --primary: var(--p-primary-color);
+    --background: var(--p-surface-0);
+    --foreground: var(--p-surface-100);
+    --muted: var(--p-surface-200);
+    --muted-foreground: var(--p-surface-600);
+    --card-background: var(--p-surface-100);
+    --card-border: 1px solid var(--p-surface-200);
   }
 
   .dark {
-    --background: #0A0A0A;
-    --foreground: #F2F2F2;
-    --card: #121212;
-    --card-foreground: #262626;
-    --muted: #262626;
-    --muted-foreground: #A3A3A3;
-    --border: #262626;
+    --background: var(--p-surface-950);
+    --foreground: var(--p-surface-900);
+    --muted: var(--p-surface-800);
+    --muted-foreground: var(--p-surface-400);
+    --card-background: var(--p-surface-900);
+    --card-border: 1px solid transparent;
   }
+}
+
+.card {
+  background: var(--card-background);
+  border: var(--card-border);
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
 }

@@ -4,6 +4,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { routes } from './app.routes';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { providePrimeNG } from 'primeng/config';
+import EternityTheme from '@/core/themes/eternity-theme';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -13,5 +15,6 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi()),
     provideAngularSvgIcon(),
     provideAnimationsAsync(),
+    providePrimeNG({ theme: EternityTheme, ripple: false })
   ]
 };

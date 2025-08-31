@@ -22,7 +22,7 @@ export class Menu {
           icon: ChartPie,
           label: 'Dashboard',
           route: '/dashboard',
-          children: [{ label: 'Nfts', route: '/dashboard/nfts' }],
+          children: [{ label: 'Nfts', route: '/dashboard/nfts' }]
         },
         {
           icon: LockKeyhole,
@@ -33,8 +33,8 @@ export class Menu {
             { label: 'Sign in', route: '/auth/sign-in' },
             { label: 'Forgot Password', route: '/auth/forgot-password' },
             { label: 'New Password', route: '/auth/new-password' },
-            { label: 'Two Steps', route: '/auth/two-steps' },
-          ],
+            { label: 'Two Steps', route: '/auth/two-steps' }
+          ]
         },
         {
           icon: TriangleAlert,
@@ -42,16 +42,16 @@ export class Menu {
           route: '/errors',
           children: [
             { label: '404', route: '/errors/404' },
-            { label: '500', route: '/errors/500' },
-          ],
+            { label: '500', route: '/errors/500' }
+          ]
         },
         {
           icon: Box,
           label: 'Components',
           route: '/components',
-          children: [{ label: 'Table', route: '/components/table' }],
-        },
-      ],
+          children: [{ label: 'Table', route: '/components/table' }]
+        }
+      ]
     },
     {
       group: 'Collaboration',
@@ -60,19 +60,19 @@ export class Menu {
         {
           icon: Download,
           label: 'Download',
-          route: '/dashboard',
+          route: '/dashboard'
         },
         {
           icon: Gift,
           label: 'Gift Card',
-          route: '/gift',
+          route: '/gift'
         },
         {
           icon: Users,
           label: 'Users',
-          route: '/users',
-        },
-      ],
+          route: '/users'
+        }
+      ]
     },
     {
       group: 'Config',
@@ -81,12 +81,12 @@ export class Menu {
         {
           icon: Settings,
           label: 'Settings',
-          route: '/settings',
+          route: '/settings'
         },
         {
           icon: Bell,
           label: 'Notifications',
-          route: '/gift',
+          route: '/gift'
         },
         {
           icon: Folder,
@@ -95,10 +95,10 @@ export class Menu {
           children: [
             { label: 'Current Files', route: '/folders/current-files' },
             { label: 'Downloads', route: '/folders/download' },
-            { label: 'Trash', route: '/folders/trash' },
-          ],
-        },
-      ],
-    },
+            { label: 'Trash', route: '/folders/trash' }
+          ]
+        }
+      ]
+    }
   ];
 }

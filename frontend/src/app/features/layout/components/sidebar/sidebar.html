@@ -1,6 +1,6 @@
 <nav
   [ngClass]="menuService.showSideBar ? 'w-[210px] xl:w-[280px]' : 'w-[70px]'"
-  class="bg-background hidden h-full flex-col justify-between pt-3 lg:flex">
+  class="bg-foreground hidden h-full flex-col justify-between pt-3 lg:flex">
     <div
       [ngClass]="menuService.showSideBar ? 'justify-between' : 'justify-center'"
       class="mx-4 mb-2 flex h-9 items-center">
@@ -9,8 +9,8 @@
           <a
             routerLink="/"
             class="flex items-center gap-2 cursor-pointer rounded-sm p-2 focus:outline-hidden focus:ring-1 hover:opacity-80">
-            <svg-icon src="assets/logo.svg" class="text-foreground"></svg-icon>
-            <h3 class="text-foreground text-lg font-semibold">Eternity</h3>
+            <svg-icon src="assets/logo.svg" class="text-color"></svg-icon>
+            <h3 class="text-color text-lg font-semibold">Eternity</h3>
           </a>
         </div>
       }

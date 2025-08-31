@@ -1,5 +1,5 @@
 <div class="relative ml-3">
-  <button (click)="toggleMenu()" class="bg-card cursor-pointer relative flex rounded-full text-sm" type="button">
+  <button (click)="toggleMenu()" class="bg-card relative flex cursor-pointer rounded-full text-sm" type="button">
     <img
       clickOutside
       (clickOutside)="isOpen = false"
@@ -9,60 +9,32 @@
   </button>
   <div
     [@openClose]="isOpen ? 'open' : 'closed'"
-    class="bg-background shadow-custom border-muted absolute z-20 mt-2 w-60 origin-top-right transform rounded-md border border-dashed py-4 ring-1 ring-transparent ring-opacity-5 transition focus:outline-hidden right-0">
+    class="bg-foreground shadow-custom border-muted ring-opacity-5 absolute right-0 z-20 mt-2 w-60 origin-top-right
+      transform rounded-md border border-dashed py-4 ring-1 ring-transparent transition focus:outline-hidden">
     <div class="flext-row flex items-center px-4 pb-4">
       <div class="w-10 shrink-0">
         <img class="rounded-md" src="https://avatars.githubusercontent.com/u/66973922" alt="" />
       </div>
-      <div class="text-foreground overflow-hidden px-2 text-sm font-semibold">
+      <div class="text-color overflow-hidden px-2 text-sm font-semibold">
         Bogdan Liusik
-        <p class="text-muted-foreground truncate text-ellipsis text-xs font-semibold">{{ 'b.liusik@dev '}}</p>
+        <p class="text-muted-foreground truncate text-xs font-semibold text-ellipsis">
+          {{ 'b.liusik@dev ' }}
+        </p>
       </div>
     </div>
-    <div class="border-border border-b border-dashed"></div>
-    <ul class="my-2 mx-2 flex flex-col">
+    <div class="border-surface border-b border-dashed"></div>
+    <ul class="mx-2 my-2 flex flex-col">
       @for (item of profileMenu; track $index) {
         <li
           routerLink="{{ item.link }}"
           :key="$index"
-          class="text-muted-foreground hover:bg-card hover:text-primary inline-flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-xs font-semibold">
-          <lucide-icon [img]="item.icon" class="h-5 w-5 text-muted-foreground/50"></lucide-icon>
+          class="text-muted-foreground hover:text-primary inline-flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-xs font-semibold">
+          <lucide-icon [img]="item.icon" class="text-muted-foreground/50 h-5 w-5"></lucide-icon>
           {{ item.title }}
         </li>
       }
     </ul>
-    <hr class="border-border border-dashed" />
-    <div class="mx-4 my-2">
-      <span class="text-foreground text-xs font-semibold">Color</span>
-      <div class="mt-2 grid grid-cols-2 gap-2">
-        @for (item of themeColors; track $index) {
-        <div
-          :key="$index"
-          (click)="toggleThemeColor(item.name)"
-          [ngClass]="{ 'border-muted-foreground/30 bg-card': item.name == themeService.theme().color }"
-          class="focus-visible:ring-ring border-border bg-background text-muted-foreground hover:bg-card hover:text-foreground shadow-xs inline-flex h-8 cursor-pointer items-center justify-start space-x-2 whitespace-nowrap rounded-md border border-dashed px-3 text-xs font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
-          <span
-            [style.backgroundColor]="item.code"
-            class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"></span>
-          <p class="capitalize">{{ item.name }}</p>
-        </div>
-        }
-      </div>
-    </div>
-    <div class="mx-4 my-2">
-      <span class="text-foreground text-xs font-semibold">Mode</span>
-      <div class="mt-2 grid grid-cols-2 gap-2">
-        @for (item of themeMode; track $index) {
-        <div
-          :key="$index"
-          (click)="toggleThemeMode()"
-          [ngClass]="{ 'border-muted-foreground/30 bg-card': item == themeService.theme().mode }"
-          class="focus-visible:ring-ring border-border bg-background text-muted-foreground hover:bg-card hover:text-foreground shadow-xs inline-flex h-8 cursor-pointer items-center justify-start space-x-2 whitespace-nowrap rounded-md border border-dashed px-3 text-xs font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
-          <lucide-icon [img]="item == 'light' ? sunIcon : moonIcon" class="h-5 w-5 text-muted-foreground/50"></lucide-icon>
-          <p class="capitalize">{{ item }}</p>
-        </div>
-        }
-      </div>
-    </div>
+    <hr class="border-surface border-dashed" />
+    <app-theme-configurator></app-theme-configurator>
   </div>
 </div>

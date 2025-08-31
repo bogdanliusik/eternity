@@ -10,10 +10,8 @@
         <li>
           <div
             (click)="toggleMenu(item)"
-            class="text-muted-foreground hover:text-foreground group flex grow items-center gap-4">
-            <div
-              class="text-muted-foreground/50"
-              [class.text-primary]="item.active && !menuService.showSideBar">
+            class="text-muted-foreground hover:text-color group flex grow items-center gap-4">
+            <div class="text-muted-foreground/50" [class.text-primary]="item.active && !menuService.showSideBar">
               <lucide-icon [img]="item.icon" class="h-5 w-5"></lucide-icon>
             </div>
             <ng-container
@@ -33,16 +31,17 @@
             </ng-template>
             <ng-template #childMenu let-item="item">
               <div class="flex h-9 grow cursor-pointer items-center justify-start rounded-sm">
-                <a class="text-muted-foreground group-hover:text-primary truncate text-xs font-semibold tracking-wide focus:outline-hidden">
+                <a
+                  class="text-muted-foreground group-hover:text-primary truncate text-xs font-semibold tracking-wide focus:outline-hidden">
                   {{ item.label }}
                 </a>
               </div>
             </ng-template>
             @if (item.children) {
-            <button
+              <button
                 [class.hidden]="!menuService.showSideBar"
-                class="text-foreground/50 flex cursor-pointer items-center justify-end p-0 right-0">
-                @if(!item.expanded) {
+                class="text-color/50 right-0 flex cursor-pointer items-center justify-end p-0">
+                @if (!item.expanded) {
                   <lucide-icon [img]="plusIcon" class="h-4 w-4"></lucide-icon>
                 } @else {
                   <lucide-icon [img]="minusIcon" class="h-4 w-4"></lucide-icon>

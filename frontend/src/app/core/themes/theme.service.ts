@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
-import { Theme } from '../models/theme.model';
 import { effect } from '@angular/core';
+import { Theme } from './theme.models';
 
 @Injectable({
   providedIn: 'root',
@@ -8,7 +8,8 @@ import { effect } from '@angular/core';
 export class ThemeService {
   public theme = signal<Theme>({
     mode: 'dark',
-    color: 'base'
+    color: 'rose',
+    surface: 'gray'
   });
 
   constructor() {
@@ -30,13 +31,8 @@ export class ThemeService {
     this.setThemeClass();
   }
 
-  public get isDark(): boolean {
-    return this.theme().mode == 'dark';
-  }
-
   private setThemeClass() {
     document.querySelector('html')!.className = this.theme().mode;
-    document.querySelector('html')!.setAttribute('data-theme', this.theme().color);
   }
 
   private setLocalStorage() {

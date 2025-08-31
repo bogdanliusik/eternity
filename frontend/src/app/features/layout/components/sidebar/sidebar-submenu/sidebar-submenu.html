@@ -2,7 +2,7 @@
   class="max-h-0 overflow-hidden pt-1 pl-4"
   [class.hidden]="!menuService.showSideBar"
   [class.max-h-screen]="submenu.expanded">
-  <ul class="border-border text-muted-foreground flex flex-col border-dashed border-l pl-2">
+  <ul class="border-surface text-muted-foreground flex flex-col border-l border-dashed pl-2">
     @for (sub of submenu.children; track sub) {
       <li>
         <div class="text-muted-foreground hover:text-primary relative flex" (click)="toggleMenu(sub)">
@@ -18,9 +18,9 @@
               class="hover:bg-card inline-block w-full rounded-lg px-4 py-2 text-sm">
               {{ sub.label }}
             </a>
-            @if(menuService.isActive(sub.route)){
+            @if (menuService.isActive(sub.route)) {
               <span
-                class="size-1.5 bg-primary absolute flex translate-y-3.5 items-center rounded-full -translate-x-[11.5px]">
+                class="bg-primary absolute flex size-1.5 -translate-x-[11.5px] translate-y-3.5 items-center rounded-full">
               </span>
             }
           </ng-template>
@@ -30,7 +30,7 @@
             </a>
             <button
               [class.hidden]="!menuService.showSideBar"
-              class="text-foreground/50 flex cursor-pointer items-center justify-end px-2">
+              class="text-color/50 flex cursor-pointer items-center justify-end px-2">
               @if (!sub.expanded) {
                 <lucide-icon [img]="plusIcon" class="h-4 w-4"></lucide-icon>
               } @else {
@@ -39,7 +39,7 @@
             </button>
           </ng-template>
         </div>
-        @if(sub.children?.length){
+        @if (sub.children?.length) {
           <app-sidebar-submenu [submenu]="sub"></app-sidebar-submenu>
         }
       </li>

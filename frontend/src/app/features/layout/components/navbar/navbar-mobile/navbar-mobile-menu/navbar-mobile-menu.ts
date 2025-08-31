@@ -10,13 +10,7 @@ import { LucideAngularModule, Minus, Plus } from 'lucide-angular';
   selector: 'app-navbar-mobile-menu',
   templateUrl: './navbar-mobile-menu.html',
   styleUrl: './navbar-mobile-menu.css',
-  imports: [
-    LucideAngularModule,
-    NgTemplateOutlet,
-    RouterLink,
-    RouterLinkActive,
-    NavbarMobileSubmenu,
-  ]
+  imports: [LucideAngularModule, NgTemplateOutlet, RouterLink, RouterLinkActive, NavbarMobileSubmenu]
 })
 export class NavbarMobileMenu {
   public plusIcon = Plus;

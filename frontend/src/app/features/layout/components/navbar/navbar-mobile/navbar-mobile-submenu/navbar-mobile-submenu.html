@@ -1,8 +1,5 @@
-<div
-  class="max-h-0 overflow-hidden pt-1 pl-2.5"
-  [class.max-h-screen]="submenu.expanded">
-  <ul
-    class="border-border text-muted-foreground flex flex-col border-dashed border-l pl-2">
+<div class="max-h-0 overflow-hidden pt-1 pl-2.5" [class.max-h-screen]="submenu.expanded">
+  <ul class="border-surface text-muted-foreground flex flex-col border-l border-dashed pl-2">
     @for (sub of submenu.children; track $index) {
       <li>
         <div class="text-muted-foreground hover:text-primary relative flex rounded-sm" (click)="toggleMenu(sub)">
@@ -19,9 +16,9 @@
               class="hover:bg-card inline-block w-full px-4 py-2 text-xs">
               {{ sub.label }}
             </a>
-            @if(menuService.isActive(sub.route)) {
+            @if (menuService.isActive(sub.route)) {
               <span
-                class="size-1.5 bg-primary absolute flex translate-y-3.5 items-center rounded-full -translate-x-[11.5px]">
+                class="bg-primary absolute flex size-1.5 -translate-x-[11.5px] translate-y-3.5 items-center rounded-full">
               </span>
             }
           </ng-template>
@@ -29,8 +26,8 @@
             <a class="inline-block w-full cursor-pointer px-4 py-2 text-xs">
               {{ sub.label }}
             </a>
-            <button class="text-foreground/50 flex cursor-pointer items-center justify-end">
-              @if(!sub.expanded) {
+            <button class="text-color opacity-50 flex cursor-pointer items-center justify-end">
+              @if (!sub.expanded) {
                 <lucide-icon [img]="plusIcon" class="h-4 w-4"></lucide-icon>
               } @else {
                 <lucide-icon [img]="minusIcon" class="h-4 w-4"></lucide-icon>
@@ -38,7 +35,7 @@
             </button>
           </ng-template>
         </div>
-        @if(sub.children?.length){
+        @if (sub.children?.length) {
           <app-navbar-mobile-submenu [submenu]="sub"></app-navbar-mobile-submenu>
         }
       </li>
