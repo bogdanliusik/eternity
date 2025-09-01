@@ -13,59 +13,67 @@
           @if (item.children) {
             <div
               (click)="toggleMenu(item)"
+              cdkOverlayOrigin
+              #trigger="cdkOverlayOrigin"
               [ngClass]="{
                 'hover:bg-primary/10': !menuService.showSideBar && item.active,
                 'hover:bg-card/50': !menuService.showSideBar
               }"
-              class="group relative flex grow items-center gap-4 rounded-lg px-2 cursor-pointer text-muted-foreground"
-              data-dropdown-trigger
+              class="group text-muted-foreground relative flex grow cursor-pointer items-center gap-4 rounded-lg px-2"
               [attr.title]="!menuService.showSideBar ? item.label : null"
-              [attr.aria-label]="!menuService.showSideBar ? item.label : null"
-            >
+              [attr.aria-label]="!menuService.showSideBar ? item.label : null">
               <div class="group-hover:text-primary">
                 <lucide-icon [img]="item.icon" class="h-5 w-5"></lucide-icon>
               </div>
               <div class="flex h-9 grow items-center justify-start rounded-sm">
                 <span
                   [class.hidden]="!menuService.showSideBar"
-                  class="truncate text-sm font-semibold tracking-wide group-hover:text-primary"
-                >
+                  class="group-hover:text-primary truncate text-sm font-semibold tracking-wide">
                   {{ item.label }}
                 </span>
               </div>
               <button
                 [class.hidden]="!menuService.showSideBar"
-                class="text-color/50 flex items-center justify-end p-0 right-0 cursor-pointer"
+                class="text-color/50 right-0 flex cursor-pointer items-center justify-end p-0"
                 (click)="$event.stopPropagation(); item.expanded = !item.expanded"
                 type="button">
-                @if (!item.expanded){
+                @if (!item.expanded) {
                   <lucide-icon [img]="plusIcon" class="h-4 w-4"></lucide-icon>
                 } @else {
                   <lucide-icon [img]="minusIcon" class="h-4 w-4"></lucide-icon>
                 }
               </button>
             </div>
-            @if (!menuService.showSideBar && item.expanded) {
-              <div class="absolute left-full top-0 z-50 ml-2 w-48 bg-card border border-surface rounded-lg shadow-lg sidebar-dropdown">
-                <div>
-                  <div class="px-3 py-2 border-b border-surface">
-                    <span class="text-sm font-semibold text-color">{{ item.label }}</span>
-                  </div>
-                  @for (child of item.children; track child) {
-                    <a
-                      routerLink="{{ child.route }}"
-                      routerLinkActive="text-primary bg-primary/10"
-                      class="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors"
-                      (click)="menuService.closeAllDropdowns()">
-                      @if (child.icon) {
-                        <lucide-icon [img]="child.icon" class="h-4 w-4"></lucide-icon>
-                      }
-                      <span>{{ child.label }}</span>
-                    </a>
-                  }
+            <ng-template
+              cdkConnectedOverlay
+              [cdkConnectedOverlayOrigin]="trigger"
+              [cdkConnectedOverlayOpen]="!menuService.showSideBar && !!item.expanded"
+              [cdkConnectedOverlayHasBackdrop]="false"
+              [cdkConnectedOverlayPositions]="overlayPositions"
+              [cdkConnectedOverlayPush]="true"
+              [cdkConnectedOverlayFlexibleDimensions]="true"
+              [cdkConnectedOverlayViewportMargin]="8"
+              [cdkConnectedOverlayScrollStrategy]="scrollStrategies.reposition"
+              (backdropClick)="menuService.closeAllDropdowns()"
+              (overlayOutsideClick)="menuService.closeAllDropdowns()">
+              <div class="bg-card border-surface w-48 rounded-lg border shadow-lg">
+                <div class="border-surface border-b px-3 py-2">
+                  <span class="text-color text-sm font-semibold">{{ item.label }}</span>
                 </div>
+                @for (child of item.children; track child) {
+                  <a
+                    routerLink="{{ child.route }}"
+                    routerLinkActive="text-primary bg-primary/10"
+                    class="text-muted-foreground hover:text-primary hover:bg-primary/5 flex items-center gap-3 px-3 py-2 text-sm"
+                    (click)="menuService.closeAllDropdowns()">
+                    @if (child.icon) {
+                      <lucide-icon [img]="child.icon" class="h-4 w-4"></lucide-icon>
+                    }
+                    <span>{{ child.label }}</span>
+                  </a>
+                }
               </div>
-            }
+            </ng-template>
             @if (menuService.showSideBar) {
               <app-sidebar-submenu [submenu]="item"></app-sidebar-submenu>
             }
@@ -73,21 +81,19 @@
             <a
               routerLink="{{ item.route }}"
               routerLinkActive="text-primary"
-              class="group relative flex grow items-center gap-4 rounded-lg
-              px-2 h-[36px] text-muted-foreground hover:text-primary cursor-pointer"
+              class="group text-muted-foreground hover:text-primary relative flex h-[36px] grow cursor-pointer items-center gap-4 rounded-lg px-2"
               [ngClass]="{
                 'hover:bg-primary/10': !menuService.showSideBar && item.active,
                 'hover:bg-card/50': !menuService.showSideBar
               }"
               [attr.title]="!menuService.showSideBar ? item.label : null"
-              [attr.aria-label]="!menuService.showSideBar ? item.label : null"
-            >
+              [attr.aria-label]="!menuService.showSideBar ? item.label : null">
               <div class="group-hover:text-primary">
                 <lucide-icon [img]="item.icon" class="h-5 w-5"></lucide-icon>
               </div>
               <span
                 [class.hidden]="!menuService.showSideBar"
-                class="truncate text-sm font-semibold tracking-wide group-hover:text-primary">
+                class="group-hover:text-primary truncate text-sm font-semibold tracking-wide">
                 {{ item.label }}
               </span>
             </a>
