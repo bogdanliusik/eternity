@@ -53,9 +53,8 @@
               [cdkConnectedOverlayPush]="true"
               [cdkConnectedOverlayFlexibleDimensions]="true"
               [cdkConnectedOverlayViewportMargin]="8"
-              [cdkConnectedOverlayScrollStrategy]="scrollStrategies.reposition"
-              (backdropClick)="menuService.closeAllDropdowns()"
-              (overlayOutsideClick)="menuService.closeAllDropdowns()">
+              [cdkConnectedOverlayScrollStrategy]="repositionsStrategy"
+              (overlayOutsideClick)="onOverlayOutsideClick($event)">
               <div class="bg-card border-surface w-48 rounded-lg border shadow-lg">
                 <div class="border-surface border-b px-3 py-2">
                   <span class="text-color text-sm font-semibold">{{ item.label }}</span>
