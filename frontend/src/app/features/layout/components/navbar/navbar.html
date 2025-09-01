@@ -1,0 +1,20 @@
+<div class="bg-foreground border-b border-surface relative">
+  <div class="mx-auto px-5">
+    <div class="flex items-center justify-between py-3.5 md:justify-start">
+      <div class="lg:hidden">
+        <button
+          (click)="toggleMobileMenu()"
+          type="button"
+          class="bg-muted text-muted-foreground hover:bg-muted-foreground hover:text-muted inline-flex cursor-pointer
+            items-center justify-center rounded-md p-2"
+          aria-expanded="false">
+          <lucide-icon [img]="menuIcon" class="h-6 w-6"></lucide-icon>
+        </button>
+      </div>
+      <div class="items-center justify-end md:flex md:flex-1 lg:w-0">
+        <app-profile-menu></app-profile-menu>
+      </div>
+    </div>
+  </div>
+  <app-navbar-mobile></app-navbar-mobile>
+</div>

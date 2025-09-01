@@ -1,0 +1,48 @@
+<div
+  class="max-h-0 overflow-hidden pt-1 pl-4"
+  [class.hidden]="!menuService.showSideBar"
+  [class.max-h-screen]="submenu.expanded">
+  <ul class="border-surface text-muted-foreground flex flex-col border-l border-dashed pl-2">
+    @for (sub of submenu.children; track sub) {
+      <li>
+        <div class="text-muted-foreground hover:text-primary relative flex" (click)="toggleMenu(sub)">
+          <ng-container
+            [ngTemplateOutlet]="sub.children ? childMenu : parentMenu"
+            [ngTemplateOutletContext]="{ sub: sub }">
+          </ng-container>
+          <ng-template #parentMenu let-sub="sub">
+            <a
+              [routerLink]="sub.route"
+              routerLinkActive="text-primary"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="hover:bg-card inline-block w-full rounded-lg px-4 py-2 text-sm">
+              {{ sub.label }}
+            </a>
+            @if (menuService.isActive(sub.route)) {
+              <span
+                class="bg-primary absolute flex size-1.5 -translate-x-[11.5px] translate-y-3.5 items-center rounded-full">
+              </span>
+            }
+          </ng-template>
+          <ng-template #childMenu let-sub="sub">
+            <a class="inline-block w-full cursor-pointer px-4 py-2 text-xs">
+              {{ sub.label }}
+            </a>
+            <button
+              [class.hidden]="!menuService.showSideBar"
+              class="text-color/50 flex cursor-pointer items-center justify-end px-2">
+              @if (!sub.expanded) {
+                <lucide-icon [img]="plusIcon" class="h-4 w-4"></lucide-icon>
+              } @else {
+                <lucide-icon [img]="minusIcon" class="h-4 w-4"></lucide-icon>
+              }
+            </button>
+          </ng-template>
+        </div>
+        @if (sub.children?.length) {
+          <app-sidebar-submenu [submenu]="sub"></app-sidebar-submenu>
+        }
+      </li>
+    }
+  </ul>
+</div>
