@@ -1,8 +1,11 @@
 ﻿using Eternity.Application.Common.Interfaces;
 using Eternity.Application.Common.Models;
+using Eternity.Application.Users.Models;
+using Eternity.Application.Users.Queries;
 using Eternity.Domain.Constants;
 using Eternity.WebApi.Extensions;
-using Microsoft.AspNetCore.Identity.Data;
+using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Eternity.WebApi.Endpoints;
 
@@ -16,7 +19,7 @@ public sealed class UsersEndpoint : EndpointGroupBase
         group.MapPost(LoginCookie, "loginCookie").AllowAnonymous();
         group.MapPost(RefreshToken, "refreshToken").AllowAnonymous();
         group.MapPost(RefreshTokenCookie, "refreshTokenCookie").AllowAnonymous();
-        group.MapGet(GetCurrentUserName, "getCurrentUserName");
+        group.MapGet(GetCurrentUser, "getCurrentUser");
         group.MapGet(GetCurrentUserNameAsMember, "getCurrentUserNameAsMember")
             .RequireAuthorization(Policies.MemberOnly);
         group.MapGet(GetCurrentUserNameAsAdmin, "getCurrentUserNameAsAdmin")
@@ -25,7 +28,7 @@ public sealed class UsersEndpoint : EndpointGroupBase
     
 
     private static async Task<IResult> Login(LoginRequest loginRequest, IIdentityService identityService) {
-        var loginResult = await identityService.LoginAsync(loginRequest.Email, loginRequest.Password);
+        var loginResult = await identityService.LoginAsync(loginRequest.Username, loginRequest.Password);
         if (!loginResult.Succeeded) {
             return Results.Unauthorized();
         }
@@ -33,10 +36,11 @@ public sealed class UsersEndpoint : EndpointGroupBase
     }
 
     private static async Task<IResult> LoginCookie(LoginRequest loginRequest, IIdentityService identityService, HttpResponse response) {
-        var loginResult = await identityService.LoginAsync(loginRequest.Email, loginRequest.Password);
-        if (!loginResult.Succeeded)
-            return Results.Unauthorized();
-
+        await Task.Delay(1000);
+        var loginResult = await identityService.LoginAsync(loginRequest.Username, loginRequest.Password);
+        if (!loginResult.Succeeded) {
+            return Results.Ok(loginResult);
+        }
         SetAuthCookies(response, loginResult.Data);
         return Results.Ok(Result.Success());
     }
@@ -61,9 +65,11 @@ public sealed class UsersEndpoint : EndpointGroupBase
         SetAuthCookies(response, refreshResult.Data);
         return Results.Ok();
     }
-
-    private static IResult GetCurrentUserName(ICurrentUser currentUser) {
-        return Results.Ok(currentUser.Name);
+    
+    private async Task<IResult> GetCurrentUser(IMediator mediator) {
+        await Task.Delay(1000);
+        var currentUser = await mediator.Send(new GetCurrentUserQuery());
+        return Results.Ok(currentUser);
     }
     
     private static IResult GetCurrentUserNameAsMember(ICurrentUser currentUser) {
@@ -90,4 +96,10 @@ public sealed class UsersEndpoint : EndpointGroupBase
         response.Cookies.Append("AccessToken", tokenInfo.AccessToken, accessCookie);
         response.Cookies.Append("RefreshToken", tokenInfo.RefreshToken, refreshCookie);
     }
+}
+
+public class LoginRequest
+{
+    public string Username { get; set; }
+    public string Password { get; set; }
 }

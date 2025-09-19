@@ -17,7 +17,9 @@ function toHttpParams(params?: HttpRequestConfig['params']): HttpParams | undefi
   return hp;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CoreHttpService {
   private readonly http = inject(HttpClient);
 
@@ -35,18 +37,15 @@ export class CoreHttpService {
       );
   }
 
-  post(url: string, body?: unknown, config?: HttpRequestConfig): Observable<boolean>;
-  post<T>(url: string, body?: unknown, config?: HttpRequestConfig): Observable<T>;
-  post<T = boolean>(url: string, body?: unknown, config?: HttpRequestConfig): Observable<T | boolean> {
-    return this.http
-      .post<ApiEnvelope<T>>(url, body, {
-        headers: config?.headers,
-        params: toHttpParams(config?.params)
-      })
-      .pipe(
-        map((envelope) => unwrapEnvelope<T>(envelope)),
-        catchError((err) => throwEnvelopeError(err))
-      );
+  post(url: string, body?: unknown, config?: Omit<HttpRequestConfig, 'raw'>): Observable<boolean>;
+  post<T>(url: string, body?: unknown, config?: Omit<HttpRequestConfig, 'raw'>): Observable<T>;
+  post<T>(url: string, body: unknown, config: HttpRequestConfig & { raw: true }): Observable<ApiEnvelope<T>>;
+  post<T = boolean>(url: string, body?: unknown, config?: HttpRequestConfig): Observable<T | boolean | ApiEnvelope<T>> {
+    const obs = this.http.post<ApiEnvelope<T>>(url, body, {
+      headers: config?.headers,
+      params: toHttpParams(config?.params),
+    }).pipe(catchError(throwEnvelopeError));
+    return (config?.raw ? obs : obs.pipe(map(unwrapEnvelope)));
   }
 
   put(url: string, body?: unknown, config?: HttpRequestConfig): Observable<boolean>;
@@ -108,5 +107,5 @@ function throwEnvelopeError(err: any) {
     const e = err.error as ApiEnvelope<unknown>;
     return throwError(() => new ApiError(err.status, e.errors, e.errors?.join('; ') || err.message));
   }
-  return throwError(() => new ApiError(err?.status, [], err?.message ?? 'Network error'));
+  return throwError(() => new ApiError(err?.status, [err?.message], err?.message ?? 'Network error'));
 }

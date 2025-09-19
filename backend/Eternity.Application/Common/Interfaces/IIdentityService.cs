@@ -9,4 +9,5 @@ public interface IIdentityService
     Task<Result<AppTokenInfo>> RefreshToken(AppTokenInfo oldTokenInfo);
     Task<bool> AuthorizeAsync(Guid userId, string policyName);
     Task<Result> DeleteUserAsync(Guid userId);
+    Task<Result<IList<string>>> GetUserRolesAsync(Guid userId);
 }
