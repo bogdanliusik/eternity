@@ -3,6 +3,7 @@
 @import 'tailwindcss';
 @plugin "tailwindcss-primeui";
 @plugin "tailwind-scrollbar";
+@import "primeicons/primeicons.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -27,6 +28,9 @@
   ::backdrop,
   ::file-selector-button {
     border-color: var(--color-gray-200, currentColor);
+  }
+  html {
+    font-size: 14px;
   }
 }
 

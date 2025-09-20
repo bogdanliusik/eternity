@@ -9,6 +9,7 @@
   "useTabs": false,
   "quoteProps": "as-needed",
   "objectWrap": "preserve",
+  "htmlWhitespaceSensitivity": "ignore",
   "plugins": [
     "prettier-plugin-tailwindcss",
     "prettier-plugin-classnames",

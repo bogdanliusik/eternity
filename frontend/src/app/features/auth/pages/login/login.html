@@ -1,0 +1,76 @@
+<div class="bg-background flex h-screen flex-col items-center justify-center px-6 sm:p-0">
+  <a href="" class="mb-6 flex items-center gap-2 text-lg font-semibold md:text-2xl">
+    <svg-icon src="assets/logo.svg" class="text-color"></svg-icon>
+    Eternity
+  </a>
+  <div
+    class="bg-foreground border-surface w-full space-y-4 rounded-lg border p-6 shadow sm:max-w-md sm:p-8 md:space-y-6">
+    <h1 class="text-lg font-semibold md:text-2xl">Sign in to your account</h1>
+    @if (authStore.hasErrors()) {
+      <div class="space-y-1 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        @for (error of authStore.errors(); track error) {
+          <div>{{ error }}</div>
+        }
+      </div>
+    }
+    <form [formGroup]="logInForm" (ngSubmit)="sendForm()" class="space-y-4 md:space-y-4">
+      <div class="flex w-full flex-col gap-2">
+        <label for="username">Username</label>
+        <input
+          [formControl]="formControls.username"
+          pInputText
+          id="username"
+          type="username"
+          [class.border-red-500]="showUsernameError()"
+          [disabled]="authStore.isLoading()" />
+        @if (showUsernameError()) {
+          <span class="text-sm text-red-500">
+            @if (formControls.username.hasError('required')) {
+              Username is required
+            } @else if (formControls.username.hasError('minlength')) {
+              Username must be at least 4 characters
+            }
+          </span>
+        }
+      </div>
+
+      <div class="flex w-full flex-col gap-2">
+        <label for="password">Password</label>
+        <input
+          [formControl]="formControls.password"
+          pInputText
+          id="password"
+          type="password"
+          placeholder="••••••••"
+          [class.border-red-500]="showPasswordError()"
+          [disabled]="authStore.isLoading()" />
+        @if (showPasswordError()) {
+          <span class="text-sm text-red-500">
+            @if (formControls.password.hasError('required')) {
+              Password is required
+            } @else if (formControls.password.hasError('minlength')) {
+              Password must be at least 8 characters
+            } @else if (formControls.password.hasError('password')) {
+              {{ formControls.password.getError('password')?.message }}
+            }
+          </span>
+        }
+      </div>
+      <div class="flex items-center justify-end">
+        <a routerLink="/forgot-password" class="text-muted-foreground text-sm hover:underline">Forgot password?</a>
+      </div>
+      <button pButton type="submit" class="w-full" [disabled]="authStore.isLoading()">
+        @if (authStore.isLoading()) {
+          <i class="pi pi-spin pi-spinner" pButtonIcon></i>
+          <span pButtonLabel>Signing in...</span>
+        } @else {
+          <span pButtonLabel>Sign in</span>
+        }
+      </button>
+      <p class="text-muted-foreground text-sm">
+        Want to join?
+        <a routerLink="/register" class="hover:underline">Sign up</a>
+      </p>
+    </form>
+  </div>
+</div>

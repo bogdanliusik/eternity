@@ -69,6 +69,15 @@ public class IdentityService(UserManager<ApplicationUser> userManager,
         return user != null ? await DeleteUserAsync(user) : Result.Success();
     }
     
+    public async Task<Result<IList<string>>> GetUserRolesAsync(Guid userId) {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user == null) {
+            return Result<IList<string>>.Failure([$"User with ID {userId} not found"]);
+        }
+        var roles = await userManager.GetRolesAsync(user);
+        return Result<IList<string>>.Success(roles);
+    }
+    
     private async Task<Result> DeleteUserAsync(ApplicationUser user) {
         var result = await userManager.DeleteAsync(user);
         return result.ToApplicationResult();
