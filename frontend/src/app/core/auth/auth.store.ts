@@ -91,14 +91,13 @@ export const AuthStore = signalStore(
                     }
                   })
                 );
-              } else {
-                const errors = result.errors.length ? result.errors : ['Login failed'];
-                patchState(store, {
-                  errors,
-                  isLoading: false
-                });
-                return EMPTY;
               }
+              const errors = result.errors.length ? result.errors : ['Login failed'];
+              patchState(store, {
+                errors,
+                isLoading: false
+              });
+              return EMPTY;
             }),
             catchError((error: ApiError) => {
               patchState(store, {
@@ -111,12 +110,48 @@ export const AuthStore = signalStore(
         )
       )
     ),
+    refreshUser: rxMethod<void>(
+      pipe(
+        tap(() => patchState(store, { isLoading: true, errors: [] })),
+        switchMap(() =>
+          authService.getCurrentUser().pipe(
+            tapResponse({
+              next: (user) => {
+                patchState(store, {
+                  user,
+                  status: AuthStatus.Authenticated,
+                  errors: [],
+                  isLoading: false
+                });
+              },
+              error: (error: ApiError) => {
+                if (error.status === 401) {
+                  patchState(store, {
+                    user: null,
+                    status: AuthStatus.Unauthenticated,
+                    errors: ['Session expired'],
+                    isLoading: false
+                  });
+                  router.navigate(['/login']);
+                } else {
+                  patchState(store, {
+                    errors: [error.message],
+                    isLoading: false
+                  });
+                }
+              }
+            })
+          )
+        )
+      )
+    ),
     handleUnauthorized: () => {
       if (store.status() === AuthStatus.Authenticated) {
         patchState(store, {
           user: null,
           status: AuthStatus.Unauthenticated,
-          errors: ['Session expired']
+          errors: ['Session expired'],
+          isLoading: false
         });
         router.navigate(['/login']);
       }

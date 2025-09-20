@@ -2,12 +2,12 @@
   <div>
     @if (menuService.showSideBar) {
       <div class="mx-1 flex items-center justify-between py-3">
-        <small [class.hidden]="!menuService.showSideBar" class="text-muted-foreground/50 text-sm font-semibold">
+        <small [class.hidden]="!menuService.showSideBar" class="text-muted-foreground/50 text-base font-semibold">
           {{ menu.group }}
         </small>
       </div>
     }
-    <ul class="flex flex-col">
+    <ul class="flex flex-col gap-1">
       @for (item of menu.items; track item) {
         <li class="relative">
           @if (item.children) {
@@ -17,32 +17,31 @@
               #trigger="cdkOverlayOrigin"
               [ngClass]="{
                 'hover:bg-primary/10': !menuService.showSideBar && item.active,
-                'hover:bg-card/50': !menuService.showSideBar
+                'justify-center': !menuService.showSideBar
               }"
-              class="group text-muted-foreground relative flex grow cursor-pointer items-center gap-4 rounded-lg px-2"
+              class="group text-muted-foreground relative flex h-[36px] grow cursor-pointer items-center gap-4 rounded-lg px-2 hover:bg-primary/10"
               [attr.title]="!menuService.showSideBar ? item.label : null"
               [attr.aria-label]="!menuService.showSideBar ? item.label : null">
               <div class="group-hover:text-primary">
                 <lucide-icon [img]="item.icon" class="h-5 w-5"></lucide-icon>
               </div>
-              <div class="flex h-9 grow items-center justify-start rounded-sm">
-                <span
-                  [class.hidden]="!menuService.showSideBar"
-                  class="group-hover:text-primary truncate text-sm font-semibold tracking-wide">
-                  {{ item.label }}
-                </span>
-              </div>
-              <button
+              <span
                 [class.hidden]="!menuService.showSideBar"
-                class="text-color/50 right-0 flex cursor-pointer items-center justify-end p-0"
-                (click)="$event.stopPropagation(); item.expanded = !item.expanded"
-                type="button">
-                @if (!item.expanded) {
-                  <lucide-icon [img]="plusIcon" class="h-4 w-4"></lucide-icon>
-                } @else {
-                  <lucide-icon [img]="minusIcon" class="h-4 w-4"></lucide-icon>
-                }
-              </button>
+                class="group-hover:text-primary flex h-9 grow items-center justify-start truncate rounded-sm text-base font-semibold tracking-wide">
+                {{ item.label }}
+              </span>
+              @if (menuService.showSideBar) {
+                <button
+                  class="text-color/50 right-0 flex cursor-pointer items-center justify-end p-0"
+                  (click)="$event.stopPropagation(); item.expanded = !item.expanded"
+                  type="button">
+                  @if (!item.expanded) {
+                    <lucide-icon [img]="plusIcon" class="h-4 w-4"></lucide-icon>
+                  } @else {
+                    <lucide-icon [img]="minusIcon" class="h-4 w-4"></lucide-icon>
+                  }
+                </button>
+              }
             </div>
             <ng-template
               cdkConnectedOverlay
@@ -57,13 +56,13 @@
               (overlayOutsideClick)="onOverlayOutsideClick($event)">
               <div class="bg-card border-surface w-48 rounded-lg border shadow-lg">
                 <div class="border-surface border-b px-3 py-2">
-                  <span class="text-color text-sm font-semibold">{{ item.label }}</span>
+                  <span class="text-color text-base font-semibold">{{ item.label }}</span>
                 </div>
                 @for (child of item.children; track child) {
                   <a
                     routerLink="{{ child.route }}"
                     routerLinkActive="text-primary bg-primary/10"
-                    class="text-muted-foreground hover:text-primary hover:bg-primary/5 flex items-center gap-3 px-3 py-2 text-sm"
+                    class="text-muted-foreground hover:text-primary hover:bg-primary/5 flex items-center gap-3 px-3 py-2 text-base"
                     (click)="menuService.closeAllDropdowns()">
                     @if (child.icon) {
                       <lucide-icon [img]="child.icon" class="h-4 w-4"></lucide-icon>
@@ -83,7 +82,8 @@
               class="group text-muted-foreground hover:text-primary relative flex h-[36px] grow cursor-pointer items-center gap-4 rounded-lg px-2"
               [ngClass]="{
                 'hover:bg-primary/10': !menuService.showSideBar && item.active,
-                'hover:bg-card/50': !menuService.showSideBar
+                'bg-primary/5': item.active,
+                'justify-center': !menuService.showSideBar
               }"
               [attr.title]="!menuService.showSideBar ? item.label : null"
               [attr.aria-label]="!menuService.showSideBar ? item.label : null">
@@ -92,7 +92,7 @@
               </div>
               <span
                 [class.hidden]="!menuService.showSideBar"
-                class="group-hover:text-primary truncate text-sm font-semibold tracking-wide">
+                class="group-hover:text-primary truncate text-base font-semibold tracking-wide">
                 {{ item.label }}
               </span>
             </a>

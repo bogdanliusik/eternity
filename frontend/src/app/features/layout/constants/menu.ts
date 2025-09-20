@@ -9,7 +9,8 @@ import {
   Users,
   Settings,
   Bell,
-  Folder
+  Folder,
+  UserIcon
 } from 'lucide-angular';
 
 export class Menu {
@@ -18,6 +19,11 @@ export class Menu {
       group: 'Base',
       separator: true,
       items: [
+        {
+          icon: UserIcon,
+          label: 'Profile',
+          route: '/profile'
+        },
         {
           icon: ChartPie,
           label: 'Dashboard',

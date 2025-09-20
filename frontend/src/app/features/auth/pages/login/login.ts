@@ -7,10 +7,19 @@ import { passwordValidator } from '../../validators/password.validator';
 import { LogInFormGroup } from './log-in-form.types';
 import { AuthStore } from '@/core/auth/auth.store';
 import { LoaderCircleIcon, LucideAngularModule } from 'lucide-angular';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, ButtonModule, InputTextModule, AngularSvgIconModule, ReactiveFormsModule, LucideAngularModule],
+  imports: [
+    FormsModule,
+    ButtonModule,
+    InputTextModule,
+    AngularSvgIconModule,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    RouterModule
+  ],
   templateUrl: './login.html'
 })
 export class Login {

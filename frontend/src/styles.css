@@ -3,6 +3,7 @@
 @import 'tailwindcss';
 @plugin "tailwindcss-primeui";
 @plugin "tailwind-scrollbar";
+@import "primeicons/primeicons.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -29,7 +30,7 @@
     border-color: var(--color-gray-200, currentColor);
   }
   html {
-    font-size: 15px;
+    font-size: 14px;
   }
 }
 

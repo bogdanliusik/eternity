@@ -13,7 +13,7 @@
               [routerLink]="sub.route"
               routerLinkActive="text-primary"
               [routerLinkActiveOptions]="{ exact: true }"
-              class="hover:bg-card inline-block w-full px-4 py-2 text-xs">
+              class="hover:bg-card inline-block w-full px-4 py-2 text-sm">
               {{ sub.label }}
             </a>
             @if (menuService.isActive(sub.route)) {
@@ -23,7 +23,7 @@
             }
           </ng-template>
           <ng-template #childMenu let-sub="sub">
-            <a class="inline-block w-full cursor-pointer px-4 py-2 text-xs">
+            <a class="inline-block w-full cursor-pointer px-4 py-2 text-sm">
               {{ sub.label }}
             </a>
             <button class="text-color opacity-50 flex cursor-pointer items-center justify-end">

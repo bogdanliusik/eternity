@@ -61,15 +61,12 @@
       </div>
       <button pButton type="submit" class="w-full" [disabled]="authStore.isLoading()">
         @if (authStore.isLoading()) {
-          <span class="flex items-center justify-center gap-2">
-            <lucide-icon class="animate-spin" [img]="loadingCircleIcon"></lucide-icon>
-            Signing in...
-          </span>
+          <i class="pi pi-spin pi-spinner" pButtonIcon></i>
+          <span pButtonLabel>Signing in...</span>
         } @else {
-          <span>Sign in</span>
+          <span pButtonLabel>Sign in</span>
         }
       </button>
-
       <p class="text-muted-foreground text-sm">
         Want to join?
         <a routerLink="/register" class="hover:underline">Sign up</a>
