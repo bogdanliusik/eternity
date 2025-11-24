@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
   postgres:
     image: postgres:16-alpine
     container_name: eternity-postgres
@@ -25,7 +24,6 @@ services:
     networks:
       - eternity-network
 
-  # ASP.NET Backend API
   backend:
     build:
       context: ./backend
@@ -78,7 +76,6 @@ services:
     networks:
       - eternity-network
 
-  # Angular Frontend with Nginx
   frontend:
     build:
       context: ./frontend
@@ -100,7 +97,6 @@ services:
     networks:
       - eternity-network
 
-  # Optional: PgAdmin for database management
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: eternity-pgadmin
