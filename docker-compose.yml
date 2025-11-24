@@ -94,11 +94,24 @@ services:
     networks:
       - eternity-network
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.eternity-frontend.rule=Host(`eternity.liusik.com`)
-      - traefik.http.routers.eternity-frontend.entrypoints=websecure
-      - traefik.http.routers.eternity-frontend.tls.certresolver=letsencrypt
-      - traefik.http.services.eternity-frontend.loadbalancer.server.port=8080
+    - traefik.enable=true
+
+    # Redirect HTTP → HTTPS
+    - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+
+    # HTTP router
+    - traefik.http.routers.http-eternity-frontend.entryPoints=http
+    - traefik.http.routers.http-eternity-frontend.middlewares=redirect-to-https
+    - traefik.http.routers.http-eternity-frontend.rule=Host(`eternity.liusik.com`) && PathPrefix(`/`)
+
+    # HTTPS router
+    - traefik.http.routers.https-eternity-frontend.entryPoints=https
+    - traefik.http.routers.https-eternity-frontend.rule=Host(`eternity.liusik.com`) && PathPrefix(`/`)
+    - traefik.http.routers.https-eternity-frontend.tls=true
+    - traefik.http.routers.https-eternity-frontend.tls.certresolver=letsencrypt
+
+    # Tell Traefik the internal port
+    - traefik.http.services.eternity-frontend.loadbalancer.server.port=8080
 
   pgadmin:
     image: dpage/pgadmin4:latest
