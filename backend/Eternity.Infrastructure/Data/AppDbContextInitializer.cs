@@ -35,8 +35,8 @@ public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, Ap
     public async Task SeedAsync() {
         try {
             await EnsureRolesAsync(RoleNames.Admin, RoleNames.Member);
-            await AddUser("supervisor", "supervisor@arvant.com", "Supervisor1!", [RoleNames.Admin, RoleNames.Member]);
-            await AddUser("b_liusik", "b_liusik@arvant.com", "B_liusik1!", [RoleNames.Member]);
+            await AddUser("supervisor@eternity.com", "supervisor@eternity.com", "Supervisor1!", [RoleNames.Admin, RoleNames.Member]);
+            await AddUser("b_liusik@eternity.com", "b_liusik@eternity.com", "B_liusik1!", [RoleNames.Member]);
         }
         catch (Exception ex) {
             logger.LogError(ex, "An error occurred while seeding the database.");

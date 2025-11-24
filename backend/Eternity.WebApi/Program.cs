@@ -12,7 +12,7 @@ builder.AddEternityAuthentication();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment()) {
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction()) {
     await app.InitialiseDatabaseAsync();
 }
 
@@ -20,7 +20,6 @@ app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
 
 app.UseOpenApi(o => o.Path = "/api/specification.json");
-
 app.UseSwaggerUi(settings => {
     settings.Path = "/api";
     settings.DocumentPath = "/api/specification.json";
