@@ -91,6 +91,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    ports:
+      - "18080:8080"
     networks:
       - eternity-network
 
