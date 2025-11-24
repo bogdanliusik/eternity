@@ -1,0 +1,57 @@
+@for (menu of menuService.pagesMenu; track $index) {
+  <div class="pt-4">
+    <div class="mx-1 mb-2 flex items-center justify-between">
+      <small class="text-muted-foreground/50 text-xs font-semibold">
+        {{ menu.group }}
+      </small>
+    </div>
+    <ul class="flex flex-col">
+      @for (item of menu.items; track $index) {
+        <li>
+          <div
+            (click)="toggleMenu(item)"
+            class="text-muted-foreground hover:text-color group flex grow items-center gap-4">
+            <div class="text-muted-foreground/50" [class.text-primary]="item.active && !menuService.showSideBar">
+              <lucide-icon [img]="item.icon" class="h-5 w-5"></lucide-icon>
+            </div>
+            <ng-container
+              [ngTemplateOutlet]="item.children ? childMenu : parentMenu"
+              [ngTemplateOutletContext]="{ item: item }">
+            </ng-container>
+            <ng-template #parentMenu let-item="item">
+              <div
+                routerLink="{{ item.route }}"
+                class="text-muted-foreground hover:text-primary flex h-[36px] cursor-pointer items-center justify-start rounded-sm">
+                <a
+                  routerLinkActive="text-primary"
+                  class="truncate text-sm font-semibold tracking-wide focus:outline-hidden">
+                  {{ item.label }}
+                </a>
+              </div>
+            </ng-template>
+            <ng-template #childMenu let-item="item">
+              <div class="flex h-9 grow cursor-pointer items-center justify-start rounded-sm">
+                <a
+                  class="text-muted-foreground group-hover:text-primary truncate text-sm font-semibold tracking-wide focus:outline-hidden">
+                  {{ item.label }}
+                </a>
+              </div>
+            </ng-template>
+            @if (item.children) {
+              <button
+                [class.hidden]="!menuService.showSideBar"
+                class="text-color/50 right-0 flex cursor-pointer items-center justify-end p-0">
+                @if (!item.expanded) {
+                  <lucide-icon [img]="plusIcon" class="h-4 w-4"></lucide-icon>
+                } @else {
+                  <lucide-icon [img]="minusIcon" class="h-4 w-4"></lucide-icon>
+                }
+              </button>
+            }
+          </div>
+          <app-navbar-mobile-submenu [submenu]="item"></app-navbar-mobile-submenu>
+        </li>
+      }
+    </ul>
+  </div>
+}

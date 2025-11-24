@@ -1,0 +1,30 @@
+<nav
+  [ngClass]="menuService.showSideBar ? 'w-[210px] xl:w-[280px]' : 'w-[70px]'"
+  class="bg-foreground hidden h-full flex-col justify-between pt-3 lg:flex">
+  <div
+    [ngClass]="menuService.showSideBar ? 'justify-between' : 'justify-center'"
+    class="mx-4 mb-2 flex h-9 items-center">
+    @if (menuService.showSideBar) {
+      <div class="flex items-center">
+        <a
+          routerLink="/"
+          class="flex cursor-pointer items-center gap-2 rounded-sm p-2 hover:opacity-80 focus:ring-1 focus:outline-hidden">
+          <svg-icon src="assets/logo.svg" class="text-color"></svg-icon>
+          <h3 class="text-color text-xl font-semibold">Eternity</h3>
+        </a>
+      </div>
+    }
+    <button
+      (click)="toggleSidebar()"
+      class="text-muted-foreground/50 hover:text-muted-foreground flex cursor-pointer items-center justify-center
+        rounded-md p-2 focus:outline-hidden"
+      [class.rotate-180]="!menuService.showSideBar">
+      <lucide-icon [img]="chevronsLeftIcon"></lucide-icon>
+    </button>
+  </div>
+  <div
+    class="scrollbar-thumb--sm scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted
+      h-full overflow-y-auto px-4">
+    <app-sidebar-menu></app-sidebar-menu>
+  </div>
+</nav>

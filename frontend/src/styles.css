@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+
+@import 'tailwindcss';
+@plugin "tailwindcss-primeui";
+@plugin "tailwind-scrollbar";
+@import "primeicons/primeicons.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --default-font-family: 'Manrope', sans-serif;
+  --shadow-custom: 0px 0px 50px 0px rgb(82 63 105 / 15%);
+
+  --color-primary: var(--primary);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-card: var(--card-background);
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+  html {
+    font-size: 14px;
+  }
+}
+
+@layer base {
+  :root {
+    --primary: var(--p-primary-color);
+    --background: var(--p-surface-0);
+    --foreground: var(--p-surface-100);
+    --muted: var(--p-surface-200);
+    --muted-foreground: var(--p-surface-600);
+    --card-background: var(--p-surface-100);
+    --card-border: 1px solid var(--p-surface-200);
+  }
+
+  .dark {
+    --background: var(--p-surface-950);
+    --foreground: var(--p-surface-900);
+    --muted: var(--p-surface-800);
+    --muted-foreground: var(--p-surface-400);
+    --card-background: var(--p-surface-900);
+    --card-border: 1px solid transparent;
+  }
+}
+
+.card {
+  background: var(--card-background);
+  border: var(--card-border);
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}

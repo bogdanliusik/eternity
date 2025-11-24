@@ -1,0 +1,34 @@
+<div
+  [ngClass]="
+    menuService.showMobileMenu ? 'pointer-events-auto scale-100 opacity-100' : 'pointer-events-none scale-95 opacity-0'
+  "
+  class="absolute inset-x-0 top-0 z-10 origin-top-right transform p-2 transition lg:hidden">
+  <div class="bg-foreground rounded-lg shadow-lg">
+    <div class="pt-5 pb-6">
+      <div class="flex items-center justify-between px-5">
+        <div>
+          <div class="flex items-center justify-start gap-3 md:mr-10 lg:hidden">
+            <a class="flex items-center justify-center rounded-sm p-2 focus:ring-1 focus:outline-hidden">
+              <svg-icon src="assets/logo.svg" class="text-color"></svg-icon>
+            </a>
+            <b class="text-color text-lg">Eternity</b>
+          </div>
+        </div>
+        <div class="-mr-2">
+          <button
+            (click)="toggleMobileMenu()"
+            type="button"
+            class="text-muted-foreground hover:bg-card hover:text-color inline-flex cursor-pointer items-center
+              justify-center rounded-md p-2">
+            <lucide-icon [img]="xIcon"></lucide-icon>
+          </button>
+        </div>
+      </div>
+      <div
+        class="scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent
+          scrollbar-thumb-muted max-h-[500px] overflow-y-auto px-2">
+        <app-navbar-mobile-menu></app-navbar-mobile-menu>
+      </div>
+    </div>
+  </div>
+</div>

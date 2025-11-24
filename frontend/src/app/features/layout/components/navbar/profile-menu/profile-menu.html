@@ -1,0 +1,40 @@
+<div class="relative ml-3">
+  <button (click)="toggleMenu()" class="bg-card relative flex cursor-pointer rounded-full text-sm" type="button">
+    <img
+      clickOutside
+      (clickOutside)="isOpen = false"
+      class="size-9 shrink-0 rounded-md"
+      src="https://avatars.githubusercontent.com/u/66973922"
+      alt="" />
+  </button>
+  <div
+    [@openClose]="isOpen ? 'open' : 'closed'"
+    class="bg-foreground shadow-custom border-muted ring-opacity-5 absolute right-0 z-20 mt-2 w-2xs origin-top-right
+      transform rounded-md border border-dashed py-4 ring-1 ring-transparent transition focus:outline-hidden">
+    <div class="flext-row flex items-center px-4 pb-4">
+      <div class="w-10 shrink-0">
+        <img class="rounded-md" src="https://avatars.githubusercontent.com/u/66973922" alt="" />
+      </div>
+      <div class="text-color overflow-hidden px-2 text-base font-semibold">
+        Bogdan Liusik
+        <p class="text-muted-foreground truncate text-sm font-semibold text-ellipsis">
+          {{ 'b.liusik@dev ' }}
+        </p>
+      </div>
+    </div>
+    <div class="border-surface border-b border-dashed"></div>
+    <ul class="mx-2 my-2 flex flex-col">
+      @for (item of profileMenu; track $index) {
+        <li
+          routerLink="{{ item.link }}"
+          :key="$index"
+          class="text-muted-foreground hover:text-primary inline-flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm font-semibold">
+          <lucide-icon [img]="item.icon" class="text-muted-foreground/50 h-5 w-5"></lucide-icon>
+          {{ item.title }}
+        </li>
+      }
+    </ul>
+    <hr class="border-surface border-dashed" />
+    <app-theme-configurator></app-theme-configurator>
+  </div>
+</div>

@@ -1,0 +1,60 @@
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+**/*.dll
+**/*.exe
+**/*.pdb
+
+# Visual Studio / Rider
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# NuGet
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+**/logs/
+*.log
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+
+# Docker files
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Tests
+**/TestResults/
+**/*Tests/
+
+# User secrets
+**/secrets.json
+
+# OS files
+.DS_Store
+Thumbs.db

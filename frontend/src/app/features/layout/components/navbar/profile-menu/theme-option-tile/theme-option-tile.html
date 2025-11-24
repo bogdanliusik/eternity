@@ -1,0 +1,13 @@
+<div
+  (click)="select.emit()"
+  [ngClass]="{
+    'border-muted-foreground bg-muted': active(),
+    'border-surface bg-foreground': !active()
+  }"
+  class="focus-visible:ring-ring text-muted-foreground hover:bg-card hover:text-color inline-flex h-8 w-full
+    cursor-pointer items-center justify-start gap-2 rounded-md border border-dashed px-3 text-sm font-medium
+    whitespace-nowrap shadow-xs transition-colors focus-visible:ring-1 focus-visible:outline-hidden
+    disabled:pointer-events-none disabled:opacity-50">
+  <ng-content></ng-content>
+  <p class="truncate capitalize">{{ label() }}</p>
+</div>
