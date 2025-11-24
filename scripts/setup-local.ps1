@@ -67,18 +67,18 @@ if ($hostsContent -notcontains "127.0.0.1    eternity.localhost") {
 Write-Host ""
 Write-Host "Building Docker images..." -ForegroundColor Yellow
 if ($dockerCmd -eq "wsl docker") {
-    wsl docker-compose --env-file .env.local build
+    wsl docker compose --env-file .env.local build
 } else {
-    docker-compose --env-file .env.local build
+    docker compose --env-file .env.local build
 }
 
 # Start services
 Write-Host ""
 Write-Host "Starting services..." -ForegroundColor Yellow
 if ($dockerCmd -eq "wsl docker") {
-    wsl docker-compose --env-file .env.local up -d
+    wsl docker compose --env-file .env.local up -d
 } else {
-    docker-compose --env-file .env.local up -d
+    docker compose --env-file .env.local up -d
 }
 
 # Wait for services
@@ -90,9 +90,9 @@ Start-Sleep -Seconds 10
 Write-Host ""
 Write-Host "Checking service health..." -ForegroundColor Yellow
 if ($dockerCmd -eq "wsl docker") {
-    wsl docker-compose --env-file .env.local ps
+    wsl docker compose --env-file .env.local ps
 } else {
-    docker-compose --env-file .env.local ps
+    docker compose --env-file .env.local ps
 }
 
 Write-Host ""
@@ -110,15 +110,15 @@ Write-Host "Useful commands:" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "View logs:" -ForegroundColor Yellow
 if ($dockerCmd -eq "wsl docker") {
-    Write-Host "  wsl docker-compose --env-file .env.local logs -f" -ForegroundColor White
+    Write-Host "  wsl docker compose --env-file .env.local logs -f" -ForegroundColor White
 } else {
-    Write-Host "  docker-compose --env-file .env.local logs -f" -ForegroundColor White
+    Write-Host "  docker compose --env-file .env.local logs -f" -ForegroundColor White
 }
 Write-Host ""
 Write-Host "Stop services:" -ForegroundColor Yellow
 if ($dockerCmd -eq "wsl docker") {
-    Write-Host "  wsl docker-compose --env-file .env.local down" -ForegroundColor White
+    Write-Host "  wsl docker compose --env-file .env.local down" -ForegroundColor White
 } else {
-    Write-Host "  docker-compose --env-file .env.local down" -ForegroundColor White
+    Write-Host "  docker compose --env-file .env.local down" -ForegroundColor White
 }
 Write-Host ""

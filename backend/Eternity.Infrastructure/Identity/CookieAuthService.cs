@@ -52,7 +52,6 @@ public class CookieAuthService : ICookieAuthService
             tokenInfo.AccessToken, 
             accessCookieOptions
         );
-        
         response.Cookies.Append(
             _cookieSettings.RefreshTokenCookieName, 
             tokenInfo.RefreshToken, 
