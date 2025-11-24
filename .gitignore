@@ -1,0 +1,10 @@
+# Environment files
+.env
+.env.local
+.env.production
+*.env
+
+# Docker volumes
+postgres_data/
+backend_logs/
+pgadmin_data/

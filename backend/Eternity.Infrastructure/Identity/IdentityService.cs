@@ -4,15 +4,20 @@ using System.Security.Cryptography;
 using System.Text;
 using Eternity.Application.Common.Interfaces;
 using Eternity.Application.Common.Models;
+using Eternity.Application.Common.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Eternity.Infrastructure.Identity;
 
-public class IdentityService(UserManager<ApplicationUser> userManager, 
+public class IdentityService(UserManager<ApplicationUser> userManager,
     IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
-    IAuthorizationService authorizationService
+    IAuthorizationService authorizationService,
+    IOptions<JwtSettings> jwtSettings,
+    ILogger<IdentityService> logger
     ) : IIdentityService
 {
     public async Task<Result<Guid>> CreateUserAsync(string userName, string password) {
@@ -21,36 +26,52 @@ public class IdentityService(UserManager<ApplicationUser> userManager,
             Email = userName,
         };
         var result = await userManager.CreateAsync(user, password);
+        if (result.Succeeded) {
+            logger.LogInformation("User {UserName} created successfully", userName);
+        } else {
+            logger.LogWarning("Failed to create user {UserName}: {Errors}", 
+                userName, string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
         return result.ToApplicationResult(user.Id);
     }
     
     public async Task<Result<AppTokenInfo>> LoginAsync(string userName, string password) {
         var identityUser = await userManager.FindByNameAsync(userName);
         if (identityUser == null) {
-            return Result<AppTokenInfo>.Failure([$"User {userName} not found"]);
+            logger.LogWarning("Login attempt failed: User {UserName} not found", userName);
+            return Result<AppTokenInfo>.Failure(["Invalid credentials"]);
         }
         var isValidPassword = await userManager.CheckPasswordAsync(identityUser, password);
         if (!isValidPassword) {
-            return Result<AppTokenInfo>.Failure(["Invalid password"]);
+            logger.LogWarning("Login attempt failed: Invalid password for user {UserName}", userName);
+            return Result<AppTokenInfo>.Failure(["Invalid credentials"]);
         }
+        logger.LogInformation("User {UserName} logged in successfully", userName);
         return await GenerateAppTokenInfo(identityUser);
     }
 
-    public async Task<Result<AppTokenInfo>> RefreshToken(AppTokenInfo oldTokenInfo) {
+    public async Task<Result<AppTokenInfo>> RefreshTokenAsync(AppTokenInfo oldTokenInfo) {
         var principal = GetTokenPrincipal(oldTokenInfo.AccessToken);
-        if (principal == null || string.IsNullOrEmpty(principal.Identity?.Name)) {
+        if (principal?.Identity?.Name == null) {
+            logger.LogWarning("Refresh token attempt failed: Invalid access token");
             return Result<AppTokenInfo>.Failure(["Invalid access token"]);
         }
         var identityUser = await userManager.FindByNameAsync(principal.Identity.Name);
         if (identityUser == null) {
+            logger.LogWarning("Refresh token attempt failed: User {UserName} not found", principal.Identity.Name);
             return Result<AppTokenInfo>.Failure(["User not found"]);
         }
-        if (oldTokenInfo.RefreshToken != identityUser.RefreshToken) {
-            return Result<AppTokenInfo>.Failure(["Invalid refresh token provided"]);
+        if (string.IsNullOrEmpty(identityUser.RefreshToken) || oldTokenInfo.RefreshToken != identityUser.RefreshToken) {
+            logger.LogWarning("Refresh token attempt failed: Invalid refresh token for user {UserName}", 
+                identityUser.UserName);
+            return Result<AppTokenInfo>.Failure(["Invalid refresh token"]);
         }
-        if (identityUser.RefreshTokenExpiry < DateTime.Now) {
+        if (identityUser.RefreshTokenExpiry < DateTime.UtcNow) {
+            logger.LogWarning("Refresh token attempt failed: Expired refresh token for user {UserName}", 
+                identityUser.UserName);
             return Result<AppTokenInfo>.Failure(["Refresh token expired"]);
         }
+        logger.LogInformation("Token refreshed successfully for user {UserName}", identityUser.UserName);
         return await GenerateAppTokenInfo(identityUser);
     }
     
@@ -64,9 +85,16 @@ public class IdentityService(UserManager<ApplicationUser> userManager,
         return result.Succeeded;
     }
 
-    public async Task<Result> DeleteUserAsync(Guid userId) {
-        var user = await userManager.FindByIdAsync(userId.ToString());
-        return user != null ? await DeleteUserAsync(user) : Result.Success();
+    public async Task<Result> DeleteUserAsync(string userId) {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user == null) {
+            return Result.Success();
+        }
+        var result = await userManager.DeleteAsync(user);
+        if (result.Succeeded) {
+            logger.LogInformation("User {UserId} deleted successfully", userId);
+        }
+        return result.ToApplicationResult();
     }
     
     public async Task<Result<IList<string>>> GetUserRolesAsync(Guid userId) {
@@ -78,53 +106,54 @@ public class IdentityService(UserManager<ApplicationUser> userManager,
         return Result<IList<string>>.Success(roles);
     }
     
-    private async Task<Result> DeleteUserAsync(ApplicationUser user) {
-        var result = await userManager.DeleteAsync(user);
-        return result.ToApplicationResult();
-    }
-    
-    private string GenerateAccessToken(Guid id, string userName, string email, IEnumerable<string> roles) {
+    private string GenerateAccessToken(string id, string userName, string email, IEnumerable<string> roles) {
         var claims = new List<Claim> {
-            new(ClaimTypes.NameIdentifier, id.ToString()),
+            new(ClaimTypes.NameIdentifier, id),
             new(ClaimTypes.Name, userName),
             new(ClaimTypes.Email, email),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-        //TODO: replace with value from config
-        var staticKey = "6AD2EFDE-AB2C-4841-A05E-7045C855BA22";
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(staticKey));
-        var signingCred = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Value.SecretKey));
+        var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         var securityToken = new JwtSecurityToken(
+            issuer: jwtSettings.Value.Issuer,
+            audience: jwtSettings.Value.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddSeconds(60),
-            signingCredentials: signingCred
+            expires: DateTime.UtcNow.AddMinutes(jwtSettings.Value.AccessTokenExpirationMinutes),
+            signingCredentials: signingCredentials
         );
-        var tokenString = new JwtSecurityTokenHandler().WriteToken(securityToken);
-        return tokenString;
+        return new JwtSecurityTokenHandler().WriteToken(securityToken);
     }
     
     private static string GenerateRefreshToken() {
         var randomNumber = new byte[64];
-        using (var numberGenerator = RandomNumberGenerator.Create()) {
-            numberGenerator.GetBytes(randomNumber);
-        }
-        var token = Convert.ToBase64String(randomNumber)
+        using var numberGenerator = RandomNumberGenerator.Create();
+        numberGenerator.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber)
             .Replace("+", "-")
             .Replace("/", "_")
             .Replace("=", "");
-        return token;
     }
     
-    private static ClaimsPrincipal? GetTokenPrincipal(string token) {
-        var securityKey = new SymmetricSecurityKey("6AD2EFDE-AB2C-4841-A05E-7045C855BA22"u8.ToArray());
-        var validation = new TokenValidationParameters {
-            IssuerSigningKey = securityKey,
-            ValidateLifetime = false,
-            ValidateActor = false,
-            ValidateIssuer = false,
-            ValidateAudience = false,
-        };
-        return new JwtSecurityTokenHandler().ValidateToken(token, validation, out _);
+    private ClaimsPrincipal? GetTokenPrincipal(string token) {
+        try {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Value.SecretKey));
+            var validation = new TokenValidationParameters {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = securityKey,
+                ValidateLifetime = false, // We're validating expired tokens for refresh
+                ValidateIssuer = true,
+                ValidIssuer = jwtSettings.Value.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtSettings.Value.Audience,
+                ClockSkew = TimeSpan.Zero
+            };
+            return new JwtSecurityTokenHandler().ValidateToken(token, validation, out _);
+        } catch (Exception ex) {
+            logger.LogWarning(ex, "Failed to validate token");
+            return null;
+        }
     }
 
     private async Task<Result<AppTokenInfo>> GenerateAppTokenInfo(ApplicationUser identityUser) {
@@ -132,10 +161,15 @@ public class IdentityService(UserManager<ApplicationUser> userManager,
             return Result<AppTokenInfo>.Failure(["Invalid user"]);
         }
         var roles = await userManager.GetRolesAsync(identityUser);
-        var accessToken = GenerateAccessToken(identityUser.Id, identityUser.UserName, identityUser.Email, roles);
+        var accessToken = GenerateAccessToken(
+            identityUser.Id.ToString(), 
+            identityUser.UserName,
+            identityUser.Email,
+            roles
+        );
         var refreshToken = GenerateRefreshToken();
         identityUser.RefreshToken = refreshToken;
-        identityUser.RefreshTokenExpiry = DateTime.UtcNow.AddHours(12);
+        identityUser.RefreshTokenExpiry = DateTime.UtcNow.AddDays(jwtSettings.Value.RefreshTokenExpirationDays);
         await userManager.UpdateAsync(identityUser);
         return Result<AppTokenInfo>.Success(new AppTokenInfo(accessToken, refreshToken));
     }
