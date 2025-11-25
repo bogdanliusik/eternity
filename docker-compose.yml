@@ -89,6 +89,10 @@ services:
       start_period: 10s
     ports:
       - "18080:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.eternity-frontend.rule=Host(`eternity.liusik.com`)"
+      - "traefik.http.services.eternity-frontend.loadbalancer.server.port=8080"
 
   pgadmin:
     image: dpage/pgadmin4:latest
