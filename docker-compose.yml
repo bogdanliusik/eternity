@@ -21,8 +21,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-    networks:
-      - eternity-network
 
   backend:
     build:
@@ -73,8 +71,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    networks:
-      - eternity-network
 
   frontend:
     build:
@@ -93,8 +89,6 @@ services:
       start_period: 10s
     ports:
       - "18080:8080"
-    networks:
-      - eternity-network
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -111,15 +105,8 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - postgres
-    networks:
-      - eternity-network
     profiles:
       - debug
-
-networks:
-  eternity-network:
-    driver: bridge
-    name: eternity-network
 
 volumes:
   postgres_data:
