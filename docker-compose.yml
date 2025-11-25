@@ -61,8 +61,6 @@ services:
       # Logging
       - Logging__LogLevel__Default=${LOG_LEVEL:-Information}
       - Logging__LogLevel__Microsoft.AspNetCore=${LOG_LEVEL_ASPNET:-Warning}
-    ports:
-      - "5000:8080"
     volumes:
       - backend_logs:/app/logs
     healthcheck:
@@ -87,12 +85,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    ports:
-      - "18080:8080"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.eternity-frontend.rule=Host(`eternity.liusik.com`)"
-      - "traefik.http.services.eternity-frontend.loadbalancer.server.port=8080"
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -103,8 +95,6 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
-    ports:
-      - "5050:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
