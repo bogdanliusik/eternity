@@ -55,8 +55,8 @@ services:
       
       # CORS Settings
       - CorsSettings__AllowedOrigins__0=http://localhost
-      - CorsSettings__AllowedOrigins__1=http://eternity.localhost
-      - CorsSettings__AllowedOrigins__2=https://eternity.localhost
+      - CorsSettings__AllowedOrigins__1=https://eternity.liusik.com
+      - CorsSettings__AllowedOrigins__2=https://api.eternity.liusik.com
       
       # Logging
       - Logging__LogLevel__Default=${LOG_LEVEL:-Information}
