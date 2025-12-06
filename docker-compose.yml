@@ -71,6 +71,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    labels:
+      - "traefik.http.services.eternity-backend.loadbalancer.server.port=8080"
 
   frontend:
     build:
@@ -89,6 +91,8 @@ services:
       start_period: 10s
     ports:
       - "18080:8080"
+    labels:
+      - "traefik.http.services.eternity-frontend.loadbalancer.server.port=8080"
 
   pgadmin:
     image: dpage/pgadmin4:latest
