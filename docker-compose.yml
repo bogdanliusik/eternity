@@ -15,6 +15,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - eternity-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-eternitydb}"]
       interval: 10s
@@ -63,6 +65,8 @@ services:
       - Logging__LogLevel__Microsoft.AspNetCore=${LOG_LEVEL_ASPNET:-Warning}
     ports:
       - "5000:8080"
+    networks:
+      - eternity-network
     volumes:
       - backend_logs:/app/logs
     healthcheck:
@@ -71,8 +75,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    labels:
-      - "traefik.http.services.eternity-backend.loadbalancer.server.port=8080"
 
   frontend:
     build:
@@ -91,8 +93,8 @@ services:
       start_period: 10s
     ports:
       - "18080:8080"
-    labels:
-      - "traefik.http.services.eternity-frontend.loadbalancer.server.port=8080"
+    networks:
+      - eternity-network
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -105,6 +107,8 @@ services:
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
     ports:
       - "5050:80"
+    networks:
+      - eternity-network
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
@@ -112,6 +116,11 @@ services:
     profiles:
       - debug
 
+networks:
+  eternity-network:
+    driver: bridge
+    name: eternity-network
+ 
 volumes:
   postgres_data:
     name: eternity-postgres-data
