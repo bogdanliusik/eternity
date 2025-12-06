@@ -40,7 +40,7 @@ services:
       # Database connection
       - ConnectionStrings__EternityDb=Host=postgres;Database=${POSTGRES_DB:-eternitydb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
       
-      # JWT Settings - REQUIRED
+      # JWT Settings
       - JwtSettings__SecretKey=${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}
       - JwtSettings__Issuer=${JWT_ISSUER:-EternityAPI}
       - JwtSettings__Audience=${JWT_AUDIENCE:-EternityClient}
@@ -61,6 +61,8 @@ services:
       # Logging
       - Logging__LogLevel__Default=${LOG_LEVEL:-Information}
       - Logging__LogLevel__Microsoft.AspNetCore=${LOG_LEVEL_ASPNET:-Warning}
+    ports:
+      - "5000:8080"
     volumes:
       - backend_logs:/app/logs
     healthcheck:
@@ -85,6 +87,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    ports:
+      - "18080:8080"
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -95,6 +99,8 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "5050:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
