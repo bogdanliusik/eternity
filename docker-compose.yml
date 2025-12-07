@@ -21,8 +21,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-    networks:
-      - eternity-network
 
   backend:
     build:
@@ -34,35 +32,17 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      # ASP.NET Core settings
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
+      - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
-      - ASPNETCORE_HTTP_PORTS=8080
       
-      # Database connection
       - ConnectionStrings__EternityDb=Host=postgres;Database=${POSTGRES_DB:-eternitydb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
-      
-      # JWT Settings - REQUIRED
       - JwtSettings__SecretKey=${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}
-      - JwtSettings__Issuer=${JWT_ISSUER:-EternityAPI}
-      - JwtSettings__Audience=${JWT_AUDIENCE:-EternityClient}
-      - JwtSettings__AccessTokenExpirationMinutes=${JWT_ACCESS_TOKEN_EXPIRATION:-15}
-      - JwtSettings__RefreshTokenExpirationDays=${JWT_REFRESH_TOKEN_EXPIRATION:-7}
-      
-      # Cookie Settings
-      - CookieSettings__AccessTokenCookieName=${COOKIE_ACCESS_TOKEN_NAME:-eternity_access_token}
-      - CookieSettings__RefreshTokenCookieName=${COOKIE_REFRESH_TOKEN_NAME:-eternity_refresh_token}
+
       - CookieSettings__SameSiteMode=${COOKIE_SAME_SITE:-Strict}
       - CookieSettings__SecurePolicy=${COOKIE_SECURE_POLICY:-SameAsRequest}
       
-      # CORS Settings
-      - CorsSettings__AllowedOrigins__0=http://localhost
-      - CorsSettings__AllowedOrigins__1=http://eternity.localhost
-      - CorsSettings__AllowedOrigins__2=https://eternity.localhost
-      
-      # Logging
-      - Logging__LogLevel__Default=${LOG_LEVEL:-Information}
-      - Logging__LogLevel__Microsoft.AspNetCore=${LOG_LEVEL_ASPNET:-Warning}
+      - CorsSettings__AllowedOrigins__0=https://eternity.liusik.com
+      - CorsSettings__AllowedOrigins__1=https://api.eternity.liusik.com
     ports:
       - "5000:8080"
     volumes:
@@ -73,8 +53,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    networks:
-      - eternity-network
+    labels:
+      - "traefik.http.services.eternity-backend.loadbalancer.server.port=8080"
 
   frontend:
     build:
@@ -93,8 +73,8 @@ services:
       start_period: 10s
     ports:
       - "18080:8080"
-    networks:
-      - eternity-network
+    labels:
+      - "traefik.http.services.eternity-frontend.loadbalancer.server.port=8080"
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -111,15 +91,8 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - postgres
-    networks:
-      - eternity-network
     profiles:
       - debug
-
-networks:
-  eternity-network:
-    driver: bridge
-    name: eternity-network
 
 volumes:
   postgres_data:
