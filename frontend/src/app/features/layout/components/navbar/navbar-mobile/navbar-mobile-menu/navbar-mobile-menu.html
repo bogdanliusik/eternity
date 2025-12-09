@@ -16,17 +16,22 @@
             </div>
             <ng-container
               [ngTemplateOutlet]="item.children ? childMenu : parentMenu"
-              [ngTemplateOutletContext]="{ item: item }">
-            </ng-container>
+              [ngTemplateOutletContext]="{ item: item }"></ng-container>
             <ng-template #parentMenu let-item="item">
               <div
                 routerLink="{{ item.route }}"
-                class="text-muted-foreground hover:text-primary flex h-[36px] cursor-pointer items-center justify-start rounded-sm">
+                class="text-muted-foreground hover:text-primary flex h-[36px] grow cursor-pointer items-center justify-start rounded-sm">
                 <a
                   routerLinkActive="text-primary"
                   class="truncate text-sm font-semibold tracking-wide focus:outline-hidden">
                   {{ item.label }}
                 </a>
+                @if (item.badgeCount && item.badgeCount > 0) {
+                  <span
+                    class="bg-primary text-primary-contrast ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-bold">
+                    {{ item.badgeCount > 99 ? '99+' : item.badgeCount }}
+                  </span>
+                }
               </div>
             </ng-template>
             <ng-template #childMenu let-item="item">

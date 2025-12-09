@@ -10,8 +10,13 @@ import {
   Settings,
   Bell,
   Folder,
-  UserIcon
+  UserIcon,
+  ClipboardList
 } from 'lucide-angular';
+
+export const MENU_ITEM_IDS = {
+  REGISTRATION_REQUESTS: 'registration-requests'
+} as const;
 
 export class Menu {
   public static pages: MenuItem[] = [
@@ -103,6 +108,19 @@ export class Menu {
             { label: 'Downloads', route: '/folders/download' },
             { label: 'Trash', route: '/folders/trash' }
           ]
+        }
+      ]
+    },
+    {
+      group: 'Administration',
+      separator: false,
+      roles: ['Admin'],
+      items: [
+        {
+          icon: ClipboardList,
+          label: 'Registration requests',
+          route: '/administration/registration-requests',
+          badge: MENU_ITEM_IDS.REGISTRATION_REQUESTS
         }
       ]
     }

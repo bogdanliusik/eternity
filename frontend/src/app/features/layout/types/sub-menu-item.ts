@@ -7,4 +7,7 @@ export interface SubMenuItem {
   expanded?: boolean;
   active?: boolean;
   children?: Array<SubMenuItem>;
+  badge?: string;
+  badgeCount?: number;
+  roles?: string[];
 }

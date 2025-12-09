@@ -1,9 +1,11 @@
-import { Injectable, OnDestroy, signal } from '@angular/core';
+import { effect, inject, Injectable, OnDestroy, signal, untracked } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MenuItem } from '../types/menu-item';
 import { SubMenuItem } from '../types/sub-menu-item';
-import { Menu } from '../constants/menu';
+import { Menu, MENU_ITEM_IDS } from '../constants/menu';
+import { AuthStore } from '@/core/auth/auth.store';
+import { AdministrationStore } from '@/core/administration/administration.store';
 
 @Injectable({
   providedIn: 'root'
@@ -13,9 +15,16 @@ export class MenuService implements OnDestroy {
   private _showMobileMenu = signal(false);
   private _pagesMenu = signal<MenuItem[]>([]);
   private _subscription = new Subscription();
+  private readonly authStore = inject(AuthStore);
+  private readonly adminStore = inject(AdministrationStore);
 
   constructor(private router: Router) {
-    this._pagesMenu.set(Menu.pages);
+    effect(() => {
+      const count = this.adminStore.registrationRequestsCount();
+      untracked(() => {
+        this.updateBadgeCount(MENU_ITEM_IDS.REGISTRATION_REQUESTS, count);
+      });
+    });
     let sub = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this._pagesMenu().forEach((menu) => {
@@ -123,6 +132,49 @@ export class MenuService implements OnDestroy {
       fragment: 'ignored',
       matrixParams: 'ignored'
     });
+  }
+
+  private initializeMenu() {
+    const userRoles = this.authStore.user()?.roles ?? [];
+    const filteredMenu = this.filterMenuByRoles(Menu.pages, userRoles);
+    this._pagesMenu.set(filteredMenu);
+  }
+
+  private filterMenuByRoles(menu: MenuItem[], userRoles: string[]): MenuItem[] {
+    return menu
+      .filter((group) => {
+        if (!group.roles || group.roles.length === 0) {
+          return true;
+        }
+        return group.roles.some((role) => userRoles.includes(role));
+      })
+      .map((group) => ({
+        ...group,
+        items: group.items.filter((item) => {
+          if (!item.roles || item.roles.length === 0) {
+            return true;
+          }
+          return item.roles.some((role) => userRoles.includes(role));
+        })
+      }))
+      .filter((group) => group.items.length > 0);
+  }
+
+  public updateBadgeCount(badgeId: string, count: number) {
+    const updatedMenu = this._pagesMenu().map((menuGroup) => ({
+      ...menuGroup,
+      items: menuGroup.items.map((item) => {
+        if (item.badge === badgeId) {
+          return { ...item, badgeCount: count };
+        }
+        return item;
+      })
+    }));
+    this._pagesMenu.set(updatedMenu);
+  }
+
+  public refreshMenu() {
+    this.initializeMenu();
   }
 
   ngOnDestroy(): void {

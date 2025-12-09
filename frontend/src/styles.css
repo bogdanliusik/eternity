@@ -14,6 +14,7 @@
   --color-primary: var(--primary);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary-contrast: var(--primary-contrast);
 
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
@@ -37,6 +38,7 @@
 @layer base {
   :root {
     --primary: var(--p-primary-color);
+    --primary-contrast: var(--p-primary-contrast-color);
     --background: var(--p-surface-0);
     --foreground: var(--p-surface-100);
     --muted: var(--p-surface-200);
