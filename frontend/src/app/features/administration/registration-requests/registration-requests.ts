@@ -1,103 +1,71 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { AdministrationStore } from '@/core/administration/administration.store';
-import { DatePipe, NgClass } from '@angular/common';
-import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
-import { SkeletonModule } from 'primeng/skeleton';
-import { RegistrationRequest, RegistrationRequestStatus } from '@/core/administration/models/registration-request';
-import {
-  LucideAngularModule,
-  UserCheck,
-  UserX,
-  RefreshCw,
-  Inbox,
-  Clock,
-  CheckCircle,
-  XCircle
-} from 'lucide-angular';
-
-interface Tab {
-  id: RegistrationRequestStatus;
-  label: string;
-  icon: typeof Clock;
-}
+import { TabsModule } from 'primeng/tabs';
+import { LucideAngularModule, RefreshCw, Clock, CircleCheckBig, CircleX } from 'lucide-angular';
+import { RequestTabBadge } from './components/request-tab-badge/request-tab-badge';
+import { RequestsEmptyState } from './components/requests-empty-state/requests-empty-state';
+import { RequestsSkeleton } from './components/requests-skeleton/requests-skeleton';
+import { RequestTable } from './components/request-table/request-table';
+import { RegistrationRequestsStore } from './store/registration-requests.store';
+import { RegistrationRequest, RegistrationRequestStatus } from './models/registration-request.model';
+import { RequestTab } from './models/request-tab.model';
 
 @Component({
   selector: 'app-registration-requests',
-  imports: [DatePipe, NgClass, TableModule, ButtonModule, TagModule, TooltipModule, SkeletonModule, LucideAngularModule],
+  imports: [
+    ButtonModule,
+    TagModule,
+    TooltipModule,
+    TabsModule,
+    LucideAngularModule,
+    RequestTabBadge,
+    RequestsEmptyState,
+    RequestsSkeleton,
+    RequestTable
+  ],
+  providers: [RegistrationRequestsStore],
   templateUrl: './registration-requests.html',
   styleUrl: './registration-requests.css'
 })
 export class RegistrationRequests implements OnInit {
-  readonly adminStore = inject(AdministrationStore);
+  readonly store = inject(RegistrationRequestsStore);
 
-  // Icons
-  readonly userCheckIcon = UserCheck;
-  readonly userXIcon = UserX;
   readonly refreshIcon = RefreshCw;
-  readonly inboxIcon = Inbox;
-  readonly clockIcon = Clock;
-  readonly checkCircleIcon = CheckCircle;
-  readonly xCircleIcon = XCircle;
 
-  // Tabs configuration
-  readonly tabs: Tab[] = [
+  readonly tabs: RequestTab[] = [
     { id: 'pending', label: 'Pending', icon: Clock },
-    { id: 'approved', label: 'Approved', icon: CheckCircle },
-    { id: 'rejected', label: 'Rejected', icon: XCircle }
+    { id: 'approved', label: 'Approved', icon: CircleCheckBig },
+    { id: 'rejected', label: 'Rejected', icon: CircleX }
   ];
 
   ngOnInit() {
-    this.adminStore.loadRequests('pending');
+    // Load all counts first for tab badges
+    this.store.loadAllCounts();
+    // Then load data for the default tab
+    this.store.loadRequests('pending');
   }
 
-  onTabChange(tab: RegistrationRequestStatus) {
-    if (this.adminStore.activeTab() !== tab) {
-      this.adminStore.loadRequests(tab);
+  onTabChange(tabId: RegistrationRequestStatus) {
+    if (this.store.activeTab() !== tabId) {
+      this.store.loadRequests(tabId);
     }
   }
 
   onApprove(request: RegistrationRequest) {
-    this.adminStore.approveRequest(request.id);
+    this.store.approveRequest(request.id);
   }
 
   onReject(request: RegistrationRequest) {
-    this.adminStore.rejectRequest(request.id);
+    this.store.rejectRequest(request.id);
   }
 
   onRefresh() {
-    this.adminStore.loadRequests(this.adminStore.activeTab());
-  }
-
-  isProcessing(id: string): boolean {
-    return this.adminStore.processingIds().includes(id);
+    this.store.loadRequests(this.store.activeTab());
   }
 
   getTabCount(tabId: RegistrationRequestStatus): number {
-    if (tabId === 'pending') return this.adminStore.pendingRequests().length;
-    if (tabId === 'approved') return this.adminStore.approvedRequests().length;
-    return this.adminStore.rejectedRequests().length;
-  }
-
-  getEmptyStateMessage(): { title: string; description: string } {
-    const tab = this.adminStore.activeTab();
-    if (tab === 'pending') {
-      return {
-        title: 'No pending requests',
-        description: 'All registration requests have been processed'
-      };
-    }
-    if (tab === 'approved') {
-      return {
-        title: 'No approved requests',
-        description: 'No registration requests have been approved yet'
-      };
-    }
-    return {
-      title: 'No rejected requests',
-      description: 'No registration requests have been rejected'
-    };
+    return this.store.getCount()(tabId);
   }
 }

@@ -1,0 +1,73 @@
+<p-table [value]="requests()" [tableStyle]="{ 'min-width': '60rem' }" [rowHover]="true">
+  <ng-template #header>
+    <tr>
+      <th>User</th>
+      <th>Username</th>
+      <th>Email</th>
+      <th>{{ activeTab() === 'pending' ? 'Requested' : 'Processed' }}</th>
+      <th class="!text-center" style="width: 180px" [hidden]="activeTab() === 'approved'">Actions</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-request>
+    <tr>
+      <td>
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full font-semibold" [class]="getAvatarClass()">
+            {{ request.name.charAt(0).toUpperCase() }}
+          </div>
+          <span class="text-color font-medium">{{ request.name }}</span>
+        </div>
+      </td>
+      <td>
+        <span class="text-muted-foreground">{{ '@' + request.username }}</span>
+      </td>
+      <td>
+        <span class="text-muted-foreground">{{ request.email }}</span>
+      </td>
+      <td>
+        <span class="text-muted-foreground">
+          {{ (activeTab() === 'pending' ? request.requestedAt : request.processedAt) | date: 'MMM d, y, h:mm a' }}
+        </span>
+      </td>
+      <td [hidden]="activeTab() === 'approved'">
+        <div class="flex items-center justify-center gap-2">
+          @if (activeTab() === 'pending') {
+            <p-button
+              label="Approve"
+              variant="outlined"
+              severity="success"
+              [disabled]="isProcessing(request.id)"
+              (click)="onApprove(request)">
+              @if (isProcessing(request.id)) {
+                <i class="pi pi-spin pi-spinner"></i>
+              } @else {
+                <i class="pi pi-user-plus"></i>
+              }
+            </p-button>
+            <p-button
+              variant="outlined"
+              severity="danger"
+              icon="pi pi-user-minus"
+              [disabled]="isProcessing(request.id)"
+              pTooltip="Reject request"
+              tooltipPosition="bottom"
+              (click)="onReject(request)"></p-button>
+          } @else if (activeTab() === 'rejected') {
+            <p-button
+              variant="outlined"
+              severity="success"
+              [disabled]="isProcessing(request.id)"
+              (click)="onApprove(request)"
+              label="Approve">
+              @if (isProcessing(request.id)) {
+                <i class="pi pi-spin pi-spinner"></i>
+              } @else {
+                <i class="pi pi-user-plus"></i>
+              }
+            </p-button>
+          }
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
