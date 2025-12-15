@@ -3,6 +3,7 @@ import { Layout } from './features/layout/layout';
 import { Login } from './features/auth/pages/login/login';
 import { authenticationGuard } from './core/auth/auth.guard';
 import { Profile } from './features/profile/profile';
+import { RegistrationRequests } from './features/administration/registration-requests/registration-requests';
 
 export const routes: Routes = [
   {
@@ -13,6 +14,10 @@ export const routes: Routes = [
       {
         path: 'profile',
         component: Profile
+      },
+      {
+        path: 'administration/registration-requests',
+        component: RegistrationRequests
       }
     ]
   },

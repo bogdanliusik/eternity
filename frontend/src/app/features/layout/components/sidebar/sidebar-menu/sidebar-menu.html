@@ -19,7 +19,7 @@
                 'hover:bg-primary/10': !menuService.showSideBar && item.active,
                 'justify-center': !menuService.showSideBar
               }"
-              class="group text-muted-foreground relative flex h-[36px] grow cursor-pointer items-center gap-4 rounded-lg px-2 hover:bg-primary/10"
+              class="group text-muted-foreground hover:bg-primary/10 relative flex h-[36px] grow cursor-pointer items-center gap-4 rounded-lg px-2"
               [attr.title]="!menuService.showSideBar ? item.label : null"
               [attr.aria-label]="!menuService.showSideBar ? item.label : null">
               <div class="group-hover:text-primary">
@@ -87,14 +87,26 @@
               }"
               [attr.title]="!menuService.showSideBar ? item.label : null"
               [attr.aria-label]="!menuService.showSideBar ? item.label : null">
-              <div class="group-hover:text-primary">
+              <div class="group-hover:text-primary relative">
                 <lucide-icon [img]="item.icon" class="h-5 w-5"></lucide-icon>
+                @if (!menuService.showSideBar && item.badgeCount && item.badgeCount > 0) {
+                    <span
+                      class="bg-primary absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-primary-contrast">
+                    {{ item.badgeCount > 99 ? '99+' : item.badgeCount }}
+                  </span>
+                }
               </div>
               <span
                 [class.hidden]="!menuService.showSideBar"
                 class="group-hover:text-primary truncate text-base font-semibold tracking-wide">
                 {{ item.label }}
               </span>
+              @if (menuService.showSideBar && item.badgeCount && item.badgeCount > 0) {
+                <span
+                  class="bg-primary ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-bold text-primary-contrast">
+                  {{ item.badgeCount > 99 ? '99+' : item.badgeCount }}
+                </span>
+              }
             </a>
           }
         </li>
