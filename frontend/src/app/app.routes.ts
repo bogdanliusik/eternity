@@ -1,9 +1,6 @@
 import { Routes } from '@angular/router';
 import { Layout } from './features/layout/layout';
-import { Login } from './features/auth/pages/login/login';
 import { authenticationGuard } from './core/auth/auth.guard';
-import { Profile } from './features/profile/profile';
-import { RegistrationRequests } from './features/administration/registration-requests/registration-requests';
 
 export const routes: Routes = [
   {
@@ -13,16 +10,19 @@ export const routes: Routes = [
     children: [
       {
         path: 'profile',
-        component: Profile
+        loadComponent: () => import('./features/profile/profile').then((m) => m.Profile)
       },
       {
         path: 'administration/registration-requests',
-        component: RegistrationRequests
+        loadComponent: () =>
+          import('./features/administration/registration-requests/registration-requests').then(
+            (m) => m.RegistrationRequests
+          )
       }
     ]
   },
   {
     path: 'login',
-    component: Login
+    loadComponent: () => import('./features/auth/pages/login/login').then((m) => m.Login)
   }
 ];
