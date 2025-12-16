@@ -6,6 +6,6 @@ namespace Eternity.Application.Common.Interfaces;
 public interface IAppDbContext
 {
     DbSet<UserAccount> UserAccounts { get; }
-
+    DbSet<RegistrationRequest> RegistrationRequests { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

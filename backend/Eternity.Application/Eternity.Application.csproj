@@ -18,4 +18,10 @@
       <ProjectReference Include="..\Eternity.Domain\Eternity.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="RegistrationRequests\Commands\" />
+      <Folder Include="RegistrationRequests\Models\" />
+      <Folder Include="RegistrationRequests\Queries\" />
+    </ItemGroup>
+
 </Project>

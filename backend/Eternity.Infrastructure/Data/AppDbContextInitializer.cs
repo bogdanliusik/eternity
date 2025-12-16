@@ -35,8 +35,8 @@ public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, Ap
     public async Task SeedAsync() {
         try {
             await EnsureRolesAsync(RoleNames.Admin, RoleNames.Member);
-            await AddUser("supervisor@eternity.com", "supervisor@eternity.com", "Supervisor1!", [RoleNames.Admin, RoleNames.Member]);
-            await AddUser("b_liusik@eternity.com", "b_liusik@eternity.com", "B_liusik1!", [RoleNames.Member]);
+            await AddUser("supervisor", "supervisor@eternity.com", "Supervisor1!", [RoleNames.Admin, RoleNames.Member]);
+            await AddUser("b_liusik", "b_liusik@eternity.com", "B_liusik1!", [RoleNames.Member]);
         }
         catch (Exception ex) {
             logger.LogError(ex, "An error occurred while seeding the database.");
@@ -46,7 +46,7 @@ public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, Ap
 
     private async Task AddUser(string userName, string email, string password, IEnumerable<string> roles) {
         if (userManager.Users.All(u => u.UserName != userName)) {
-            var result = await identityService.CreateUserAsync(userName, password);
+            var result = await identityService.CreateUserAsync(userName, email, password);
             var createdUser = await userManager.FindByNameAsync(userName);
             if (createdUser == null) {
                 throw new InvalidOperationException($"Couldn't create {userName} user");
