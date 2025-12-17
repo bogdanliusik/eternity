@@ -23,35 +23,43 @@
       </button>
     </div>
   </div>
-  <p-tabs [value]="store.activeTab()" (valueChange)="onTabChange($any($event))" class="rounded-md">
-    <p-tablist>
-      @for (tab of tabs; track tab.id) {
-        <p-tab [value]="tab.id" class="flex items-center gap-2">
-          <lucide-icon [img]="tab.icon" class="h-4 w-4"></lucide-icon>
-          <span>{{ tab.label }}</span>
-          <app-request-tab-badge [status]="tab.id" [count]="getTabCount(tab.id)" [isLoading]="store.countsLoading()" />
-        </p-tab>
-      }
-    </p-tablist>
-    <p-tabpanels>
-      @for (tab of tabs; track tab.id) {
-        <p-tabpanel [value]="tab.id">
-          <div class="card overflow-hidden !p-0">
-            @if (store.isLoading() && store.currentRequests().length === 0) {
-              <app-requests-skeleton />
-            } @else if (store.currentRequests().length === 0) {
-              <app-requests-empty-state [activeTab]="store.activeTab()" />
-            } @else {
-              <app-request-table
-                [requests]="store.currentRequests()"
-                [activeTab]="store.activeTab()"
-                [processingIds]="store.processingIds()"
-                (approve)="onApprove($event)"
-                (reject)="onReject($event)" />
+  <div class="card">
+    <p-tabs [value]="store.activeTab()" (valueChange)="onTabChange($any($event))" class="rounded-md" scrollable>
+      <p-tablist>
+        @for (tab of tabs; track tab.id) {
+          <p-tab [value]="tab.id" class="flex items-center !gap-2">
+            <lucide-icon [img]="tab.icon" class="h-4 w-4"></lucide-icon>
+            <span>{{ tab.label }}</span>
+            @if (getTabCount(tab.id) > 0) {
+              <p-badge
+                [value]="getTabCount(tab.id).toString()"
+                [severity]="
+                  tab.id === statusEnum.Rejected ? 'danger' : tab.id === statusEnum.Approved ? 'success' : 'info'
+                " />
             }
-          </div>
-        </p-tabpanel>
-      }
-    </p-tabpanels>
-  </p-tabs>
+          </p-tab>
+        }
+      </p-tablist>
+      <p-tabpanels>
+        @for (tab of tabs; track tab.id) {
+          <p-tabpanel [value]="tab.id">
+            <div class="card overflow-hidden !p-0">
+              @if (store.isLoading() && store.currentRequests().length === 0) {
+                <app-requests-skeleton />
+              } @else if (store.currentRequests().length === 0) {
+                <app-requests-empty-state [activeTab]="store.activeTab()" />
+              } @else {
+                <app-request-table
+                  [requests]="store.currentRequests()"
+                  [activeTab]="store.activeTab()"
+                  [processingIds]="store.processingIds()"
+                  (approve)="onApprove($event)"
+                  (reject)="onReject($event)" />
+              }
+            </div>
+          </p-tabpanel>
+        }
+      </p-tabpanels>
+    </p-tabs>
+  </div>
 </div>

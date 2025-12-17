@@ -46,15 +46,15 @@ public class RegistrationRequestsEndpoint : EndpointGroupBase
         return ToHttpResult(result);
     }
 
-    private static async Task<IResult> SubmitRegistrationRequest(SubmitRegistrationRequestCommand command, IMediator mediator) {
+    private static async Task<IResult> SubmitRegistrationRequest(SubmitRegistrationRequestCommand command, 
+        IMediator mediator) {
         var result = await mediator.Send(command);
         return ToHttpResult(result);
     }
 
     private static IResult ToHttpResult<T>(Result<T> result) => Results.Ok(result);
 
-    private sealed class RequestStatusQuery
-    {
+    private class RequestStatusQuery {
         public RegistrationRequestStatus Status { get; init; } = RegistrationRequestStatus.Pending;
     }
 }

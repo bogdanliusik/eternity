@@ -26,7 +26,7 @@ public class GetRegistrationRequestsQueryHandler(IAppDbContext dbContext)
                 Name = r.Name,
                 Username = r.UserName,
                 Email = r.Email,
-                Status = r.Status.ToString().ToLowerInvariant(),
+                Status = r.Status,
                 RequestedAt = r.RequestedAt,
                 ProcessedAt = r.ProcessedAt
             })

@@ -37,7 +37,7 @@ const initialState: RegistrationRequestsState = {
   approvedRequests: [],
   rejectedRequests: [],
 
-  activeTab: 'pending',
+  activeTab: RegistrationRequestStatus.Pending,
   isLoading: false,
   processingIds: []
 };
@@ -47,19 +47,19 @@ export const RegistrationRequestsStore = signalStore(
   withComputed((store) => ({
     currentRequests: computed(() => {
       const tab = store.activeTab();
-      if (tab === 'pending') {
+      if (tab === RegistrationRequestStatus.Pending) {
         return store.pendingRequests();
       }
-      if (tab === 'approved') {
+      if (tab === RegistrationRequestStatus.Approved) {
         return store.approvedRequests();
       }
       return store.rejectedRequests();
     }),
     getCount: computed(() => (status: RegistrationRequestStatus) => {
-      if (status === 'pending') {
+      if (status === RegistrationRequestStatus.Pending) {
         return store.pendingCount();
       }
-      if (status === 'approved') {
+      if (status === RegistrationRequestStatus.Approved) {
         return store.approvedCount();
       }
       return store.rejectedCount();
@@ -107,13 +107,13 @@ export const RegistrationRequestsStore = signalStore(
               tapResponse({
                 next: (requests) => {
                   const update: Partial<RegistrationRequestsState> = { isLoading: false };
-                  if (status === 'pending') {
+                  if (status === RegistrationRequestStatus.Pending) {
                     update.pendingRequests = requests;
                     update.pendingCount = requests.length;
-                  } else if (status === 'approved') {
+                  } else if (status === RegistrationRequestStatus.Approved) {
                     update.approvedRequests = requests;
                     update.approvedCount = requests.length;
-                  } else if (status === 'rejected') {
+                  } else if (status === RegistrationRequestStatus.Rejected) {
                     update.rejectedRequests = requests;
                     update.rejectedCount = requests.length;
                   }
@@ -164,7 +164,6 @@ export const RegistrationRequestsStore = signalStore(
                     processingIds: store.processingIds().filter((pid) => pid !== id)
                   });
 
-                  // Sync with global admin store for menu badge
                   if (wasPending) {
                     globalAdminStore.updatePendingCount(newPendingCount);
                   }
@@ -208,8 +207,6 @@ export const RegistrationRequestsStore = signalStore(
                     rejectedCount: store.rejectedCount() + 1,
                     processingIds: store.processingIds().filter((pid) => pid !== id)
                   });
-
-                  // Sync with global admin store for menu badge
                   globalAdminStore.updatePendingCount(newPendingCount);
                 },
                 error: () => {

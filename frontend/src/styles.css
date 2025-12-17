@@ -39,20 +39,20 @@
   :root {
     --primary: var(--p-primary-color);
     --primary-contrast: var(--p-primary-contrast-color);
-    --background: var(--p-surface-0);
-    --foreground: var(--p-surface-100);
+    --background: var(--p-surface-100);
+    --foreground: var(--p-content-background);
     --muted: var(--p-surface-200);
     --muted-foreground: var(--p-surface-600);
-    --card-background: var(--p-surface-100);
+    --card-background: var(--p-content-background);
     --card-border: 1px solid var(--p-surface-200);
   }
 
   .dark {
     --background: var(--p-surface-950);
-    --foreground: var(--p-surface-900);
+    --foreground: var(--p-content-background);
     --muted: var(--p-surface-800);
     --muted-foreground: var(--p-surface-400);
-    --card-background: var(--p-surface-900);
+    --card-background: var(--p-content-background);
     --card-border: 1px solid transparent;
   }
 }
