@@ -20,10 +20,10 @@ public class IdentityService(UserManager<ApplicationUser> userManager,
     ILogger<IdentityService> logger
     ) : IIdentityService
 {
-    public async Task<Result<Guid>> CreateUserAsync(string userName, string password) {
+    public async Task<Result<Guid>> CreateUserAsync(string userName, string email, string password) {
         var user = new ApplicationUser {
             UserName = userName,
-            Email = userName,
+            Email = email,
         };
         var result = await userManager.CreateAsync(user, password);
         if (result.Succeeded) {
@@ -34,12 +34,33 @@ public class IdentityService(UserManager<ApplicationUser> userManager,
         }
         return result.ToApplicationResult(user.Id);
     }
+
+    public async Task<Result<Guid>> FindUserIdByNameAsync(string userName) {
+        var user = await userManager.FindByNameAsync(userName);
+        if (user == null) {
+            return Result<Guid>.Failure([$"User {userName} not found"]);
+        }
+        return Result<Guid>.Success(user.Id);
+    }
+
+    public async Task<Result> DeleteUserByNameAsync(string userName) {
+        var user = await userManager.FindByNameAsync(userName);
+        if (user == null) {
+            return Result.Success();
+        }
+        var result = await userManager.DeleteAsync(user);
+        return result.ToApplicationResult();
+    }
     
     public async Task<Result<AppTokenInfo>> LoginAsync(string userName, string password) {
         var identityUser = await userManager.FindByNameAsync(userName);
         if (identityUser == null) {
             logger.LogWarning("Login attempt failed: User {UserName} not found", userName);
             return Result<AppTokenInfo>.Failure(["Invalid credentials"]);
+        }
+        var lockoutCheck = CheckLockout(identityUser);
+        if (!lockoutCheck.Succeeded) {
+            return lockoutCheck;
         }
         var isValidPassword = await userManager.CheckPasswordAsync(identityUser, password);
         if (!isValidPassword) {
@@ -60,6 +81,10 @@ public class IdentityService(UserManager<ApplicationUser> userManager,
         if (identityUser == null) {
             logger.LogWarning("Refresh token attempt failed: User {UserName} not found", principal.Identity.Name);
             return Result<AppTokenInfo>.Failure(["User not found"]);
+        }
+        var lockoutCheck = CheckLockout(identityUser);
+        if (!lockoutCheck.Succeeded) {
+            return lockoutCheck;
         }
         if (string.IsNullOrEmpty(identityUser.RefreshToken) || oldTokenInfo.RefreshToken != identityUser.RefreshToken) {
             logger.LogWarning("Refresh token attempt failed: Invalid refresh token for user {UserName}", 
@@ -104,6 +129,39 @@ public class IdentityService(UserManager<ApplicationUser> userManager,
         }
         var roles = await userManager.GetRolesAsync(user);
         return Result<IList<string>>.Success(roles);
+    }
+
+    public async Task<Result> SetUserLockoutEndAsync(Guid userId, DateTimeOffset? lockoutEnd) {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user == null) {
+            return Result.Failure(["User not found"]);
+        }
+        var result = await userManager.SetLockoutEndDateAsync(user, lockoutEnd);
+        if (result.Succeeded) {
+            await userManager.SetLockoutEnabledAsync(user, lockoutEnd.HasValue);
+            logger.LogInformation("Lockout for user {UserId} set to {Lockout}", userId, lockoutEnd);
+            return Result.Success();
+        }
+        return result.ToApplicationResult();
+    }
+
+    public async Task<Result> AddUserToRoleAsync(Guid userId, string role) {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user == null) {
+            return Result.Failure(["User not found"]);
+        }
+        var result = await userManager.AddToRoleAsync(user, role);
+        return result.ToApplicationResult();
+    }
+
+    private Result<AppTokenInfo> CheckLockout(ApplicationUser identityUser) {
+        if (identityUser is { LockoutEnabled: true, LockoutEnd: not null } 
+            && identityUser.LockoutEnd > DateTimeOffset.UtcNow) {
+            logger.LogWarning("User {UserName} is locked out until {LockoutEnd}", 
+                identityUser.UserName, identityUser.LockoutEnd);
+            return Result<AppTokenInfo>.Failure(["User is not approved or is locked."]);
+        }
+        return Result<AppTokenInfo>.Success(null!);
     }
     
     private string GenerateAccessToken(string id, string userName, string email, IEnumerable<string> roles) {

@@ -1,12 +1,10 @@
 ﻿using Eternity.Application.Common.Interfaces;
 using Eternity.Application.Common.Models;
 using Eternity.Application.Common.Security;
-using Eternity.Application.Users.Models;
 using Eternity.Application.Users.Queries;
 using Eternity.Domain.Constants;
 using Eternity.WebApi.Extensions;
 using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
 
 namespace Eternity.WebApi.Endpoints;
@@ -32,7 +30,7 @@ public sealed class UsersEndpoint : EndpointGroupBase
     private static async Task<IResult> Login(LoginRequest loginRequest, IIdentityService identityService) {
         var loginResult = await identityService.LoginAsync(loginRequest.Username, loginRequest.Password);
         if (!loginResult.Succeeded) {
-            return Results.Unauthorized();
+            return Results.Json(loginResult, statusCode: StatusCodes.Status401Unauthorized);
         }
         return Results.Ok(loginResult.Data);
     }
@@ -42,7 +40,7 @@ public sealed class UsersEndpoint : EndpointGroupBase
         await Task.Delay(1000);
         var loginResult = await identityService.LoginAsync(loginRequest.Username, loginRequest.Password);
         if (!loginResult.Succeeded) {
-            return Results.Unauthorized();
+            return Results.Json(loginResult, statusCode: StatusCodes.Status401Unauthorized);
         }
         cookieAuthService.SetAuthenticationCookies(response, loginResult.Data);
         return Results.Ok(Result.Success());
@@ -50,10 +48,9 @@ public sealed class UsersEndpoint : EndpointGroupBase
 
     private static async Task<IResult> RefreshToken(AppTokenInfo oldTokenInfo, IIdentityService identityService) {
         var refreshResult = await identityService.RefreshTokenAsync(oldTokenInfo);
-        if (!refreshResult.Succeeded) {
-            return Results.Unauthorized();
-        }
-        return Results.Ok(refreshResult.Data);
+        return refreshResult.Succeeded
+            ? Results.Ok(refreshResult.Data)
+            : Results.Json(refreshResult, statusCode: StatusCodes.Status401Unauthorized);
     }
 
     private static async Task<IResult> RefreshTokenCookie(
@@ -71,7 +68,7 @@ public sealed class UsersEndpoint : EndpointGroupBase
             new AppTokenInfo(accessToken, refreshToken)
         );
         if (!refreshResult.Succeeded) {
-            return Results.Unauthorized();
+            return Results.Json(refreshResult, statusCode: StatusCodes.Status401Unauthorized);
         }
         cookieAuthService.SetAuthenticationCookies(response, refreshResult.Data);
         return Results.Ok();

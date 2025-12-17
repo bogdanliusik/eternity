@@ -3,8 +3,8 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { TabsModule } from 'primeng/tabs';
+import { BadgeModule } from 'primeng/badge';
 import { LucideAngularModule, RefreshCw, Clock, CircleCheckBig, CircleX } from 'lucide-angular';
-import { RequestTabBadge } from './components/request-tab-badge/request-tab-badge';
 import { RequestsEmptyState } from './components/requests-empty-state/requests-empty-state';
 import { RequestsSkeleton } from './components/requests-skeleton/requests-skeleton';
 import { RequestTable } from './components/request-table/request-table';
@@ -19,8 +19,8 @@ import { RequestTab } from './models/request-tab.model';
     TagModule,
     TooltipModule,
     TabsModule,
+    BadgeModule,
     LucideAngularModule,
-    RequestTabBadge,
     RequestsEmptyState,
     RequestsSkeleton,
     RequestTable
@@ -32,19 +32,21 @@ import { RequestTab } from './models/request-tab.model';
 export class RegistrationRequests implements OnInit {
   readonly store = inject(RegistrationRequestsStore);
 
+  readonly statusEnum = RegistrationRequestStatus;
+
   readonly refreshIcon = RefreshCw;
 
   readonly tabs: RequestTab[] = [
-    { id: 'pending', label: 'Pending', icon: Clock },
-    { id: 'approved', label: 'Approved', icon: CircleCheckBig },
-    { id: 'rejected', label: 'Rejected', icon: CircleX }
+    { id: RegistrationRequestStatus.Pending, label: 'Pending', icon: Clock },
+    { id: RegistrationRequestStatus.Approved, label: 'Approved', icon: CircleCheckBig },
+    { id: RegistrationRequestStatus.Rejected, label: 'Rejected', icon: CircleX }
   ];
 
   ngOnInit() {
     // Load all counts first for tab badges
     this.store.loadAllCounts();
     // Then load data for the default tab
-    this.store.loadRequests('pending');
+    this.store.loadRequests(RegistrationRequestStatus.Pending);
   }
 
   onTabChange(tabId: RegistrationRequestStatus) {

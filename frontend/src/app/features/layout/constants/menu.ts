@@ -87,7 +87,7 @@ export class Menu {
     },
     {
       group: 'Config',
-      separator: false,
+      separator: true,
       items: [
         {
           icon: Settings,

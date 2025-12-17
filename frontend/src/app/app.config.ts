@@ -10,12 +10,14 @@ import { routes } from './app.routes';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 import { providePrimeNG } from 'primeng/config';
+import { MessageService } from 'primeng/api';
 import EternityTheme from '@/core/themes/eternity-theme';
 import { authInterceptor } from './core/auth/auth.interceptor';
 import { initializeAuth } from './core/auth/auth.store';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    MessageService,
     provideAppInitializer(initializeAuth()),
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),

@@ -4,8 +4,13 @@
       <th>User</th>
       <th>Username</th>
       <th>Email</th>
-      <th>{{ activeTab() === 'pending' ? 'Requested' : 'Processed' }}</th>
-      <th class="!text-center" style="width: 180px" [hidden]="activeTab() === 'approved'">Actions</th>
+      <th>{{ activeTab() === statusEnum.Pending ? 'Requested' : 'Processed' }}</th>
+      <th
+        class="!text-center"
+        style="width: 180px"
+        [hidden]="activeTab() === statusEnum.Approved || activeTab() === statusEnum.Rejected">
+        Actions
+      </th>
     </tr>
   </ng-template>
   <ng-template #body let-request>
@@ -26,12 +31,14 @@
       </td>
       <td>
         <span class="text-muted-foreground">
-          {{ (activeTab() === 'pending' ? request.requestedAt : request.processedAt) | date: 'MMM d, y, h:mm a' }}
+          {{
+            (activeTab() === statusEnum.Pending ? request.requestedAt : request.processedAt) | date: 'MMM d, y, h:mm a'
+          }}
         </span>
       </td>
-      <td [hidden]="activeTab() === 'approved'">
+      <td [hidden]="activeTab() === statusEnum.Approved || activeTab() === statusEnum.Rejected">
         <div class="flex items-center justify-center gap-2">
-          @if (activeTab() === 'pending') {
+          @if (activeTab() === statusEnum.Pending) {
             <p-button
               label="Approve"
               variant="outlined"
@@ -52,19 +59,6 @@
               pTooltip="Reject request"
               tooltipPosition="bottom"
               (click)="onReject(request)"></p-button>
-          } @else if (activeTab() === 'rejected') {
-            <p-button
-              variant="outlined"
-              severity="success"
-              [disabled]="isProcessing(request.id)"
-              (click)="onApprove(request)"
-              label="Approve">
-              @if (isProcessing(request.id)) {
-                <i class="pi pi-spin pi-spinner"></i>
-              } @else {
-                <i class="pi pi-user-plus"></i>
-              }
-            </p-button>
           }
         </div>
       </td>

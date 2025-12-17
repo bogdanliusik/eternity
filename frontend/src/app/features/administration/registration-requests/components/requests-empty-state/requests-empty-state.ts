@@ -8,15 +8,15 @@ export interface EmptyStateMessage {
 }
 
 const EMPTY_STATE_MESSAGES: Record<RegistrationRequestStatus, EmptyStateMessage> = {
-  pending: {
+  [RegistrationRequestStatus.Pending]: {
     title: 'No pending requests',
     description: 'All registration requests have been processed'
   },
-  approved: {
+  [RegistrationRequestStatus.Approved]: {
     title: 'No approved requests',
     description: 'No registration requests have been approved yet'
   },
-  rejected: {
+  [RegistrationRequestStatus.Rejected]: {
     title: 'No rejected requests',
     description: 'No registration requests have been rejected'
   }

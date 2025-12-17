@@ -13,8 +13,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 {
     public DbSet<UserAccount> UserAccounts => Set<UserAccount>();
 
+    public DbSet<RegistrationRequest> RegistrationRequests => Set<RegistrationRequest>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfiguration(new UserAccountConfiguration());
+        modelBuilder.ApplyConfiguration(new RegistrationRequestConfiguration());
     }
 }

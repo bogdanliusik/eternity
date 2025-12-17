@@ -15,6 +15,8 @@ export class RequestTable {
   readonly activeTab = input.required<RegistrationRequestStatus>();
   readonly processingIds = input.required<string[]>();
 
+  readonly statusEnum = RegistrationRequestStatus;
+
   readonly approve = output<RegistrationRequest>();
   readonly reject = output<RegistrationRequest>();
 
@@ -32,10 +34,10 @@ export class RequestTable {
 
   getAvatarClass(): string {
     const tab = this.activeTab();
-    if (tab === 'pending') {
+    if (tab === RegistrationRequestStatus.Pending) {
       return 'bg-primary/10 text-primary';
     }
-    if (tab === 'approved') {
+    if (tab === RegistrationRequestStatus.Approved) {
       return 'bg-green-500/10 text-green-600';
     }
     return 'bg-red-500/10 text-red-600';
