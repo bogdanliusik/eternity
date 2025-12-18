@@ -21,16 +21,9 @@
           pInputText
           id="username"
           type="username"
-          [class.border-red-500]="showUsernameError()"
-          [disabled]="authStore.isLoading()" />
+          [class.border-red-500]="showUsernameError()" />
         @if (showUsernameError()) {
-          <span class="text-sm text-red-500">
-            @if (formControls.username.hasError('required')) {
-              Username is required
-            } @else if (formControls.username.hasError('minlength')) {
-              Username must be at least 4 characters
-            }
-          </span>
+          <span class="text-sm text-red-500">Username is required</span>
         }
       </div>
 
@@ -42,18 +35,9 @@
           id="password"
           type="password"
           placeholder="••••••••"
-          [class.border-red-500]="showPasswordError()"
-          [disabled]="authStore.isLoading()" />
+          [class.border-red-500]="showPasswordError()" />
         @if (showPasswordError()) {
-          <span class="text-sm text-red-500">
-            @if (formControls.password.hasError('required')) {
-              Password is required
-            } @else if (formControls.password.hasError('minlength')) {
-              Password must be at least 8 characters
-            } @else if (formControls.password.hasError('password')) {
-              {{ formControls.password.getError('password')?.message }}
-            }
-          </span>
+          <span class="text-sm text-red-500">Password is required</span>
         }
       </div>
       <div class="flex items-center justify-end">

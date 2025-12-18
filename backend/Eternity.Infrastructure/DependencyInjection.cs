@@ -1,4 +1,5 @@
 ﻿using Eternity.Application.Common.Interfaces;
+using Eternity.Application.Common.Security;
 using Eternity.Domain.Constants;
 using Eternity.Infrastructure.Data;
 using Eternity.Infrastructure.Data.Interceptors;
@@ -17,6 +18,8 @@ public static class DependencyInjection
     public static void AddInfrastructureServices(this IHostApplicationBuilder builder) {
         builder.Services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         builder.Services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
+        builder.Services.Configure<AdminSeedSettings>(
+            builder.Configuration.GetSection(AdminSeedSettings.SectionName));
         var dbConnectionString = builder.Configuration.GetConnectionString("EternityDb");
         builder.Services.AddDbContext<AppDbContext>((sp, options) => {
             options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());

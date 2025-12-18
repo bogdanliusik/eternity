@@ -1,0 +1,144 @@
+<div class="bg-background flex min-h-screen flex-col items-center justify-center px-6 py-8 sm:p-0">
+  <a href="" class="mb-6 flex items-center gap-2 text-lg font-semibold md:text-2xl">
+    <svg-icon src="assets/logo.svg" class="text-color"></svg-icon>
+    Eternity
+  </a>
+  <div
+    class="bg-foreground border-surface w-full space-y-4 rounded-lg border p-6 shadow sm:max-w-md sm:p-8 md:space-y-6">
+    <h1 class="text-lg font-semibold md:text-2xl">Create an account</h1>
+    @if (authStore.registrationSuccess()) {
+      <div class="space-y-1 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+        <div>Registration request submitted successfully!</div>
+        <div>You will be notified once your account is approved.</div>
+      </div>
+    }
+    @if (authStore.hasErrors()) {
+      <div class="space-y-1 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        @for (error of authStore.errors(); track error) {
+          <div>{{ error }}</div>
+        }
+      </div>
+    }
+    @if (!authStore.registrationSuccess()) {
+      <form [formGroup]="registrationForm" (ngSubmit)="sendForm()" class="space-y-4 md:space-y-4">
+        <div class="flex w-full flex-col gap-2">
+          <label for="name">Full Name</label>
+          <input
+            [formControl]="formControls.name"
+            pInputText
+            id="name"
+            type="text"
+            placeholder="John Doe"
+            [class.border-red-500]="showNameError()" />
+          @if (showNameError()) {
+            <span class="text-sm text-red-500">
+              @if (formControls.name.hasError('required')) {
+                Full name is required
+              } @else if (formControls.name.hasError('minlength')) {
+                Full name must be at least 2 characters
+              }
+            </span>
+          }
+        </div>
+        <div class="flex w-full flex-col gap-2">
+          <label for="userName">Username</label>
+          <input
+            [formControl]="formControls.userName"
+            pInputText
+            id="userName"
+            type="text"
+            placeholder="johndoe"
+            [class.border-red-500]="showUserNameError()" />
+          @if (showUserNameError()) {
+            <span class="text-sm text-red-500">
+              @if (formControls.userName.hasError('required')) {
+                Username is required
+              } @else if (formControls.userName.hasError('minlength')) {
+                Username must be at least 4 characters
+              }
+            </span>
+          }
+        </div>
+
+        <div class="flex w-full flex-col gap-2">
+          <label for="email">Email</label>
+          <input
+            [formControl]="formControls.email"
+            pInputText
+            id="email"
+            type="email"
+            placeholder="john@example.com"
+            [class.border-red-500]="showEmailError()" />
+          @if (showEmailError()) {
+            <span class="text-sm text-red-500">
+              @if (formControls.email.hasError('required')) {
+                Email is required
+              } @else if (formControls.email.hasError('email')) {
+                Please enter a valid email address
+              }
+            </span>
+          }
+        </div>
+
+        <div class="flex w-full flex-col gap-2">
+          <label for="password">Password</label>
+          <input
+            [formControl]="formControls.password"
+            pInputText
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            [class.border-red-500]="showPasswordError()" />
+          @if (showPasswordError()) {
+            <span class="text-sm text-red-500">
+              @if (formControls.password.hasError('required')) {
+                Password is required
+              } @else if (formControls.password.hasError('password')) {
+                {{ getPasswordErrorMessage() }}
+              }
+            </span>
+          }
+        </div>
+
+        <div class="flex w-full flex-col gap-2">
+          <label for="confirmPassword">Confirm Password</label>
+          <input
+            [formControl]="formControls.confirmPassword"
+            pInputText
+            id="confirmPassword"
+            type="password"
+            placeholder="••••••••"
+            [class.border-red-500]="showConfirmPasswordError()" />
+          @if (showConfirmPasswordError()) {
+            <span class="text-sm text-red-500">
+              @if (formControls.confirmPassword.hasError('required')) {
+                Please confirm your password
+              } @else if (formControls.confirmPassword.hasError('passwordMismatch')) {
+                Passwords do not match
+              }
+            </span>
+          }
+        </div>
+
+        <button pButton type="submit" class="w-full" [disabled]="authStore.isLoading()">
+          @if (authStore.isLoading()) {
+            <i class="pi pi-spin pi-spinner" pButtonIcon></i>
+            <span pButtonLabel>Creating account...</span>
+          } @else {
+            <span pButtonLabel>Create account</span>
+          }
+        </button>
+        <p class="text-muted-foreground text-sm">
+          Already have an account?
+          <a routerLink="/login" class="hover:underline">Sign in</a>
+        </p>
+      </form>
+    } @else {
+      <div class="pt-2">
+        <a routerLink="/login" pButton class="w-full">
+          <span pButtonLabel>Back to Sign in</span>
+        </a>
+      </div>
+    }
+  </div>
+</div>

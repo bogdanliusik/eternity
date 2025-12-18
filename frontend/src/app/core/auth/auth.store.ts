@@ -1,5 +1,5 @@
 import { Router } from '@angular/router';
-import { AuthService } from './auth.service';
+import { AuthService, RegisterRequest } from './auth.service';
 import { CurrentUser } from './models/current.user';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
@@ -9,6 +9,7 @@ import { catchError, EMPTY, filter, firstValueFrom, pipe, switchMap, tap } from 
 import { toObservable } from '@angular/core/rxjs-interop';
 import { LoginRequest } from './models/login.request';
 import { ApiError } from '../models/api.error';
+import { ApiErrorHandler } from '../operators/handle-api-error';
 
 export enum AuthStatus {
   Unknown = 'unknown',
@@ -22,19 +23,27 @@ interface AuthState {
   status: AuthStatus;
   errors: string[];
   isLoading: boolean;
+  registrationSuccess: boolean;
 }
 
 const initialState: AuthState = {
   user: null,
   status: AuthStatus.Unknown,
   errors: [],
-  isLoading: false
+  isLoading: false,
+  registrationSuccess: false
 };
 
 export const AuthStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withMethods((store, authService = inject(AuthService), router = inject(Router)) => ({
+  withMethods(
+    (
+      store,
+      authService = inject(AuthService),
+      router = inject(Router),
+      errorHandler = inject(ApiErrorHandler)
+    ) => ({
     initializeAuth: rxMethod<void>(
       pipe(
         tap(() => patchState(store, { status: AuthStatus.Checking, isLoading: true })),
@@ -145,6 +154,38 @@ export const AuthStore = signalStore(
         )
       )
     ),
+    register: rxMethod<RegisterRequest>(
+      pipe(
+        tap(() => patchState(store, { isLoading: true, errors: [], registrationSuccess: false })),
+        switchMap((request) =>
+          authService.register(request).pipe(
+            tapResponse({
+              next: (result) => {
+                if (result.succeeded) {
+                  patchState(store, {
+                    registrationSuccess: true,
+                    errors: [],
+                    isLoading: false
+                  });
+                } else {
+                  const errors = result.errors.length ? result.errors : ['Registration failed'];
+                  patchState(store, {
+                    errors,
+                    isLoading: false
+                  });
+                }
+              },
+              error: (error: ApiError) => {
+                patchState(store, {
+                  errors: error.errors.length > 0 ? error.errors : [error.message],
+                  isLoading: false
+                });
+              }
+            })
+          )
+        )
+      )
+    ),
     handleUnauthorized: () => {
       if (store.status() === AuthStatus.Authenticated) {
         patchState(store, {
@@ -157,7 +198,7 @@ export const AuthStore = signalStore(
       }
     },
     clearErrors: () => {
-      patchState(store, { errors: [] });
+      patchState(store, { errors: [], registrationSuccess: false });
     },
     setUnauthenticated: () => {
       patchState(store, { status: AuthStatus.Unauthenticated });

@@ -37,7 +37,7 @@ public sealed class UsersEndpoint : EndpointGroupBase
     
     private static async Task<IResult> LoginCookie(LoginRequest loginRequest, IIdentityService identityService,
         ICookieAuthService cookieAuthService, HttpResponse response) {
-        await Task.Delay(1000);
+        await Task.Delay(500);
         var loginResult = await identityService.LoginAsync(loginRequest.Username, loginRequest.Password);
         if (!loginResult.Succeeded) {
             return Results.Json(loginResult, statusCode: StatusCodes.Status401Unauthorized);
@@ -80,7 +80,6 @@ public sealed class UsersEndpoint : EndpointGroupBase
     }
     
     private async Task<IResult> GetCurrentUser(IMediator mediator) {
-        await Task.Delay(1000);
         var currentUser = await mediator.Send(new GetCurrentUserQuery());
         return Results.Ok(currentUser);
     }
