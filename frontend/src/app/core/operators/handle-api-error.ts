@@ -18,7 +18,6 @@ export class ApiErrorHandler {
       source.pipe(
         catchError((error: unknown) => {
           const apiError = error instanceof ApiError ? error : new ApiError(undefined, [String(error)]);
-
           if (apiError.errors.length > 0) {
             for (const errorMessage of apiError.errors) {
               this.messageService.add({

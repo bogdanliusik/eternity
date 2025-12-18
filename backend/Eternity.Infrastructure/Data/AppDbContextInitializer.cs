@@ -1,4 +1,5 @@
 ﻿using Eternity.Application.Common.Interfaces;
+using Eternity.Application.Common.Security;
 using Eternity.Domain.Constants;
 using Eternity.Domain.Entities;
 using Eternity.Infrastructure.Identity;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Eternity.Infrastructure.Data;
 
@@ -21,7 +23,8 @@ public static class InitializerExtensions
 }
 
 public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, AppDbContext context, 
-    UserManager<ApplicationUser> userManager, IIdentityService identityService, RoleManager<IdentityRole<Guid>> roleManager) 
+    UserManager<ApplicationUser> userManager, IIdentityService identityService, 
+    RoleManager<IdentityRole<Guid>> roleManager, IOptions<AdminSeedSettings> adminSeedOptions) 
 {
     public async Task InitialiseAsync() {
         try {
@@ -35,8 +38,19 @@ public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, Ap
     public async Task SeedAsync() {
         try {
             await EnsureRolesAsync(RoleNames.Admin, RoleNames.Member);
-            await AddUser("supervisor", "supervisor@eternity.com", "Supervisor1!", [RoleNames.Admin, RoleNames.Member]);
-            await AddUser("b_liusik", "b_liusik@eternity.com", "B_liusik1!", [RoleNames.Member]);
+
+            var adminSeed = adminSeedOptions.Value;
+            if (string.IsNullOrWhiteSpace(adminSeed.Username) || string.IsNullOrWhiteSpace(adminSeed.Email)) {
+                logger.LogInformation("Admin seed configuration missing username or email; skipping admin creation.");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(adminSeed.Password)) {
+                logger.LogWarning("Admin seed password not provided; skipping admin creation.");
+                return;
+            }
+
+            var roles = new[] { RoleNames.Admin, RoleNames.Member };
+            await AddUser(adminSeed.Username.Trim(), adminSeed.Email.Trim(), adminSeed.Password, roles);
         }
         catch (Exception ex) {
             logger.LogError(ex, "An error occurred while seeding the database.");

@@ -3,7 +3,6 @@ import { AngularSvgIconModule } from 'angular-svg-icon';
 import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { passwordValidator } from '../../validators/password.validator';
 import { LogInFormGroup } from './log-in-form.types';
 import { AuthStore } from '@/core/auth/auth.store';
 import { LoaderCircleIcon, LucideAngularModule } from 'lucide-angular';
@@ -49,6 +48,14 @@ export class Login {
         console.log('Login successful, user:', this.authStore.user());
       }
     });
+
+    effect(() => {
+      if (this.authStore.isLoading()) {
+        this.logInForm.disable();
+      } else {
+        this.logInForm.enable();
+      }
+    });
   }
 
   sendForm(): void {
@@ -64,11 +71,11 @@ export class Login {
   private createLoginForm(): LogInFormGroup {
     return this.formBuilder.group({
       username: new FormControl<string>('', {
-        validators: [Validators.required, Validators.minLength(4)],
+        validators: [Validators.required],
         nonNullable: true
       }),
       password: new FormControl<string>('', {
-        validators: [Validators.required, Validators.minLength(8), passwordValidator()],
+        validators: [Validators.required],
         nonNullable: true
       })
     });

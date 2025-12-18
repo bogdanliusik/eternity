@@ -5,6 +5,13 @@ import { Observable } from 'rxjs';
 import { CurrentUser } from './models/current.user';
 import { ApiEnvelope } from '../models/api.envelope';
 
+export interface RegisterRequest {
+  name: string;
+  userName: string;
+  email: string;
+  password: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -18,5 +25,9 @@ export class AuthService {
 
   getCurrentUser(): Observable<CurrentUser> {
     return this.http.get<CurrentUser>(`${this.baseUrl}/getCurrentUser`);
+  }
+
+  register(registerRequest: RegisterRequest): Observable<ApiEnvelope<void>> {
+    return this.http.post<void>('/api/registration-requests', registerRequest, { raw: true });
   }
 }
