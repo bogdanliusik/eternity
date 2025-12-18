@@ -41,6 +41,7 @@ public static class ServicesExtensions
                     .AllowCredentials();
             });
         });
+        builder.AddEternityRateLimiting();
     }
     
     public static void AddEternityAuthentication(this IHostApplicationBuilder builder) {

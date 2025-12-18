@@ -18,7 +18,9 @@ public class RegistrationRequestsEndpoint : EndpointGroupBase
         group.MapGet(GetPendingCount, "pending-count");
         group.MapPost(ApproveRequest, "{id}/approve");
         group.MapPost(RejectRequest, "{id}/reject");
-        group.MapPost(SubmitRegistrationRequest, "").AllowAnonymous();
+        group.MapPost(SubmitRegistrationRequest, "")
+            .AllowAnonymous()
+            .RequireRateLimiting(RateLimitingExtensions.RegistrationPolicyName);
     }
 
     private static async Task<IResult> GetRequests([AsParameters] RequestStatusQuery query, IMediator mediator) {

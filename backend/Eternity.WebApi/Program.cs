@@ -16,6 +16,9 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction()) {
     await app.InitialiseDatabaseAsync();
 }
 
+app.UseForwardedHeaders();
+app.UseRateLimiter();
+
 app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
 
