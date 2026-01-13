@@ -4,8 +4,8 @@ public class JwtSettings
 {
     public const string SectionName = "JwtSettings";
     public string SecretKey { get; init; } = string.Empty;
-    public int AccessTokenExpirationMinutes { get; init; } = 15;
-    public int RefreshTokenExpirationDays { get; init; } = 7;
+    public int AccessTokenExpirationSeconds { get; init; } = (int)TimeSpan.FromMinutes(15).TotalSeconds;
+    public int RefreshTokenExpirationMinutes { get; init; } = (int)TimeSpan.FromDays(3).TotalMinutes;
     public string Issuer { get; init; } = string.Empty;
     public string Audience { get; init; } = string.Empty;
 }

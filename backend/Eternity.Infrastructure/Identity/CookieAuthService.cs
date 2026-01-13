@@ -8,59 +8,45 @@ using Microsoft.Extensions.Options;
 
 namespace Eternity.Infrastructure.Identity;
 
-public class CookieAuthService : ICookieAuthService
+public class CookieAuthService(
+    IOptions<CookieSettings> cookieSettings,
+    IOptions<JwtSettings> jwtSettings,
+    IWebHostEnvironment environment)
+    : ICookieAuthService
 {
-    private readonly CookieSettings _cookieSettings;
-    private readonly JwtSettings _jwtSettings;
-    private readonly IWebHostEnvironment _environment;
-
-    public CookieAuthService(
-        IOptions<CookieSettings> cookieSettings,
-        IOptions<JwtSettings> jwtSettings,
-        IWebHostEnvironment environment)
-    {
-        _cookieSettings = cookieSettings.Value;
-        _jwtSettings = jwtSettings.Value;
-        _environment = environment;
-    }
+    private readonly CookieSettings _cookieSettings = cookieSettings.Value;
+    private readonly JwtSettings _jwtSettings = jwtSettings.Value;
 
     public void SetAuthenticationCookies(HttpResponse response, AppTokenInfo tokenInfo) {
         var isSecure = _cookieSettings.SecurePolicy switch {
             "Always" => true,
             "None" => false,
             "SameAsRequest" => response.HttpContext.Request.IsHttps,
-            _ => !_environment.IsDevelopment()
+            _ => !environment.IsDevelopment()
         };
-        var accessCookieOptions = new CookieOptions {
+        var cookieExpiration = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.RefreshTokenExpirationMinutes);
+        var cookieOptions = new CookieOptions {
             HttpOnly = true,
             Secure = isSecure,
             SameSite = _cookieSettings.SameSiteMode,
-            Expires = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
-            Path = "/",
-            IsEssential = true
-        };
-        var refreshCookieOptions = new CookieOptions {
-            HttpOnly = true,
-            Secure = isSecure,
-            SameSite = _cookieSettings.SameSiteMode,
-            Expires = DateTimeOffset.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
+            Expires = cookieExpiration,
             Path = "/",
             IsEssential = true
         };
         response.Cookies.Append(
             _cookieSettings.AccessTokenCookieName, 
             tokenInfo.AccessToken, 
-            accessCookieOptions
+            cookieOptions
         );
         response.Cookies.Append(
-            _cookieSettings.RefreshTokenCookieName, 
-            tokenInfo.RefreshToken, 
-            refreshCookieOptions
+            _cookieSettings.SessionIdCookieName, 
+            tokenInfo.SessionId.ToString(), 
+            cookieOptions
         );
     }
     
     public void RemoveAuthenticationCookies(HttpResponse response) {
         response.Cookies.Delete(_cookieSettings.AccessTokenCookieName);
-        response.Cookies.Delete(_cookieSettings.RefreshTokenCookieName);
+        response.Cookies.Delete(_cookieSettings.SessionIdCookieName);
     }
 }

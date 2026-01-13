@@ -1,11 +1,10 @@
 ﻿using Eternity.Application.Common.Interfaces;
 using Eternity.Application.Common.Models;
-using Eternity.Application.Common.Security;
+using Eternity.Application.Sessions.Commands;
 using Eternity.Application.Users.Queries;
 using Eternity.Domain.Constants;
 using Eternity.WebApi.Extensions;
 using MediatR;
-using Microsoft.Extensions.Options;
 
 namespace Eternity.WebApi.Endpoints;
 
@@ -15,10 +14,7 @@ public sealed class UsersEndpoint : EndpointGroupBase
     
     public override void Map(RouteGroupBuilder group) {
         group.RequireAuthorization();
-        group.MapPost(Login, "login").AllowAnonymous();
         group.MapPost(LoginCookie, "loginCookie").AllowAnonymous();
-        group.MapPost(RefreshToken, "refreshToken").AllowAnonymous();
-        group.MapPost(RefreshTokenCookie, "refreshTokenCookie").AllowAnonymous();
         group.MapPost(Logout, "logout");
         group.MapGet(GetCurrentUser, "getCurrentUser");
         group.MapGet(GetCurrentUserNameAsMember, "getCurrentUserNameAsMember")
@@ -26,55 +22,26 @@ public sealed class UsersEndpoint : EndpointGroupBase
         group.MapGet(GetCurrentUserNameAsAdmin, "getCurrentUserNameAsAdmin")
              .RequireAuthorization(Policies.AdminOnly);
     }
-
-    private static async Task<IResult> Login(LoginRequest loginRequest, IIdentityService identityService) {
-        var loginResult = await identityService.LoginAsync(loginRequest.Username, loginRequest.Password);
-        if (!loginResult.Succeeded) {
-            return Results.Json(loginResult, statusCode: StatusCodes.Status401Unauthorized);
-        }
-        return Results.Ok(loginResult.Data);
-    }
     
     private static async Task<IResult> LoginCookie(LoginRequest loginRequest, IIdentityService identityService,
-        ICookieAuthService cookieAuthService, HttpResponse response) {
-        await Task.Delay(500);
-        var loginResult = await identityService.LoginAsync(loginRequest.Username, loginRequest.Password);
+        ICookieAuthService cookieAuthService, HttpContext context) {
+        var ipAddress = GetClientIpAddress(context);
+        var userAgent = context.Request.Headers.UserAgent.ToString();
+        var loginResult = await identityService.LoginAsync(
+            loginRequest.Username, 
+            loginRequest.Password,
+            ipAddress,
+            userAgent);
         if (!loginResult.Succeeded) {
             return Results.Json(loginResult, statusCode: StatusCodes.Status401Unauthorized);
         }
-        cookieAuthService.SetAuthenticationCookies(response, loginResult.Data);
+        cookieAuthService.SetAuthenticationCookies(context.Response, loginResult.Data);
         return Results.Ok(Result.Success());
     }
-
-    private static async Task<IResult> RefreshToken(AppTokenInfo oldTokenInfo, IIdentityService identityService) {
-        var refreshResult = await identityService.RefreshTokenAsync(oldTokenInfo);
-        return refreshResult.Succeeded
-            ? Results.Ok(refreshResult.Data)
-            : Results.Json(refreshResult, statusCode: StatusCodes.Status401Unauthorized);
-    }
-
-    private static async Task<IResult> RefreshTokenCookie(
-        HttpRequest request,
-        HttpResponse response,
-        IIdentityService identityService,
-        ICookieAuthService cookieAuthService,
-        IOptions<CookieSettings> cookieSettings) {
-        var settings = cookieSettings.Value;
-        if (!request.Cookies.TryGetValue(settings.AccessTokenCookieName, out var accessToken) ||
-            !request.Cookies.TryGetValue(settings.RefreshTokenCookieName, out var refreshToken)) {
-            return Results.Unauthorized();
-        }
-        var refreshResult = await identityService.RefreshTokenAsync(
-            new AppTokenInfo(accessToken, refreshToken)
-        );
-        if (!refreshResult.Succeeded) {
-            return Results.Json(refreshResult, statusCode: StatusCodes.Status401Unauthorized);
-        }
-        cookieAuthService.SetAuthenticationCookies(response, refreshResult.Data);
-        return Results.Ok();
-    }
     
-    private static IResult Logout(HttpResponse response, ICookieAuthService cookieAuthService) {
+    private static async Task<IResult> Logout(IMediator mediator, ICookieAuthService cookieAuthService, 
+        HttpResponse response) {
+        await mediator.Send(new TerminateCurrentSessionCommand());
         cookieAuthService.RemoveAuthenticationCookies(response);
         return Results.Ok();
     }
@@ -91,10 +58,21 @@ public sealed class UsersEndpoint : EndpointGroupBase
     private static IResult GetCurrentUserNameAsAdmin(ICurrentUser currentUser) {
         return Results.Ok(currentUser.Name);
     }
+    
+    private static string? GetClientIpAddress(HttpContext context) {
+        var forwardedFor = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(forwardedFor)) {
+            var ip = forwardedFor.Split(',').FirstOrDefault()?.Trim();
+            if (!string.IsNullOrEmpty(ip)) {
+                return ip;
+            }
+        }
+        return context.Connection.RemoteIpAddress?.ToString();
+    }
 }
 
 public class LoginRequest
 {
-    public string Username { get; set; }
-    public string Password { get; set; }
+    public string Username { get; set; } = null!;
+    public string Password { get; set; } = null!;
 }

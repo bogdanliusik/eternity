@@ -5,21 +5,27 @@ using System.Text;
 using Eternity.Application.Common.Interfaces;
 using Eternity.Application.Common.Models;
 using Eternity.Application.Common.Security;
+using Eternity.Domain.Entities;
+using Eternity.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Eternity.Infrastructure.Identity;
 
-public class IdentityService(UserManager<ApplicationUser> userManager,
+public class IdentityService(
+    UserManager<ApplicationUser> userManager,
     IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
     IAuthorizationService authorizationService,
     IOptions<JwtSettings> jwtSettings,
+    AppDbContext dbContext,
     ILogger<IdentityService> logger
     ) : IIdentityService
 {
+
     public async Task<Result<Guid>> CreateUserAsync(string userName, string email, string password) {
         var user = new ApplicationUser {
             UserName = userName,
@@ -52,7 +58,8 @@ public class IdentityService(UserManager<ApplicationUser> userManager,
         return result.ToApplicationResult();
     }
     
-    public async Task<Result<AppTokenInfo>> LoginAsync(string userName, string password) {
+    public async Task<Result<AppTokenInfo>> LoginAsync(string userName, string password,
+        string? ipAddress, string? userAgent) {
         var identityUser = await userManager.FindByNameAsync(userName);
         if (identityUser == null) {
             logger.LogWarning("Login attempt failed: User {UserName} not found", userName);
@@ -68,36 +75,41 @@ public class IdentityService(UserManager<ApplicationUser> userManager,
             return Result<AppTokenInfo>.Failure(["Invalid credentials"]);
         }
         logger.LogInformation("User {UserName} logged in successfully", userName);
-        return await GenerateAppTokenInfo(identityUser);
+        return await GenerateAppTokenInfo(identityUser, ipAddress, userAgent);
     }
 
-    public async Task<Result<AppTokenInfo>> RefreshTokenAsync(AppTokenInfo oldTokenInfo) {
-        var principal = GetTokenPrincipal(oldTokenInfo.AccessToken);
-        if (principal?.Identity?.Name == null) {
-            logger.LogWarning("Refresh token attempt failed: Invalid access token");
-            return Result<AppTokenInfo>.Failure(["Invalid access token"]);
+    public async Task<Result<AppTokenInfo>> RefreshTokenAsync(Guid sessionId) {
+        var session = await dbContext.UserSessions
+            .FirstOrDefaultAsync(s => s.Id == sessionId && !s.IsTerminated);
+        if (session == null) {
+            logger.LogWarning("Refresh token attempt failed: Session {SessionId} not found or terminated", sessionId);
+            return Result<AppTokenInfo>.Failure(["Invalid session"]);
         }
-        var identityUser = await userManager.FindByNameAsync(principal.Identity.Name);
+        if (session.RefreshTokenExpiry < DateTime.UtcNow) {
+            logger.LogWarning("Refresh token attempt failed: Expired refresh token for session {SessionId}", sessionId);
+            session.Terminate();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
+            return Result<AppTokenInfo>.Failure(["Refresh token expired"]);
+        }
+        var identityUser = await userManager.FindByIdAsync(session.UserId.ToString());
         if (identityUser == null) {
-            logger.LogWarning("Refresh token attempt failed: User {UserName} not found", principal.Identity.Name);
+            logger.LogWarning("Refresh token attempt failed: User {UserId} not found", session.UserId);
             return Result<AppTokenInfo>.Failure(["User not found"]);
         }
         var lockoutCheck = CheckLockout(identityUser);
         if (!lockoutCheck.Succeeded) {
             return lockoutCheck;
         }
-        if (string.IsNullOrEmpty(identityUser.RefreshToken) || oldTokenInfo.RefreshToken != identityUser.RefreshToken) {
-            logger.LogWarning("Refresh token attempt failed: Invalid refresh token for user {UserName}", 
-                identityUser.UserName);
-            return Result<AppTokenInfo>.Failure(["Invalid refresh token"]);
-        }
-        if (identityUser.RefreshTokenExpiry < DateTime.UtcNow) {
-            logger.LogWarning("Refresh token attempt failed: Expired refresh token for user {UserName}", 
-                identityUser.UserName);
-            return Result<AppTokenInfo>.Failure(["Refresh token expired"]);
-        }
-        logger.LogInformation("Token refreshed successfully for user {UserName}", identityUser.UserName);
-        return await GenerateAppTokenInfo(identityUser);
+        logger.LogInformation("Token refreshed successfully for user {UserName}, session {SessionId}", 
+            identityUser.UserName, sessionId);
+        return await GenerateAppTokenInfoForExistingSession(identityUser, session);
+    }
+
+    public async Task<bool> IsSessionValidAsync(Guid sessionId) {
+        var session = await dbContext.UserSessions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == sessionId);
+        return session is { IsActive: true };
     }
     
     public async Task<bool> AuthorizeAsync(Guid userId, string policyName) {
@@ -164,12 +176,14 @@ public class IdentityService(UserManager<ApplicationUser> userManager,
         return Result<AppTokenInfo>.Success(null!);
     }
     
-    private string GenerateAccessToken(string id, string userName, string email, IEnumerable<string> roles) {
+    private string GenerateAccessToken(string id, string userName, string email, 
+        IEnumerable<string> roles, Guid sessionId) {
         var claims = new List<Claim> {
             new(ClaimTypes.NameIdentifier, id),
             new(ClaimTypes.Name, userName),
             new(ClaimTypes.Email, email),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(ClaimTypes.Sid, sessionId.ToString())
         };
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Value.SecretKey));
@@ -178,7 +192,7 @@ public class IdentityService(UserManager<ApplicationUser> userManager,
             issuer: jwtSettings.Value.Issuer,
             audience: jwtSettings.Value.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(jwtSettings.Value.AccessTokenExpirationMinutes),
+            expires: DateTime.UtcNow.AddSeconds(jwtSettings.Value.AccessTokenExpirationSeconds),
             signingCredentials: signingCredentials
         );
         return new JwtSecurityTokenHandler().WriteToken(securityToken);
@@ -193,42 +207,62 @@ public class IdentityService(UserManager<ApplicationUser> userManager,
             .Replace("/", "_")
             .Replace("=", "");
     }
-    
-    private ClaimsPrincipal? GetTokenPrincipal(string token) {
-        try {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Value.SecretKey));
-            var validation = new TokenValidationParameters {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = securityKey,
-                ValidateLifetime = false, // We're validating expired tokens for refresh
-                ValidateIssuer = true,
-                ValidIssuer = jwtSettings.Value.Issuer,
-                ValidateAudience = true,
-                ValidAudience = jwtSettings.Value.Audience,
-                ClockSkew = TimeSpan.Zero
-            };
-            return new JwtSecurityTokenHandler().ValidateToken(token, validation, out _);
-        } catch (Exception ex) {
-            logger.LogWarning(ex, "Failed to validate token");
-            return null;
-        }
-    }
 
-    private async Task<Result<AppTokenInfo>> GenerateAppTokenInfo(ApplicationUser identityUser) {
+    private async Task<Result<AppTokenInfo>> GenerateAppTokenInfo(ApplicationUser identityUser,
+        string? ipAddress, string? userAgent) {
         if (string.IsNullOrEmpty(identityUser.UserName) || string.IsNullOrEmpty(identityUser.Email)) {
             return Result<AppTokenInfo>.Failure(["Invalid user"]);
         }
+        
         var roles = await userManager.GetRolesAsync(identityUser);
+        var refreshToken = GenerateRefreshToken();
+        var refreshTokenExpiry = DateTime.UtcNow.AddMinutes(jwtSettings.Value.RefreshTokenExpirationMinutes);
+        
+        // Create new session
+        var session = UserSession.Create(
+            identityUser.Id, 
+            refreshToken, 
+            refreshTokenExpiry,
+            ipAddress,
+            userAgent
+        );
+        
+        dbContext.UserSessions.Add(session);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+        
         var accessToken = GenerateAccessToken(
             identityUser.Id.ToString(), 
             identityUser.UserName,
             identityUser.Email,
-            roles
+            roles,
+            session.Id
         );
+        
+        return Result<AppTokenInfo>.Success(new AppTokenInfo(accessToken, session.Id));
+    }
+
+    private async Task<Result<AppTokenInfo>> GenerateAppTokenInfoForExistingSession(
+        ApplicationUser identityUser, UserSession session) {
+        if (string.IsNullOrEmpty(identityUser.UserName) || string.IsNullOrEmpty(identityUser.Email)) {
+            return Result<AppTokenInfo>.Failure(["Invalid user"]);
+        }
+        
+        var roles = await userManager.GetRolesAsync(identityUser);
         var refreshToken = GenerateRefreshToken();
-        identityUser.RefreshToken = refreshToken;
-        identityUser.RefreshTokenExpiry = DateTime.UtcNow.AddDays(jwtSettings.Value.RefreshTokenExpirationDays);
-        await userManager.UpdateAsync(identityUser);
-        return Result<AppTokenInfo>.Success(new AppTokenInfo(accessToken, refreshToken));
+        var refreshTokenExpiry = DateTime.UtcNow.AddMinutes(jwtSettings.Value.RefreshTokenExpirationMinutes);
+        
+        // Update existing session with new refresh token
+        session.UpdateRefreshToken(refreshToken, refreshTokenExpiry);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+        
+        var accessToken = GenerateAccessToken(
+            identityUser.Id.ToString(), 
+            identityUser.UserName,
+            identityUser.Email,
+            roles,
+            session.Id
+        );
+        
+        return Result<AppTokenInfo>.Success(new AppTokenInfo(accessToken, session.Id));
     }
 }

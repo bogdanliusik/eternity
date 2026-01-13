@@ -6,4 +6,5 @@ public interface ICurrentUser
     bool IsAvailable { get; }
     string Name { get; }
     List<string>? Roles { get; }
+    Guid SessionId { get; }
 }

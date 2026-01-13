@@ -6,7 +6,7 @@ public class CookieSettings
 {
     public const string SectionName = "CookieSettings";
     public string AccessTokenCookieName { get; init; } = "eternity_access_token";
-    public string RefreshTokenCookieName { get; init; } = "eternity_refresh_token";
+    public string SessionIdCookieName { get; init; } = "eternity_session_id";
     public SameSiteMode SameSiteMode { get; init; } = SameSiteMode.Strict;
     public string SecurePolicy { get; init; } = "Always"; // Always, SameAsRequest, None
 }

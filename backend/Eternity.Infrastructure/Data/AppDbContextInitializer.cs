@@ -38,7 +38,6 @@ public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, Ap
     public async Task SeedAsync() {
         try {
             await EnsureRolesAsync(RoleNames.Admin, RoleNames.Member);
-
             var adminSeed = adminSeedOptions.Value;
             if (string.IsNullOrWhiteSpace(adminSeed.Username) || string.IsNullOrWhiteSpace(adminSeed.Email)) {
                 logger.LogInformation("Admin seed configuration missing username or email; skipping admin creation.");
@@ -48,7 +47,6 @@ public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, Ap
                 logger.LogWarning("Admin seed password not provided; skipping admin creation.");
                 return;
             }
-
             var roles = new[] { RoleNames.Admin, RoleNames.Member };
             await AddUser(adminSeed.Username.Trim(), adminSeed.Email.Trim(), adminSeed.Password, roles);
         }
@@ -61,6 +59,9 @@ public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, Ap
     private async Task AddUser(string userName, string email, string password, IEnumerable<string> roles) {
         if (userManager.Users.All(u => u.UserName != userName)) {
             var result = await identityService.CreateUserAsync(userName, email, password);
+            if (!result.Succeeded) {
+                throw new AggregateException(result.Errors.Select(e => new InvalidOperationException(e)));
+            }
             var createdUser = await userManager.FindByNameAsync(userName);
             if (createdUser == null) {
                 throw new InvalidOperationException($"Couldn't create {userName} user");

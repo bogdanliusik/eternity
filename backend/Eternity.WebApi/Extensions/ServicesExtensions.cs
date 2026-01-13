@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using Eternity.Application.Common.Interfaces;
 using Eternity.Application.Common.Security;
 using Eternity.Infrastructure.Data;
@@ -20,7 +21,7 @@ public static class ServicesExtensions
         builder.Services.AddHealthChecks()
             .AddDbContextCheck<AppDbContext>();
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddOpenApiDocument((configure, sp) => {
+        builder.Services.AddOpenApiDocument((configure, _) => {
             configure.Title = "Eternity API";
             configure.AddSecurity("JWT", [], new OpenApiSecurityScheme {
                 Type = OpenApiSecuritySchemeType.ApiKey,
@@ -80,13 +81,7 @@ public static class ServicesExtensions
                     ClockSkew = TimeSpan.Zero
                 };
                 options.Events = new JwtBearerEvents {
-                    OnMessageReceived = context => {
-                        var accessToken = context.HttpContext.Request.Cookies[cookieSettings.AccessTokenCookieName];
-                        if (!string.IsNullOrEmpty(accessToken)) {
-                            context.Token = accessToken;
-                        }
-                        return Task.CompletedTask;
-                    },
+                    OnMessageReceived = context => HandleMessageReceived(context, cookieSettings),
                     OnAuthenticationFailed = context => {
                         if (context.Exception is SecurityTokenExpiredException) {
                             context.Response.Headers.Append("Token-Expired", "true");
@@ -96,5 +91,45 @@ public static class ServicesExtensions
                 };
                 options.SaveToken = true;
             });
+    }
+
+    private static async Task HandleMessageReceived(MessageReceivedContext context, CookieSettings cookieSettings) {
+        var accessToken = context.HttpContext.Request.Cookies[cookieSettings.AccessTokenCookieName];
+        if (string.IsNullOrEmpty(accessToken)) {
+            return;
+        }
+        var sessionIdStr = context.HttpContext.Request.Cookies[cookieSettings.SessionIdCookieName];
+        if (string.IsNullOrEmpty(sessionIdStr) || !Guid.TryParse(sessionIdStr, out var sessionId)) {
+            context.Token = accessToken;
+            return;
+        }
+        var identityService = context.HttpContext.RequestServices.GetRequiredService<IIdentityService>();
+        var isSessionValid = await identityService.IsSessionValidAsync(sessionId);
+        if (!isSessionValid) {
+            var cookieAuthService = context.HttpContext.RequestServices.GetRequiredService<ICookieAuthService>();
+            cookieAuthService.RemoveAuthenticationCookies(context.HttpContext.Response);
+            context.Fail("Session has been terminated");
+            return;
+        }
+        if (IsTokenExpired(accessToken)) {
+            var refreshResult = await identityService.RefreshTokenAsync(sessionId);
+            if (refreshResult.Succeeded) {
+                var cookieAuthService = context.HttpContext.RequestServices.GetRequiredService<ICookieAuthService>();
+                cookieAuthService.SetAuthenticationCookies(context.HttpContext.Response, refreshResult.Data);
+                accessToken = refreshResult.Data.AccessToken;
+            }
+        }
+        context.Token = accessToken;
+    }
+
+    private static bool IsTokenExpired(string token) {
+        try {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            return jwtToken.ValidTo < DateTime.UtcNow;
+        }
+        catch {
+            return true;
+        }
     }
 }
