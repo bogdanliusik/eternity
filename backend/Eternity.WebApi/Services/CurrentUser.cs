@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Eternity.Application.Common.Interfaces;
+using Eternity.Infrastructure.Identity;
 
 namespace Eternity.WebApi.Services;
 
@@ -36,4 +37,16 @@ public class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUse
     
     public List<string>? Roles => httpContextAccessor.HttpContext?.User
         .FindAll(ClaimTypes.Role).Select(x => x.Value).ToList();
+
+    public Guid SessionId {
+        get {
+            var sessionIdClaim = httpContextAccessor.HttpContext?.User.Claims.FirstOrDefault(
+                c => c.Type == ClaimTypes.Sid);
+            if (!string.IsNullOrEmpty(sessionIdClaim?.Value) && 
+                Guid.TryParse(sessionIdClaim.Value, out var sessionId)) {
+                return sessionId;
+            }
+            throw new UnauthorizedAccessException("Session id is not accessible.");
+        }
+    }
 }

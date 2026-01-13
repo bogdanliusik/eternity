@@ -15,9 +15,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     public DbSet<RegistrationRequest> RegistrationRequests => Set<RegistrationRequest>();
 
+    public DbSet<UserSession> UserSessions => Set<UserSession>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfiguration(new UserAccountConfiguration());
         modelBuilder.ApplyConfiguration(new RegistrationRequestConfiguration());
+        modelBuilder.ApplyConfiguration(new UserSessionConfiguration());
     }
 }

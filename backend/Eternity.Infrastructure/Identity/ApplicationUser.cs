@@ -5,7 +5,5 @@ namespace Eternity.Infrastructure.Identity;
 
 public class ApplicationUser : IdentityUser<Guid>
 {
-    public UserAccount UserAccount { get; set; }
-    public string? RefreshToken { get; set; }
-    public DateTime RefreshTokenExpiry { get; set; }
+    public UserAccount UserAccount { get; set; } = null!;
 }
