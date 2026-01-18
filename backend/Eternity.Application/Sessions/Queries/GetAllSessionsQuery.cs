@@ -1,4 +1,5 @@
 using Eternity.Application.Common.Interfaces;
+using Eternity.Application.Common.Mapping;
 using Eternity.Application.Common.Models;
 using Eternity.Application.Common.Security;
 using Eternity.Application.Sessions.Models;
@@ -9,13 +10,13 @@ using Microsoft.EntityFrameworkCore;
 namespace Eternity.Application.Sessions.Queries;
 
 [Authorize(Policy = Policies.AdminOnly)]
-public record GetAllSessionsQuery(bool? IsActive = null) 
-    : IRequest<Result<List<UserSessionDto>>>;
+public record GetAllSessionsQuery(int PageNumber, int PageSize, bool? IsActive = null) 
+    : IRequest<Result<PaginatedList<UserSessionDto>>>;
 
 public class GetAllSessionsQueryHandler(IAppDbContext dbContext, ICurrentUser currentUser)
-    : IRequestHandler<GetAllSessionsQuery, Result<List<UserSessionDto>>>
+    : IRequestHandler<GetAllSessionsQuery, Result<PaginatedList<UserSessionDto>>>
 {
-    public async Task<Result<List<UserSessionDto>>> Handle(GetAllSessionsQuery request, 
+    public async Task<Result<PaginatedList<UserSessionDto>>> Handle(GetAllSessionsQuery request, 
         CancellationToken cancellationToken) {
         var query = dbContext.UserSessions.AsNoTracking();
         if (request.IsActive.HasValue) {
@@ -39,7 +40,7 @@ public class GetAllSessionsQueryHandler(IAppDbContext dbContext, ICurrentUser cu
                 IsActive = !s.IsTerminated && s.RefreshTokenExpiry > DateTime.UtcNow,
                 IsCurrentSession = currentUser.SessionId == s.Id
             })
-            .ToListAsync(cancellationToken);
-        return Result<List<UserSessionDto>>.Success(sessions);
+            .PaginatedListAsync(request.PageNumber, request.PageSize);
+        return Result<PaginatedList<UserSessionDto>>.Success(sessions);
     }
 }

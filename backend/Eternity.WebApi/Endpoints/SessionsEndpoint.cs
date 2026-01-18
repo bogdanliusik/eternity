@@ -1,5 +1,3 @@
-using Eternity.Application.Common.Interfaces;
-using Eternity.Application.Common.Models;
 using Eternity.Application.Sessions.Commands;
 using Eternity.Application.Sessions.Queries;
 using Eternity.Domain.Constants;
@@ -20,7 +18,7 @@ public class SessionsEndpoint : EndpointGroupBase
     }
 
     private static async Task<IResult> GetAllSessions([AsParameters] SessionFilterQuery filter, IMediator mediator) {
-        var result = await mediator.Send(new GetAllSessionsQuery(filter.IsActive));
+        var result = await mediator.Send(new GetAllSessionsQuery(filter.PageNumber, filter.PageSize, filter.IsActive));
         return Results.Ok(result);
     }
 
@@ -35,6 +33,8 @@ public class SessionsEndpoint : EndpointGroupBase
     }
 
     private class SessionFilterQuery {
+        public int PageNumber { get; init; }
+        public int PageSize { get; init; }
         public bool? IsActive { get; init; }
     }
 }

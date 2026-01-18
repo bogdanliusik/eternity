@@ -29,4 +29,3 @@ public class PaginatedList<T>
         return new PaginatedList<T>(items, count, pageNumber, pageSize);
     }
 }
-
