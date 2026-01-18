@@ -59,6 +59,13 @@ public class UserSession
         IsTerminated = true;
         EndedAt = DateTimeOffset.UtcNow;
     }
+    
+    public void MarkExpired() {
+        if (EndedAt.HasValue) {
+            return;
+        }
+        EndedAt = RefreshTokenExpiry;
+    }
 
     private static (string? device, string? browser) ParseUserAgent(string? userAgent) {
         if (string.IsNullOrWhiteSpace(userAgent)) {
