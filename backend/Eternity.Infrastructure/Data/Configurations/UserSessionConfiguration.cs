@@ -35,6 +35,11 @@ public class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
         builder.HasIndex(x => x.UserId);
         builder.HasIndex(x => x.RefreshToken);
         builder.HasIndex(x => new { x.UserId, x.IsTerminated });
+        
+        builder.HasIndex(x => new { x.IsTerminated, x.RefreshTokenExpiry })
+            .HasDatabaseName("ix_user_sessions_is_terminated_refresh_token_expiry");
+        builder.HasIndex(x => new { x.IsTerminated, x.EndedAt, x.RefreshTokenExpiry })
+            .HasDatabaseName("ix_user_sessions_is_terminated_ended_at_refresh_token_expiry");
 
         builder.Ignore(x => x.IsActive);
     }
