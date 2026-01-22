@@ -64,7 +64,7 @@ public class UserSession
         if (EndedAt.HasValue) {
             return;
         }
-        EndedAt = RefreshTokenExpiry;
+        EndedAt = new DateTimeOffset(RefreshTokenExpiry, TimeSpan.Zero);
     }
 
     private static (string? device, string? browser) ParseUserAgent(string? userAgent) {

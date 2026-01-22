@@ -11,7 +11,7 @@ namespace Eternity.Application.Sessions.Queries;
 
 [Authorize(Policy = Policies.AdminOnly)]
 public record GetAllSessionsQuery(int PageNumber, int PageSize, bool? IsActive = null) 
-    : IRequest<Result<PaginatedList<UserSessionDto>>>;
+    : IRequest<Result<PaginatedList<UserSessionDto>>>, IPaginatedQuery;
 
 public class GetAllSessionsQueryHandler(IAppDbContext dbContext, ICurrentUser currentUser)
     : IRequestHandler<GetAllSessionsQuery, Result<PaginatedList<UserSessionDto>>>
@@ -40,7 +40,7 @@ public class GetAllSessionsQueryHandler(IAppDbContext dbContext, ICurrentUser cu
                 IsActive = !s.IsTerminated && s.RefreshTokenExpiry > DateTime.UtcNow,
                 IsCurrentSession = currentUser.SessionId == s.Id
             })
-            .PaginatedListAsync(request.PageNumber, request.PageSize);
+            .PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
         return Result<PaginatedList<UserSessionDto>>.Success(sessions);
     }
 }

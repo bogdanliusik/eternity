@@ -3,8 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
-namespace Eternity.Infrastructure.BackgroundJobs;
+namespace Eternity.Infrastructure.BackgroundJobs.SessionCleanup;
 
 /// <summary>
 /// Background service that periodically marks expired sessions with their EndedAt timestamp.
@@ -12,20 +13,23 @@ namespace Eternity.Infrastructure.BackgroundJobs;
 /// </summary>
 public class SessionCleanupService(
     IServiceScopeFactory scopeFactory,
-    ILogger<SessionCleanupService> logger)
+    ILogger<SessionCleanupService> logger,
+    IOptions<SessionCleanupSettings> options)
     : BackgroundService
 {
-    private readonly TimeSpan _interval = TimeSpan.FromMinutes(15);
+    private readonly TimeSpan _interval = TimeSpan.FromMinutes(options.Value.IntervalMinutes);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
         logger.LogInformation("Session cleanup service started");
         while (!stoppingToken.IsCancellationRequested) {
+            await Task.Delay(_interval, stoppingToken);
             try {
                 await ProcessExpiredSessionsAsync(stoppingToken);
+            } catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) {
+                break;
             } catch (Exception ex) {
                 logger.LogError(ex, "Error occurred while processing expired sessions");
             }
-            await Task.Delay(_interval, stoppingToken);
         }
         logger.LogInformation("Session cleanup service stopped");
     }
