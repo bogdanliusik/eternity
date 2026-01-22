@@ -1,6 +1,7 @@
 ﻿using Eternity.Application.Common.Interfaces;
 using Eternity.Application.Common.Security;
 using Eternity.Domain.Constants;
+using Eternity.Infrastructure.BackgroundJobs.SessionCleanup;
 using Eternity.Infrastructure.Data;
 using Eternity.Infrastructure.Data.Interceptors;
 using Eternity.Infrastructure.Identity;
@@ -53,5 +54,9 @@ public static class DependencyInjection
             options.AddPolicy(Policies.AdminOnly, policy => policy.RequireRole(RoleNames.Admin));
             options.AddPolicy(Policies.MemberOnly, policy => policy.RequireRole(RoleNames.Member));
         });
+        // Background jobs
+        builder.Services.Configure<SessionCleanupSettings>(
+            builder.Configuration.GetSection(SessionCleanupSettings.SectionName));
+        builder.Services.AddHostedService<SessionCleanupService>();
     }
 }
