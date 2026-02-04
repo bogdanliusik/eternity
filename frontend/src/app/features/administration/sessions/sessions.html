@@ -1,0 +1,118 @@
+<div class="space-y-6">
+  <div
+    class="border-muted from-primary/10 via-background to-primary/5 relative overflow-hidden rounded-2xl border
+      bg-gradient-to-br p-6">
+    <div class="bg-primary/20 absolute -top-16 -right-16 h-40 w-40 rounded-full blur-3xl"></div>
+    <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+      <div class="space-y-2">
+        <div class="flex items-center gap-3">
+          <div class="bg-primary/15 text-primary flex h-11 w-11 items-center justify-center rounded-xl">
+            <lucide-icon [img]="sessionsIcon" class="h-5 w-5"></lucide-icon>
+          </div>
+          <div>
+            <h1 class="text-color text-2xl font-bold">Sessions</h1>
+            <p class="text-muted-foreground text-sm">Track live activity and terminate risky sessions.</p>
+          </div>
+        </div>
+        <div class="text-muted-foreground flex flex-wrap items-center gap-3 text-xs">
+          <span class="flex items-center gap-2">
+            <span class="bg-primary h-2 w-2 rounded-full"></span>
+            Monitoring in real time
+          </span>
+          <span class="bg-muted-foreground/40 h-1 w-1 rounded-full"></span>
+          <span>{{ store.currentTotalCount() }} results</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <p-tag value="30 / page" severity="info" />
+        <button
+          pButton
+          [disabled]="store.isLoading()"
+          (click)="onRefresh()"
+          class="p-button-outlined"
+          pTooltip="Refresh list"
+          tooltipPosition="bottom">
+          @if (store.isLoading()) {
+            <i class="pi pi-spin pi-spinner"></i>
+          } @else {
+            <lucide-icon [img]="refreshIcon" class="h-4 w-4"></lucide-icon>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="grid gap-4 lg:grid-cols-3">
+    <div class="card !p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-muted-foreground text-xs tracking-wide uppercase">Active sessions</p>
+          <p class="text-color text-2xl font-semibold">{{ formatCount(store.activeTotalCount()) }}</p>
+        </div>
+        <p-tag [value]="store.activeTotalCount() === null ? 'Loading' : 'Live'" severity="success" />
+      </div>
+    </div>
+    <div class="card !p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-muted-foreground text-xs tracking-wide uppercase">Inactive history</p>
+          <p class="text-color text-2xl font-semibold">{{ formatCount(store.inactiveTotalCount()) }}</p>
+        </div>
+        <p-tag value="Archive" severity="secondary" />
+      </div>
+    </div>
+    <div class="card !p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-muted-foreground text-xs tracking-wide uppercase">Current session</p>
+          <p class="text-color text-2xl font-semibold">{{ hasCurrentSession() ? 'Protected' : 'None' }}</p>
+        </div>
+        <p-tag [value]="hasCurrentSession() ? 'This device' : 'No flag'" severity="info" />
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <p-tabs [value]="store.activeTab()" (valueChange)="onTabChange($any($event))" class="rounded-md" scrollable>
+      <p-tablist>
+        @for (tab of tabs; track tab.id) {
+          <p-tab [value]="tab.id" class="flex items-center !gap-2">
+            <lucide-icon [img]="tab.icon" class="h-4 w-4"></lucide-icon>
+            <span>{{ tab.label }}</span>
+            @if (getTabCount(tab.id) !== null) {
+              <p-badge
+                [value]="getTabCount(tab.id)!.toString()"
+                [severity]="tab.id === statusEnum.Active ? 'success' : 'info'" />
+            }
+          </p-tab>
+        }
+      </p-tablist>
+      <p-tabpanels>
+        @for (tab of tabs; track tab.id) {
+          <p-tabpanel [value]="tab.id">
+            <div class="card overflow-hidden !p-0">
+              @if (store.isLoading() && store.currentSessions().length === 0) {
+                <app-sessions-skeleton />
+              } @else if (store.currentSessions().length === 0) {
+                <app-sessions-empty-state [activeTab]="store.activeTab()" />
+              } @else {
+                <app-sessions-table
+                  [sessions]="store.currentSessions()"
+                  [activeTab]="store.activeTab()"
+                  [processingIds]="store.processingIds()"
+                  (terminate)="onTerminate($event)" />
+                @if (store.currentTotalCount() > store.pageSize()) {
+                  <div class="border-muted border-t p-4">
+                    <p-paginator
+                      [rows]="store.pageSize()"
+                      [first]="(store.currentPage() - 1) * store.pageSize()"
+                      [totalRecords]="store.currentTotalCount()"
+                      (onPageChange)="onPageChange($event)" />
+                  </div>
+                }
+              }
+            </div>
+          </p-tabpanel>
+        }
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</div>

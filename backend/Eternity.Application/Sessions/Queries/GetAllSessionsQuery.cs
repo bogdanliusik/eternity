@@ -18,9 +18,9 @@ public class GetAllSessionsQueryHandler(IAppDbContext dbContext, ICurrentUser cu
 {
     public async Task<Result<PaginatedList<UserSessionDto>>> Handle(GetAllSessionsQuery request, 
         CancellationToken cancellationToken) {
+        var now = DateTime.UtcNow;
         var query = dbContext.UserSessions.AsNoTracking();
         if (request.IsActive.HasValue) {
-            var now = DateTime.UtcNow;
             if (request.IsActive.Value) {
                 query = query.Where(s => !s.IsTerminated && s.RefreshTokenExpiry > now);
             } else {
@@ -28,18 +28,8 @@ public class GetAllSessionsQueryHandler(IAppDbContext dbContext, ICurrentUser cu
             }
         }
         var sessions = await query
+            .ProjectWithUser(dbContext.UserAccounts.AsNoTracking(), currentUser.SessionId, now)
             .OrderByDescending(s => s.StartedAt)
-            .Select(s => new UserSessionDto {
-                Id = s.Id,
-                UserId = s.UserId,
-                StartedAt = s.StartedAt,
-                EndedAt = s.EndedAt,
-                IpAddress = s.IpAddress,
-                DeviceInfo = s.DeviceInfo,
-                BrowserInfo = s.BrowserInfo,
-                IsActive = !s.IsTerminated && s.RefreshTokenExpiry > DateTime.UtcNow,
-                IsCurrentSession = currentUser.SessionId == s.Id
-            })
             .PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
         return Result<PaginatedList<UserSessionDto>>.Success(sessions);
     }

@@ -41,6 +41,7 @@ services:
       - AdminSeed__Username=${ADMIN_SEED_USERNAME:-admin}
       - AdminSeed__Email=${ADMIN_SEED_EMAIL:-admin@eternity.com}
       - AdminSeed__Password=${ADMIN_SEED_PASSWORD:?ADMIN_SEED_PASSWORD is required}
+      - AdminSeed__FullName=${ADMIN_SEED_FULLNAME:-Administrator}
 
       - CookieSettings__SameSiteMode=${COOKIE_SAME_SITE:-Strict}
       - CookieSettings__SecurePolicy=${COOKIE_SECURE_POLICY:-SameAsRequest}

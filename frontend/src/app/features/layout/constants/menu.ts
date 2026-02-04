@@ -11,7 +11,8 @@ import {
   Bell,
   Folder,
   UserIcon,
-  ClipboardList
+  ClipboardList,
+  Server
 } from 'lucide-angular';
 
 export const MENU_ITEM_IDS = {
@@ -121,6 +122,11 @@ export class Menu {
           label: 'Registration requests',
           route: '/administration/registration-requests',
           badge: MENU_ITEM_IDS.REGISTRATION_REQUESTS
+        },
+        {
+          icon: Server,
+          label: 'Sessions',
+          route: '/administration/sessions'
         }
       ]
     }

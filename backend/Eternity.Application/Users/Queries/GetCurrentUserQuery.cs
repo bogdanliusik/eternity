@@ -21,9 +21,9 @@ public class GetCurrentUserQueryHandler(IAppDbContext dbContext, ICurrentUser cu
             .Select(u => new UserDto {
                 Id = u.Id,
                 Username = u.UserName,
+                FullName = u.FullName,
                 Email = u.Email,
                 AvatarUrl = u.AvatarUrl,
-                IsOnline = u.IsOnline,
                 Roles = result.Data
             })
             .FirstAsync(u => u.Id == currentUser.Id, cancellationToken);
