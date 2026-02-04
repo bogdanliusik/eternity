@@ -47,8 +47,11 @@ public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, Ap
                 logger.LogWarning("Admin seed password not provided; skipping admin creation.");
                 return;
             }
-            var roles = new[] { RoleNames.Admin, RoleNames.Member };
-            await AddUser(adminSeed.Username.Trim(), adminSeed.Email.Trim(), adminSeed.Password, roles);
+            if (string.IsNullOrEmpty(adminSeed.FullName)) {
+                logger.LogWarning("Admin seed full name not provided");
+                return;
+            }
+            await SeedOrUpdateUserAsync(adminSeed, RoleNames.Admin, RoleNames.Member);
         }
         catch (Exception ex) {
             logger.LogError(ex, "An error occurred while seeding the database.");
@@ -56,26 +59,72 @@ public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, Ap
         }
     }
 
-    private async Task AddUser(string userName, string email, string password, IEnumerable<string> roles) {
-        if (userManager.Users.All(u => u.UserName != userName)) {
-            var result = await identityService.CreateUserAsync(userName, email, password);
-            if (!result.Succeeded) {
-                throw new AggregateException(result.Errors.Select(e => new InvalidOperationException(e)));
+    private async Task SeedOrUpdateUserAsync(AdminSeedSettings seed, params string[] roles) {
+        var userName = seed.Username?.Trim();
+        var email = seed.Email?.Trim();
+        var fullName = seed.FullName?.Trim();
+        var password = seed.Password;
+        if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(email) 
+            || string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(password)) {
+            throw new InvalidOperationException("Admin seed values are missing required fields.");
+        }
+        var identityUser = await userManager.FindByNameAsync(userName);
+        if (identityUser == null) {
+            identityUser = await CreateIdentityUserAsync(userName, email, password);
+        } else {
+            await EnsureIdentityUserUpdatedAsync(identityUser, email, password);
+        }
+        var existingRoles = await userManager.GetRolesAsync(identityUser);
+        foreach (var role in roles.Where(role => !existingRoles.Contains(role))) {
+            await userManager.AddToRoleAsync(identityUser, role);
+        }
+        await UpsertUserAccountAsync(identityUser.Id, userName, fullName, email);
+        await context.SaveChangesAsync();
+    }
+
+    private async Task<ApplicationUser> CreateIdentityUserAsync(string userName, string email, string password) {
+        var result = await identityService.CreateUserAsync(userName, email, password);
+        if (!result.Succeeded) {
+            throw new AggregateException(result.Errors.Select(e => new InvalidOperationException(e)));
+        }
+        var createdUser = await userManager.FindByNameAsync(userName);
+        if (createdUser == null) {
+            throw new InvalidOperationException($"Couldn't create {userName} user");
+        }
+        return createdUser;
+    }
+
+    private async Task EnsureIdentityUserUpdatedAsync(ApplicationUser identityUser, string email, string password) {
+        if (!string.Equals(identityUser.Email, email, StringComparison.OrdinalIgnoreCase)) {
+            identityUser.Email = email;
+            var updateResult = await userManager.UpdateAsync(identityUser);
+            if (!updateResult.Succeeded) {
+                throw new AggregateException(updateResult.Errors.Select(
+                    e => new InvalidOperationException(e.Description)));
             }
-            var createdUser = await userManager.FindByNameAsync(userName);
-            if (createdUser == null) {
-                throw new InvalidOperationException($"Couldn't create {userName} user");
-            }
-            foreach (var role in roles) {
-                await userManager.AddToRoleAsync(createdUser, role);
-            }
+        }
+        var resetToken = await userManager.GeneratePasswordResetTokenAsync(identityUser);
+        var passwordResult = await userManager.ResetPasswordAsync(identityUser, resetToken, password);
+        if (!passwordResult.Succeeded) {
+            throw new AggregateException(passwordResult.Errors.Select(
+                e => new InvalidOperationException(e.Description)));
+        }
+    }
+
+    private async Task UpsertUserAccountAsync(Guid id, string userName, string fullName, string email) {
+        var userAccount = await context.UserAccounts.FirstOrDefaultAsync(u => u.Id == id);
+        if (userAccount == null) {
             await context.UserAccounts.AddAsync(new UserAccount {
-                Id = result.Data,
+                Id = id,
                 UserName = userName,
+                FullName = fullName,
                 Email = email
             });
-            await context.SaveChangesAsync();
+            return;
         }
+        userAccount.UserName = userName;
+        userAccount.FullName = fullName;
+        userAccount.Email = email;
     }
     
     private async Task EnsureRolesAsync(params string[] roles) {

@@ -1,0 +1,102 @@
+<p-table [value]="sessions()" [tableStyle]="{ 'min-width': '70rem' }" [rowHover]="true">
+  <ng-template #header>
+    <tr>
+      <th>User</th>
+      <th>Device</th>
+      <th>Network</th>
+      <th>Timing</th>
+      <th>Status</th>
+      <th class="!text-center" style="width: 160px" [hidden]="activeTab() !== statusEnum.Active">Actions</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-session>
+    <tr>
+      <td>
+        <div class="flex items-center gap-3">
+          <div
+            class="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl
+              text-xs font-semibold">
+            @if (hasAvatar(session)) {
+              <img [src]="session.user.avatarUrl" [alt]="getDisplayName(session)" class="h-full w-full object-cover" />
+            } @else {
+              {{ getUserInitials(session) }}
+            }
+          </div>
+          <div class="space-y-1.5">
+            <div class="text-color font-medium">{{ getDisplayName(session) }}</div>
+            <div class="text-muted-foreground flex items-center gap-2 text-xs">
+              <span>{{ getShortId(session.id) }}</span>
+              <button
+                pButton
+                variant="text"
+                icon="pi pi-copy"
+                class="!h-6 !w-6 !p-0"
+                pTooltip="Copy session id"
+                tooltipPosition="bottom"
+                [cdkCopyToClipboard]="session.id"></button>
+            </div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div class="space-y-1">
+          <div class="text-color flex items-center gap-2 text-sm font-medium">
+            <i class="pi pi-desktop text-muted-foreground"></i>
+            <span>{{ session.deviceInfo }}</span>
+          </div>
+          <div class="text-muted-foreground flex items-center gap-2 text-xs">
+            <i class="pi pi-globe"></i>
+            <span>{{ session.browserInfo }}</span>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div class="space-y-2">
+          <p-tag [value]="session.ipAddress" severity="info" />
+          @if (session.isCurrentSession) {
+            <p-tag value="Current session" severity="success" />
+          }
+        </div>
+      </td>
+      <td>
+        <div class="space-y-1">
+          <div class="text-color text-sm font-medium">
+            {{ session.startedAt | date: 'MMM d, y, h:mm a' }}
+          </div>
+          <div class="text-muted-foreground text-xs">
+            @if (session.endedAt) {
+              Ended {{ session.endedAt | date: 'MMM d, y, h:mm a' }}
+            } @else {
+              Active
+            }
+          </div>
+        </div>
+      </td>
+      <td>
+        <div class="flex flex-col items-start gap-2">
+          <p-tag
+            [value]="session.isActive ? 'Active' : 'Inactive'"
+            [severity]="session.isActive ? 'success' : 'secondary'" />
+        </div>
+      </td>
+      <td [hidden]="activeTab() !== statusEnum.Active">
+        <div class="flex items-center justify-center gap-2">
+          <p-button
+            label="Terminate"
+            variant="outlined"
+            severity="danger"
+            [disabled]="isProcessing(session.id) || session.isCurrentSession"
+            [pTooltip]="session.isCurrentSession ? 'Current session cannot be terminated' : 'Terminate session'"
+            tooltipPosition="bottom"
+            (click)="onTerminate(session)">
+            @if (isProcessing(session.id)) {
+              <i class="pi pi-spin pi-spinner"></i>
+            } @else {
+              <i class="pi pi-power-off"></i>
+            }
+          </p-button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

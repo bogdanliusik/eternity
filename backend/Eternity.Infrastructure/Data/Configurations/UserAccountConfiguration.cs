@@ -11,6 +11,7 @@ public sealed class UserAccountConfiguration : IEntityTypeConfiguration<UserAcco
         builder.HasKey(x => x.Id);
         
         builder.Property(x => x.UserName).HasMaxLength(256).IsRequired();
+        builder.Property(x => x.FullName).HasMaxLength(256).IsRequired();
         builder.Property(p => p.Email).HasMaxLength(256).IsRequired();
         builder.Property(x => x.AvatarUrl).HasMaxLength(512);
         

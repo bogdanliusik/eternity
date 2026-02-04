@@ -18,6 +18,10 @@ export const routes: Routes = [
           import('./features/administration/registration-requests/registration-requests').then(
             (m) => m.RegistrationRequests
           )
+      },
+      {
+        path: 'administration/sessions',
+        loadComponent: () => import('./features/administration/sessions/sessions').then((m) => m.Sessions)
       }
     ]
   },
@@ -27,7 +31,6 @@ export const routes: Routes = [
   },
   {
     path: 'register',
-    loadComponent: () =>
-      import('./features/auth/pages/registration/registration').then((m) => m.Registration)
+    loadComponent: () => import('./features/auth/pages/registration/registration').then((m) => m.Registration)
   }
 ];

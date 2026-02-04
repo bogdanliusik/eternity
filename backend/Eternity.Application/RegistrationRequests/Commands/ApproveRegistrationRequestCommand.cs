@@ -42,6 +42,7 @@ public class ApproveRegistrationRequestCommandHandler(IAppDbContext dbContext, I
         await dbContext.UserAccounts.AddAsync(new UserAccount {
             Id = userId,
             UserName = registrationRequest.UserName,
+            FullName = registrationRequest.Name,
             Email = registrationRequest.Email
         }, cancellationToken);
         registrationRequest.Approve();

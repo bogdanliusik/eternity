@@ -13,20 +13,11 @@ public class GetCurrentSessionQueryHandler(IAppDbContext dbContext, ICurrentUser
 {
     public async Task<Result<UserSessionDto>> Handle(GetCurrentSessionQuery request, 
         CancellationToken cancellationToken) {
+        var now = DateTime.UtcNow;
         var session = await dbContext.UserSessions
             .AsNoTracking()
             .Where(s => s.Id == currentUser.SessionId)
-            .Select(s => new UserSessionDto {
-                Id = s.Id,
-                UserId = s.UserId,
-                StartedAt = s.StartedAt,
-                EndedAt = s.EndedAt,
-                IpAddress = s.IpAddress,
-                DeviceInfo = s.DeviceInfo,
-                BrowserInfo = s.BrowserInfo,
-                IsActive = !s.IsTerminated && s.RefreshTokenExpiry > DateTime.UtcNow,
-                IsCurrentSession = true
-            })
+            .ProjectWithUser(dbContext.UserAccounts.AsNoTracking(), currentUser.SessionId, now)
             .FirstOrDefaultAsync(cancellationToken);
         if (session == null) {
             return Result<UserSessionDto>.Failure(["Session not found"]);
