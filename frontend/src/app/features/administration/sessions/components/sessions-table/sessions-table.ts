@@ -52,16 +52,4 @@ export class SessionsTable {
   hasAvatar(session: Session): boolean {
     return Boolean(session.user?.avatarUrl && session.user.avatarUrl.trim().length > 0);
   }
-
-  getUserMeta(session: Session): string {
-    const username = session.user?.username?.trim();
-    const email = session.user?.email?.trim();
-    if (username && email) {
-      return `@${username} | ${email}`;
-    }
-    if (username) {
-      return `@${username}`;
-    }
-    return email || '--';
-  }
 }

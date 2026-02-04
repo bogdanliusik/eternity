@@ -13,7 +13,7 @@ public class UserSessionDto
     public string? BrowserInfo { get; init; }
     public bool IsActive { get; init; }
     public bool IsCurrentSession { get; init; }
-    public required UserDto User { get; init; }
+    public required SessionUserDto User { get; init; }
 }
 
 internal static class UserSessionDtoExtensions
@@ -29,13 +29,12 @@ internal static class UserSessionDtoExtensions
             BrowserInfo = s.BrowserInfo,
             IsActive = !s.IsTerminated && s.RefreshTokenExpiry > now,
             IsCurrentSession = s.Id == currentSessionId,
-            User = new UserDto {
+            User = new SessionUserDto {
                 Id = u.Id,
                 Username = u.UserName,
                 FullName = u.FullName,
                 Email = u.Email,
-                AvatarUrl = u.AvatarUrl,
-                Roles = Array.Empty<string>()
+                AvatarUrl = u.AvatarUrl
             }
         });
 }

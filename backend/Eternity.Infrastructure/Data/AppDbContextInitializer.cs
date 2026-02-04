@@ -39,18 +39,6 @@ public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, Ap
         try {
             await EnsureRolesAsync(RoleNames.Admin, RoleNames.Member);
             var adminSeed = adminSeedOptions.Value;
-            if (string.IsNullOrWhiteSpace(adminSeed.Username) || string.IsNullOrWhiteSpace(adminSeed.Email)) {
-                logger.LogInformation("Admin seed configuration missing username or email; skipping admin creation.");
-                return;
-            }
-            if (string.IsNullOrWhiteSpace(adminSeed.Password)) {
-                logger.LogWarning("Admin seed password not provided; skipping admin creation.");
-                return;
-            }
-            if (string.IsNullOrEmpty(adminSeed.FullName)) {
-                logger.LogWarning("Admin seed full name not provided");
-                return;
-            }
             await SeedOrUpdateUserAsync(adminSeed, RoleNames.Admin, RoleNames.Member);
         }
         catch (Exception ex) {
