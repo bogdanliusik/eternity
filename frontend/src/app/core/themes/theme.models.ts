@@ -5,6 +5,7 @@ export interface Theme {
   mode: ThemeMode;
   color: ThemeColorName;
   surface: ThemeSurfaceName;
+  fullWidth?: boolean;
 }
 
 export interface ThemeSurface {

@@ -7,10 +7,12 @@ import { ColorScale, updatePreset, updateSurfacePalette } from '@primeuix/themes
 import { THEME_COLORS, THEME_SURFACES } from '@/core/themes/theme.constants';
 import { ThemeColorName, ThemeMode } from '@/core/themes/theme.types';
 import { SunIcon, MoonIcon, LucideAngularModule } from 'lucide-angular';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-theme-configurator',
-  imports: [ThemeOptionTile, LucideAngularModule],
+  imports: [ThemeOptionTile, LucideAngularModule, ToggleSwitchModule, FormsModule],
   templateUrl: './theme-configurator.html'
 })
 export class ThemeConfigurator {
@@ -28,6 +30,8 @@ export class ThemeConfigurator {
     }));
   });
   readonly surfaces = signal<ThemeSurface[]>(THEME_SURFACES);
+
+  readonly isFullWidth = computed(() => this.theme().fullWidth ?? false);
 
   toggleMode(mode: ThemeMode) {
     this.theme.update((t) => ({
@@ -50,6 +54,13 @@ export class ThemeConfigurator {
       surface: surface.name
     }));
     updateSurfacePalette(surface.palette);
+  }
+
+  toggleFullWidth(value: boolean): void {
+    this.theme.update((theme) => ({
+      ...theme,
+      fullWidth: value
+    }));
   }
 
   buildThemePreset() {
