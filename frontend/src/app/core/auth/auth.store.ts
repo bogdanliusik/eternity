@@ -5,11 +5,11 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { computed, DOCUMENT, inject } from '@angular/core';
 import { tapResponse } from '@ngrx/operators';
-import { catchError, EMPTY, filter, firstValueFrom, pipe, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, filter, firstValueFrom, from, pipe, switchMap, tap } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { LoginRequest } from './models/login.request';
 import { ApiError } from '../models/api.error';
-import { ApiErrorHandler } from '../operators/handle-api-error';
+import { GeneralHubService } from '../services/general-hub.service';
 
 export enum AuthStatus {
   Unknown = 'unknown',
@@ -42,23 +42,37 @@ export const AuthStore = signalStore(
       store,
       authService = inject(AuthService),
       router = inject(Router),
-      errorHandler = inject(ApiErrorHandler)
+      generalHubService = inject(GeneralHubService)
     ) => ({
-    initializeAuth: rxMethod<void>(
-      pipe(
-        tap(() => patchState(store, { status: AuthStatus.Checking, isLoading: true })),
-        switchMap(() => {
-          return authService.getCurrentUser().pipe(
-            tapResponse({
-              next: (user) => {
-                patchState(store, {
-                  user,
-                  status: AuthStatus.Authenticated,
-                  errors: [],
-                  isLoading: false
-                });
-              },
-              error: (error: ApiError) => {
+      initializeAuth: rxMethod<void>(
+        pipe(
+          tap(() => patchState(store, { status: AuthStatus.Checking, isLoading: true })),
+          switchMap(() => {
+            return authService.getCurrentUser().pipe(
+              switchMap((user) =>
+                from(generalHubService.connect()).pipe(
+                  tapResponse({
+                    next: () => {
+                      patchState(store, {
+                        user,
+                        status: AuthStatus.Authenticated,
+                        errors: [],
+                        isLoading: false
+                      });
+                    },
+                    error: () => {
+                      // Connection failed but user is still authenticated
+                      patchState(store, {
+                        user,
+                        status: AuthStatus.Authenticated,
+                        errors: [],
+                        isLoading: false
+                      });
+                    }
+                  })
+                )
+              ),
+              catchError((error: ApiError) => {
                 const isUnauthorized = error.status === 401;
                 patchState(store, {
                   user: null,
@@ -66,144 +80,160 @@ export const AuthStore = signalStore(
                   errors: isUnauthorized ? [] : ['Failed to check authentication'],
                   isLoading: false
                 });
-              }
-            })
-          );
-        })
-      )
-    ),
-    login: rxMethod<LoginRequest>(
-      pipe(
-        tap(() => patchState(store, { isLoading: true, errors: [] })),
-        switchMap((credentials) =>
-          authService.loginWithCookies(credentials).pipe(
-            switchMap((result) => {
-              if (result.succeeded) {
-                return authService.getCurrentUser().pipe(
-                  tapResponse({
-                    next: (user) => {
-                      patchState(store, {
-                        user,
-                        status: AuthStatus.Authenticated,
-                        errors: [],
-                        isLoading: false
-                      });
-                      router.navigate(['/']);
-                    },
-                    error: (error: ApiError) => {
+                return EMPTY;
+              })
+            );
+          })
+        )
+      ),
+      login: rxMethod<LoginRequest>(
+        pipe(
+          tap(() => patchState(store, { isLoading: true, errors: [] })),
+          switchMap((credentials) =>
+            authService.loginWithCookies(credentials).pipe(
+              switchMap((result) => {
+                if (result.succeeded) {
+                  return authService.getCurrentUser().pipe(
+                    switchMap((user) =>
+                      from(generalHubService.connect()).pipe(
+                        tapResponse({
+                          next: () => {
+                            patchState(store, {
+                              user,
+                              status: AuthStatus.Authenticated,
+                              errors: [],
+                              isLoading: false
+                            });
+                            router.navigate(['/']);
+                          },
+                          error: () => {
+                            patchState(store, {
+                              user,
+                              status: AuthStatus.Authenticated,
+                              errors: [],
+                              isLoading: false
+                            });
+                            router.navigate(['/']);
+                          }
+                        })
+                      )
+                    ),
+                    catchError((error: ApiError) => {
                       patchState(store, {
                         user: null,
                         status: AuthStatus.Unauthenticated,
                         errors: [error.message],
                         isLoading: false
                       });
-                    }
-                  })
-                );
-              }
-              const errors = result.errors.length ? result.errors : ['Login failed'];
-              patchState(store, {
-                errors,
-                isLoading: false
-              });
-              return EMPTY;
-            }),
-            catchError((error: ApiError) => {
-              patchState(store, {
-                errors: [error.message],
-                isLoading: false
-              });
-              return EMPTY;
-            })
-          )
-        )
-      )
-    ),
-    refreshUser: rxMethod<void>(
-      pipe(
-        tap(() => patchState(store, { isLoading: true, errors: [] })),
-        switchMap(() =>
-          authService.getCurrentUser().pipe(
-            tapResponse({
-              next: (user) => {
+                      return EMPTY;
+                    })
+                  );
+                }
+                const errors = result.errors.length ? result.errors : ['Login failed'];
                 patchState(store, {
-                  user,
-                  status: AuthStatus.Authenticated,
-                  errors: [],
+                  errors,
                   isLoading: false
                 });
-              },
-              error: (error: ApiError) => {
-                if (error.status === 401) {
-                  patchState(store, {
-                    user: null,
-                    status: AuthStatus.Unauthenticated,
-                    errors: ['Session expired'],
-                    isLoading: false
-                  });
-                  router.navigate(['/login']);
-                } else {
-                  patchState(store, {
-                    errors: [error.message],
-                    isLoading: false
-                  });
-                }
-              }
-            })
+                return EMPTY;
+              }),
+              catchError((error: ApiError) => {
+                patchState(store, {
+                  errors: [error.message],
+                  isLoading: false
+                });
+                return EMPTY;
+              })
+            )
           )
         )
-      )
-    ),
-    register: rxMethod<RegisterRequest>(
-      pipe(
-        tap(() => patchState(store, { isLoading: true, errors: [], registrationSuccess: false })),
-        switchMap((request) =>
-          authService.register(request).pipe(
-            tapResponse({
-              next: (result) => {
-                if (result.succeeded) {
+      ),
+      refreshUser: rxMethod<void>(
+        pipe(
+          tap(() => patchState(store, { isLoading: true, errors: [] })),
+          switchMap(() =>
+            authService.getCurrentUser().pipe(
+              tapResponse({
+                next: (user) => {
                   patchState(store, {
-                    registrationSuccess: true,
+                    user,
+                    status: AuthStatus.Authenticated,
                     errors: [],
                     isLoading: false
                   });
-                } else {
-                  const errors = result.errors.length ? result.errors : ['Registration failed'];
+                },
+                error: (error: ApiError) => {
+                  if (error.status === 401) {
+                    patchState(store, {
+                      user: null,
+                      status: AuthStatus.Unauthenticated,
+                      errors: ['Session expired'],
+                      isLoading: false
+                    });
+                    router.navigate(['/login']);
+                  } else {
+                    patchState(store, {
+                      errors: [error.message],
+                      isLoading: false
+                    });
+                  }
+                }
+              })
+            )
+          )
+        )
+      ),
+      register: rxMethod<RegisterRequest>(
+        pipe(
+          tap(() => patchState(store, { isLoading: true, errors: [], registrationSuccess: false })),
+          switchMap((request) =>
+            authService.register(request).pipe(
+              tapResponse({
+                next: (result) => {
+                  if (result.succeeded) {
+                    patchState(store, {
+                      registrationSuccess: true,
+                      errors: [],
+                      isLoading: false
+                    });
+                  } else {
+                    const errors = result.errors.length ? result.errors : ['Registration failed'];
+                    patchState(store, {
+                      errors,
+                      isLoading: false
+                    });
+                  }
+                },
+                error: (error: ApiError) => {
                   patchState(store, {
-                    errors,
+                    errors: error.errors.length > 0 ? error.errors : [error.message],
                     isLoading: false
                   });
                 }
-              },
-              error: (error: ApiError) => {
-                patchState(store, {
-                  errors: error.errors.length > 0 ? error.errors : [error.message],
-                  isLoading: false
-                });
-              }
-            })
+              })
+            )
           )
         )
-      )
-    ),
-    handleUnauthorized: () => {
-      if (store.status() === AuthStatus.Authenticated) {
-        patchState(store, {
-          user: null,
-          status: AuthStatus.Unauthenticated,
-          errors: ['Session expired'],
-          isLoading: false
-        });
-        router.navigate(['/login']);
+      ),
+      handleUnauthorized: () => {
+        if (store.status() === AuthStatus.Authenticated) {
+          generalHubService.disconnect();
+          patchState(store, {
+            user: null,
+            status: AuthStatus.Unauthenticated,
+            errors: ['Session expired'],
+            isLoading: false
+          });
+          router.navigate(['/login']);
+        }
+      },
+      clearErrors: () => {
+        patchState(store, { errors: [], registrationSuccess: false });
+      },
+      setUnauthenticated: () => {
+        patchState(store, { status: AuthStatus.Unauthenticated });
       }
-    },
-    clearErrors: () => {
-      patchState(store, { errors: [], registrationSuccess: false });
-    },
-    setUnauthenticated: () => {
-      patchState(store, { status: AuthStatus.Unauthenticated });
-    }
-  })),
+    })
+  ),
   withComputed((store) => ({
     isAuthenticated: computed(() => store.status() === AuthStatus.Authenticated),
     isUnauthenticated: computed(() => store.status() === AuthStatus.Unauthenticated),

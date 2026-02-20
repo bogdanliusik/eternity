@@ -2,6 +2,7 @@ using Eternity.Application;
 using Eternity.Infrastructure;
 using Eternity.Infrastructure.Data;
 using Eternity.WebApi.Extensions;
+using Eternity.WebApi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,8 @@ app.UseRateLimiter();
 app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
 
+app.UseCors("AllowAngularApp");
+
 app.UseOpenApi(o => o.Path = "/api/specification.json");
 app.UseSwaggerUi(settings => {
     settings.Path = "/api";
@@ -29,5 +32,6 @@ app.UseSwaggerUi(settings => {
 });
 
 app.MapEndpoints();
+app.MapHub<GeneralHub>("/hubs/general");
 
 app.Run();

@@ -6,20 +6,32 @@
       <th>Network</th>
       <th>Timing</th>
       <th>Status</th>
-      <th class="!text-center" style="width: 160px" [hidden]="activeTab() !== statusEnum.Active">Actions</th>
+      <th class="!text-center" style="width: 200px" [hidden]="!showActions()">Actions</th>
     </tr>
   </ng-template>
   <ng-template #body let-session>
     <tr>
       <td>
         <div class="flex items-center gap-3">
-          <div
-            class="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl
-              text-xs font-semibold">
-            @if (hasAvatar(session)) {
-              <img [src]="session.user.avatarUrl" [alt]="getDisplayName(session)" class="h-full w-full object-cover" />
-            } @else {
-              {{ getUserInitials(session) }}
+          <div class="relative">
+            <div
+              class="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl
+                text-xs font-semibold">
+              @if (hasAvatar(session)) {
+                <img
+                  [src]="session.user.avatarUrl"
+                  [alt]="getDisplayName(session)"
+                  class="h-full w-full object-cover" />
+              } @else {
+                {{ getUserInitials(session) }}
+              }
+            </div>
+            @if (session.isOnline) {
+              <span
+                class="dark:border-surface-900 absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full
+                  border-2 border-white bg-green-500"
+                pTooltip="Online"
+                tooltipPosition="bottom"></span>
             }
           </div>
           <div class="space-y-1.5">
@@ -74,13 +86,28 @@
       </td>
       <td>
         <div class="flex flex-col items-start gap-2">
-          <p-tag
-            [value]="session.isActive ? 'Active' : 'Inactive'"
-            [severity]="session.isActive ? 'success' : 'secondary'" />
+          @if (session.isOnline) {
+            <p-tag value="Online" severity="success" />
+          } @else if (session.isActive) {
+            <p-tag value="Active" severity="warn" />
+          } @else {
+            <p-tag value="Inactive" severity="secondary" />
+          }
         </div>
       </td>
-      <td [hidden]="activeTab() !== statusEnum.Active">
+      <td [hidden]="!showActions()">
         <div class="flex items-center justify-center gap-2">
+          @if (session.isOnline) {
+            <p-button
+              label="Ping"
+              variant="outlined"
+              severity="info"
+              pTooltip="Send a test message"
+              tooltipPosition="bottom"
+              (click)="onPing(session)">
+              <i class="pi pi-send"></i>
+            </p-button>
+          }
           <p-button
             label="Terminate"
             variant="outlined"

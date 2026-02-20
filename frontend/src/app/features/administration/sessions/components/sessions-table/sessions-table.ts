@@ -19,6 +19,7 @@ export class SessionsTable {
 
   readonly statusEnum = SessionStatus;
   readonly terminate = output<Session>();
+  readonly ping = output<Session>();
 
   isProcessing(id: string): boolean {
     return this.processingIds().includes(id);
@@ -26,6 +27,10 @@ export class SessionsTable {
 
   onTerminate(session: Session): void {
     this.terminate.emit(session);
+  }
+
+  onPing(session: Session): void {
+    this.ping.emit(session);
   }
 
   getShortId(value: string): string {
@@ -51,5 +56,9 @@ export class SessionsTable {
 
   hasAvatar(session: Session): boolean {
     return Boolean(session.user?.avatarUrl && session.user.avatarUrl.trim().length > 0);
+  }
+
+  showActions(): boolean {
+    return this.activeTab() !== SessionStatus.Inactive;
   }
 }

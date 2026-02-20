@@ -38,6 +38,8 @@ public class UserSession
 
     public bool IsTerminated { get; private set; }
 
+    public bool IsOnline { get; private set; }
+
     public bool IsActive => !IsTerminated && RefreshTokenExpiry > DateTime.UtcNow;
 
     public static UserSession Create(Guid userId, string refreshToken, DateTime refreshTokenExpiry,
@@ -57,7 +59,17 @@ public class UserSession
             return;
         }
         IsTerminated = true;
+        IsOnline = false;
         EndedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void SetOnline() {
+        if (!IsActive) return;
+        IsOnline = true;
+    }
+
+    public void SetOffline() {
+        IsOnline = false;
     }
     
     public void MarkExpired() {

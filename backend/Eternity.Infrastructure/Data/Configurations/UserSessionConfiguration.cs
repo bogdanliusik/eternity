@@ -31,6 +31,9 @@ public class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
         builder.Property(x => x.IsTerminated)
             .HasDefaultValue(false)
             .IsRequired();
+        builder.Property(x => x.IsOnline)
+            .HasDefaultValue(false)
+            .IsRequired();
         
         builder.HasIndex(x => x.UserId);
         builder.HasIndex(x => x.RefreshToken);

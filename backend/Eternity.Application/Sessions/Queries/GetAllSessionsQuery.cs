@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Eternity.Application.Sessions.Queries;
 
 [Authorize(Policy = Policies.AdminOnly)]
-public record GetAllSessionsQuery(int PageNumber, int PageSize, bool? IsActive = null) 
+public record GetAllSessionsQuery(int PageNumber, int PageSize, bool? IsActive = null, bool? IsOnline = null) 
     : IRequest<Result<PaginatedList<UserSessionDto>>>, IPaginatedQuery;
 
 public class GetAllSessionsQueryHandler(IAppDbContext dbContext, ICurrentUser currentUser)
@@ -26,6 +26,9 @@ public class GetAllSessionsQueryHandler(IAppDbContext dbContext, ICurrentUser cu
             } else {
                 query = query.Where(s => s.IsTerminated || s.RefreshTokenExpiry <= now);
             }
+        }
+        if (request.IsOnline.HasValue) {
+            query = query.Where(s => s.IsOnline == request.IsOnline.Value);
         }
         var sessions = await query
             .ProjectWithUser(dbContext.UserAccounts.AsNoTracking(), currentUser.SessionId, now)
