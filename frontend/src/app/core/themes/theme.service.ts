@@ -9,7 +9,8 @@ export class ThemeService {
   public theme = signal<Theme>({
     mode: 'dark',
     color: 'rose',
-    surface: 'gray'
+    surface: 'gray',
+    fullWidth: false
   });
 
   constructor() {

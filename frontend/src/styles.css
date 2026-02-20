@@ -39,11 +39,11 @@
   :root {
     --primary: var(--p-primary-color);
     --primary-contrast: var(--p-primary-contrast-color);
-    --background: var(--p-surface-100);
-    --foreground: var(--p-content-background);
+    --background: #ffffff;
+    --foreground: var(--p-surface-100);
     --muted: var(--p-surface-200);
     --muted-foreground: var(--p-surface-600);
-    --card-background: var(--p-content-background);
+    --card-background: var(--p-background);
     --card-border: 1px solid var(--p-surface-200);
   }
 
