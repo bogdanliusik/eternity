@@ -1,0 +1,47 @@
+<div class="card">
+  <p-tabs [value]="store.activeTab()" (valueChange)="onTabChange($any($event))" class="rounded-md" scrollable>
+    <p-tablist>
+      @for (tab of config.tabs; track tab.id) {
+        <p-tab [value]="tab.id" class="flex items-center !gap-2">
+          <lucide-icon [img]="tab.icon" class="h-4 w-4"></lucide-icon>
+          <span>{{ tab.label }}</span>
+          @if (getTabCount(tab.id) !== null) {
+            <p-badge [value]="getTabCount(tab.id)!.toString()" [severity]="tab.badgeSeverity || 'info'" />
+          }
+        </p-tab>
+      }
+    </p-tablist>
+    <p-tabpanels>
+      @for (tab of config.tabs; track tab.id) {
+        <p-tabpanel [value]="tab.id">
+          <div class="card overflow-hidden !p-0">
+            @if (store.isLoading() && store.currentItems().length === 0) {
+              @if (skeletonTpl()) {
+                <ng-container [ngTemplateOutlet]="skeletonTpl()!" />
+              } @else {
+                <app-tabbed-list-skeleton />
+              }
+            } @else if (store.currentItems().length === 0) {
+              <app-tabbed-list-empty-state [tab]="tab" />
+            } @else {
+              @if (contentTpl()) {
+                <ng-container
+                  [ngTemplateOutlet]="contentTpl()!"
+                  [ngTemplateOutletContext]="{ $implicit: store.currentItems(), tab: tab }" />
+              }
+              @if (store.currentTotalCount() > store.pageSize()) {
+                <div class="border-muted border-t p-4">
+                  <p-paginator
+                    [rows]="store.pageSize()"
+                    [first]="(store.currentPage() - 1) * store.pageSize()"
+                    [totalRecords]="store.currentTotalCount()"
+                    (onPageChange)="onPageChange($event)" />
+                </div>
+              }
+            }
+          </div>
+        </p-tabpanel>
+      }
+    </p-tabpanels>
+  </p-tabs>
+</div>

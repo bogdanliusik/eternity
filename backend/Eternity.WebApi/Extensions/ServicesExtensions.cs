@@ -17,6 +17,9 @@ public static class ServicesExtensions
     public static void AddWebServices(this IHostApplicationBuilder builder) {
         builder.Services.AddScoped<ICurrentUser, CurrentUser>();
         builder.Services.AddScoped<ICookieAuthService, CookieAuthService>();
+        builder.Services.AddSingleton<ConnectionTracker>();
+        builder.Services.AddSingleton<IOnlineManager, OnlineManager>();
+        builder.Services.AddSignalR();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddHealthChecks()
             .AddDbContextCheck<AppDbContext>();
@@ -106,16 +109,22 @@ public static class ServicesExtensions
         var identityService = context.HttpContext.RequestServices.GetRequiredService<IIdentityService>();
         var isSessionValid = await identityService.IsSessionValidAsync(sessionId);
         if (!isSessionValid) {
-            var cookieAuthService = context.HttpContext.RequestServices.GetRequiredService<ICookieAuthService>();
-            cookieAuthService.RemoveAuthenticationCookies(context.HttpContext.Response);
+            var isWebSocketRequest = context.HttpContext.Request.Path.StartsWithSegments("/hubs");
+            if (!isWebSocketRequest) {
+                var cookieAuthService = context.HttpContext.RequestServices.GetRequiredService<ICookieAuthService>();
+                cookieAuthService.RemoveAuthenticationCookies(context.HttpContext.Response);
+            }
             context.Fail("Session has been terminated");
             return;
         }
         if (IsTokenExpired(accessToken)) {
             var refreshResult = await identityService.RefreshTokenAsync(sessionId);
             if (refreshResult.Succeeded) {
-                var cookieAuthService = context.HttpContext.RequestServices.GetRequiredService<ICookieAuthService>();
-                cookieAuthService.SetAuthenticationCookies(context.HttpContext.Response, refreshResult.Data);
+                var isWebSocketRequest = context.HttpContext.Request.Path.StartsWithSegments("/hubs");
+                if (!isWebSocketRequest) {
+                    var cookieAuthService = context.HttpContext.RequestServices.GetRequiredService<ICookieAuthService>();
+                    cookieAuthService.SetAuthenticationCookies(context.HttpContext.Response, refreshResult.Data);
+                }
                 accessToken = refreshResult.Data.AccessToken;
             }
         }

@@ -20,19 +20,19 @@
             Monitoring in real time
           </span>
           <span class="bg-muted-foreground/40 h-1 w-1 rounded-full"></span>
-          <span>{{ store.currentTotalCount() }} results</span>
+          <span>{{ listStore.currentTotalCount() }} results</span>
         </div>
       </div>
       <div class="flex items-center gap-3">
         <p-tag value="30 / page" severity="info" />
         <button
           pButton
-          [disabled]="store.isLoading()"
-          (click)="onRefresh()"
+          [disabled]="listStore.isLoading()"
+          (click)="listStore.refresh()"
           class="p-button-outlined"
           pTooltip="Refresh list"
           tooltipPosition="bottom">
-          @if (store.isLoading()) {
+          @if (listStore.isLoading()) {
             <i class="pi pi-spin pi-spinner"></i>
           } @else {
             <lucide-icon [img]="refreshIcon" class="h-4 w-4"></lucide-icon>
@@ -41,21 +41,30 @@
       </div>
     </div>
   </div>
-  <div class="grid gap-4 lg:grid-cols-3">
+  <div class="grid gap-4 lg:grid-cols-4">
+    <div class="card !p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-muted-foreground text-xs tracking-wide uppercase">Online now</p>
+          <p class="text-color text-2xl font-semibold">{{ formatCount(listStore.tabCount()('online')) }}</p>
+        </div>
+        <p-tag [value]="listStore.tabCount()('online') === null ? 'Loading' : 'Connected'" severity="success" />
+      </div>
+    </div>
     <div class="card !p-4">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-muted-foreground text-xs tracking-wide uppercase">Active sessions</p>
-          <p class="text-color text-2xl font-semibold">{{ formatCount(store.activeTotalCount()) }}</p>
+          <p class="text-color text-2xl font-semibold">{{ formatCount(listStore.tabCount()('active')) }}</p>
         </div>
-        <p-tag [value]="store.activeTotalCount() === null ? 'Loading' : 'Live'" severity="success" />
+        <p-tag [value]="listStore.tabCount()('active') === null ? 'Loading' : 'Live'" severity="warn" />
       </div>
     </div>
     <div class="card !p-4">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-muted-foreground text-xs tracking-wide uppercase">Inactive history</p>
-          <p class="text-color text-2xl font-semibold">{{ formatCount(store.inactiveTotalCount()) }}</p>
+          <p class="text-color text-2xl font-semibold">{{ formatCount(listStore.tabCount()('inactive')) }}</p>
         </div>
         <p-tag value="Archive" severity="secondary" />
       </div>
@@ -64,55 +73,58 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="text-muted-foreground text-xs tracking-wide uppercase">Current session</p>
-          <p class="text-color text-2xl font-semibold">{{ hasCurrentSession() ? 'Protected' : 'None' }}</p>
+          <p class="text-color text-2xl font-semibold">
+            {{ sessionsStore.hasCurrentSession() ? 'Protected' : 'None' }}
+          </p>
         </div>
-        <p-tag [value]="hasCurrentSession() ? 'This device' : 'No flag'" severity="info" />
+        <p-tag [value]="sessionsStore.hasCurrentSession() ? 'This device' : 'No flag'" severity="info" />
       </div>
     </div>
   </div>
-  <div class="card">
-    <p-tabs [value]="store.activeTab()" (valueChange)="onTabChange($any($event))" class="rounded-md" scrollable>
-      <p-tablist>
-        @for (tab of tabs; track tab.id) {
-          <p-tab [value]="tab.id" class="flex items-center !gap-2">
-            <lucide-icon [img]="tab.icon" class="h-4 w-4"></lucide-icon>
-            <span>{{ tab.label }}</span>
-            @if (getTabCount(tab.id) !== null) {
-              <p-badge
-                [value]="getTabCount(tab.id)!.toString()"
-                [severity]="tab.id === statusEnum.Active ? 'success' : 'info'" />
-            }
-          </p-tab>
-        }
-      </p-tablist>
-      <p-tabpanels>
-        @for (tab of tabs; track tab.id) {
-          <p-tabpanel [value]="tab.id">
-            <div class="card overflow-hidden !p-0">
-              @if (store.isLoading() && store.currentSessions().length === 0) {
-                <app-sessions-skeleton />
-              } @else if (store.currentSessions().length === 0) {
-                <app-sessions-empty-state [activeTab]="store.activeTab()" />
-              } @else {
-                <app-sessions-table
-                  [sessions]="store.currentSessions()"
-                  [activeTab]="store.activeTab()"
-                  [processingIds]="store.processingIds()"
-                  (terminate)="onTerminate($event)" />
-                @if (store.currentTotalCount() > store.pageSize()) {
-                  <div class="border-muted border-t p-4">
-                    <p-paginator
-                      [rows]="store.pageSize()"
-                      [first]="(store.currentPage() - 1) * store.pageSize()"
-                      [totalRecords]="store.currentTotalCount()"
-                      (onPageChange)="onPageChange($event)" />
-                  </div>
-                }
-              }
-            </div>
-          </p-tabpanel>
-        }
-      </p-tabpanels>
-    </p-tabs>
-  </div>
+  <app-tabbed-list>
+    <ng-template #content let-items>
+      <app-sessions-table
+        [sessions]="$any(items)"
+        [activeTab]="activeSessionTab()"
+        [processingIds]="listStore.processingIds()"
+        (terminate)="sessionsStore.terminate($event)"
+        (ping)="sessionsStore.openPingDialog($event)" />
+    </ng-template>
+    <ng-template #skeleton>
+      <app-sessions-skeleton />
+    </ng-template>
+  </app-tabbed-list>
 </div>
+
+<p-dialog
+  header="Ping Session"
+  [visible]="sessionsStore.pingVisible()"
+  (visibleChange)="$event || sessionsStore.closePingDialog()"
+  [modal]="true"
+  [style]="{ width: '28rem' }"
+  [closable]="true">
+  <div class="space-y-4">
+    <p class="text-muted-foreground text-sm">
+      Send a message to this session. The user will see a popup notification if they are online.
+    </p>
+    <input
+      pInputText
+      type="text"
+      placeholder="Enter message..."
+      class="w-full"
+      [ngModel]="sessionsStore.pingMessage()"
+      (ngModelChange)="sessionsStore.updatePingMessage($event)"
+      (keydown.enter)="sessionsStore.sendPing()"
+      [disabled]="sessionsStore.isPinging()" />
+  </div>
+  <ng-template #footer>
+    <div class="flex items-center justify-end gap-2">
+      <p-button label="Cancel" variant="outlined" severity="secondary" (click)="sessionsStore.closePingDialog()" />
+      <p-button
+        label="Send"
+        [disabled]="!sessionsStore.pingMessage().trim() || sessionsStore.isPinging()"
+        (click)="sessionsStore.sendPing()"
+        [loading]="sessionsStore.isPinging()"></p-button>
+    </div>
+  </ng-template>
+</p-dialog>

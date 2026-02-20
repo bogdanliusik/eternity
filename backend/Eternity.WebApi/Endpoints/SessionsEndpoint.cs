@@ -14,12 +14,14 @@ public class SessionsEndpoint : EndpointGroupBase
     public override void Map(RouteGroupBuilder group) {
         group.RequireAuthorization();
         group.MapGet(GetCurrentSession, "current");
-        group.MapGet(GetAllSessions, "getAll").RequireAuthorization(Policies.AdminOnly);;
+        group.MapGet(GetAllSessions, "getAll").RequireAuthorization(Policies.AdminOnly);
         group.MapPost(TerminateSession, "terminate/{id:guid}").RequireAuthorization(Policies.AdminOnly);
+        group.MapPost(PingSession, "pingSession").RequireAuthorization(Policies.AdminOnly);
     }
 
     private static async Task<IResult> GetAllSessions([AsParameters] SessionFilterQuery filter, IMediator mediator) {
-        var result = await mediator.Send(new GetAllSessionsQuery(filter.GetPageNumber(), filter.GetPageSize(), filter.IsActive));
+        var result = await mediator.Send(new GetAllSessionsQuery(
+            filter.GetPageNumber(), filter.GetPageSize(), filter.IsActive, filter.IsOnline));
         return Results.Ok(result);
     }
 
@@ -33,8 +35,20 @@ public class SessionsEndpoint : EndpointGroupBase
         return Results.Ok(result);
     }
 
+    private static async Task<IResult> PingSession(PingSessionRequest request, IMediator mediator) {
+        var result = await mediator.Send(new PingSessionCommand(request.SessionId, request.Message));
+        return Results.Ok(result);
+    }
+
     private class SessionFilterQuery : PaginationFilter
     {
         public bool? IsActive { get; init; }
+        public bool? IsOnline { get; init; }
     }
+}
+
+public class PingSessionRequest
+{
+    public Guid SessionId { get; set; }
+    public string Message { get; set; } = null!;
 }

@@ -1,4 +1,5 @@
 export enum SessionStatus {
+  Online = 'online',
   Active = 'active',
   Inactive = 'inactive'
 }
@@ -19,6 +20,7 @@ export interface Session {
   deviceInfo: string;
   browserInfo: string;
   isActive: boolean;
+  isOnline: boolean;
   isCurrentSession: boolean;
   user: SessionUser;
 }

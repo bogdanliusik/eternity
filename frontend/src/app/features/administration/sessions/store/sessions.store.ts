@@ -1,147 +1,149 @@
-import { computed, inject } from '@angular/core';
+import { inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { tapResponse } from '@ngrx/operators';
-import { map, mergeMap, pipe, switchMap, tap } from 'rxjs';
+import { MessageService } from 'primeng/api';
 import { SessionsService } from '../services/sessions.service';
 import { Session, SessionStatus } from '../models/session.model';
+import { Activity, Archive, Wifi } from 'lucide-angular';
+import { TabbedListConfig, TabDefinition } from '@/shared/components/tabbed-list/tabbed-list.models';
+import { TABBED_LIST_CONFIG, TabbedListStore } from '@/shared/components/tabbed-list/tabbed-list.store';
+import { computed } from '@angular/core';
 
-interface SessionsState {
-  activeSessions: Session[];
-  inactiveSessions: Session[];
-  activeTotalCount: number | null;
-  inactiveTotalCount: number | null;
-  activePage: number;
-  inactivePage: number;
-  pageSize: number;
-  activeTab: SessionStatus;
-  isLoading: boolean;
-  processingIds: string[];
+export const SESSION_TABS: TabDefinition[] = [
+  {
+    id: SessionStatus.Online,
+    label: 'Online',
+    icon: Wifi,
+    badgeSeverity: 'success',
+    emptyState: {
+      title: 'No users online',
+      description: 'No users currently have an active WebSocket connection.'
+    }
+  },
+  {
+    id: SessionStatus.Active,
+    label: 'Active',
+    icon: Activity,
+    badgeSeverity: 'warn',
+    emptyState: {
+      title: 'No active sessions',
+      description: 'Everyone is signed out or sessions have expired.'
+    }
+  },
+  {
+    id: SessionStatus.Inactive,
+    label: 'Inactive',
+    icon: Archive,
+    badgeSeverity: 'info',
+    emptyState: {
+      title: 'No inactive sessions yet',
+      description: 'Ended sessions will appear here for auditing.'
+    }
+  }
+];
+
+function sessionsConfigFactory(): TabbedListConfig {
+  const service = inject(SessionsService);
+  return {
+    tabs: SESSION_TABS,
+    defaultTab: SessionStatus.Online,
+    pageSize: 30,
+    itemId: (item: any) => item.id,
+    loadFn: (tabId, page, pageSize) => {
+      switch (tabId) {
+        case SessionStatus.Online:
+          return service.getOnlineSessions(page, pageSize);
+        case SessionStatus.Active:
+          return service.getSessions(true, page, pageSize);
+        default:
+          return service.getSessions(false, page, pageSize);
+      }
+    }
+  };
 }
 
-const initialState: SessionsState = {
-  activeSessions: [],
-  inactiveSessions: [],
-  activeTotalCount: null,
-  inactiveTotalCount: null,
-  activePage: 1,
-  inactivePage: 1,
-  pageSize: 30,
-  activeTab: SessionStatus.Active,
-  isLoading: false,
-  processingIds: []
-};
+interface PingDialogState {
+  pingVisible: boolean;
+  pingSessionId: string;
+  pingMessage: string;
+  isPinging: boolean;
+}
 
 export const SessionsStore = signalStore(
-  withState(initialState),
-  withComputed((store) => ({
-    currentSessions: computed(() =>
-      store.activeTab() === SessionStatus.Active ? store.activeSessions() : store.inactiveSessions()
-    ),
-    currentPage: computed(() =>
-      store.activeTab() === SessionStatus.Active ? store.activePage() : store.inactivePage()
-    ),
-    currentTotalCount: computed(() =>
-      store.activeTab() === SessionStatus.Active
-        ? (store.activeTotalCount() ?? store.activeSessions().length)
-        : (store.inactiveTotalCount() ?? store.inactiveSessions().length)
-    ),
-    getCount: computed(() => (status: SessionStatus) => {
-      if (status === SessionStatus.Active) {
-        return store.activeTotalCount();
-      }
-      return store.inactiveTotalCount();
-    })
-  })),
-  withMethods((store, service = inject(SessionsService)) => {
-    const loadSessions = rxMethod<{ tab?: SessionStatus; page?: number }>(
-      pipe(
-        map((payload) => {
-          const tab = payload?.tab ?? store.activeTab();
-          const page = payload?.page ?? (tab === SessionStatus.Active ? store.activePage() : store.inactivePage());
-          return { tab, page };
-        }),
-        tap(({ tab, page }) => {
-          patchState(store, {
-            isLoading: true,
-            activeTab: tab,
-            ...(tab === SessionStatus.Active ? { activePage: page } : { inactivePage: page })
-          });
-        }),
-        switchMap(({ tab, page }) =>
-          service.getSessions(tab === SessionStatus.Active, page, store.pageSize()).pipe(
-            tapResponse({
-              next: (response) => {
-                const update: Partial<SessionsState> = { isLoading: false };
-                if (tab === SessionStatus.Active) {
-                  update.activeSessions = response.items;
-                  update.activeTotalCount = response.totalCount;
-                  update.activePage = page;
-                } else {
-                  update.inactiveSessions = response.items;
-                  update.inactiveTotalCount = response.totalCount;
-                  update.inactivePage = page;
-                }
-                patchState(store, update);
-              },
-              error: () => {
-                patchState(store, { isLoading: false });
-              }
-            })
-          )
-        )
-      )
-    );
-    const terminateSession = rxMethod<Session>(
-      pipe(
-        tap((session) =>
-          patchState(store, {
-            processingIds: [...store.processingIds(), session.id]
-          })
-        ),
-        mergeMap((session) =>
-          service.terminateSession(session.id).pipe(
-            tapResponse({
-              next: () => {
-                const activeSessions = store.activeSessions().filter((s) => s.id !== session.id);
-                const currentActiveTotal = store.activeTotalCount();
-                const currentInactiveTotal = store.inactiveTotalCount();
-                const activeTotal =
-                  currentActiveTotal === null ? activeSessions.length : Math.max(0, currentActiveTotal - 1);
-                const inactiveTotal = currentInactiveTotal === null ? null : currentInactiveTotal + 1;
-                patchState(store, {
-                  activeSessions,
-                  activeTotalCount: activeTotal,
-                  inactiveTotalCount: inactiveTotal,
-                  processingIds: store.processingIds().filter((id) => id !== session.id)
-                });
-                if (
-                  store.activeTab() === SessionStatus.Active &&
-                  activeSessions.length === 0 &&
-                  store.activePage() > 1
-                ) {
-                  const newPage = store.activePage() - 1;
-                  patchState(store, { activePage: newPage });
-                  loadSessions({ tab: SessionStatus.Active, page: newPage });
-                }
-              },
-              error: () => {
-                patchState(store, {
-                  processingIds: store.processingIds().filter((id) => id !== session.id)
-                });
-              }
-            })
-          )
-        )
-      )
-    );
-
+  withState<PingDialogState>({
+    pingVisible: false,
+    pingSessionId: '',
+    pingMessage: '',
+    isPinging: false
+  }),
+  withComputed(() => {
+    const listStore = inject(TabbedListStore);
     return {
-      loadSessions,
-      terminateSession,
-      setActiveTab: (tab: SessionStatus) => {
-        patchState(store, { activeTab: tab });
+      hasCurrentSession: computed(() => {
+        const online = listStore.tabItems()(SessionStatus.Online) as Session[];
+        const active = listStore.tabItems()(SessionStatus.Active) as Session[];
+        return online.some((s) => s.isCurrentSession) || active.some((s) => s.isCurrentSession);
+      })
+    };
+  }),
+  withMethods((store) => {
+    const listStore = inject(TabbedListStore);
+    const service = inject(SessionsService);
+    const messageService = inject(MessageService);
+    return {
+      terminate(session: Session) {
+        listStore.addProcessingId(session.id);
+        service.terminateSession(session.id).subscribe({
+          next: () => {
+            listStore.removeItem(session.id, {
+              fromTabs: [SessionStatus.Online, SessionStatus.Active],
+              countAdjustments: { [SessionStatus.Inactive]: 1 }
+            });
+            listStore.removeProcessingId(session.id);
+          },
+          error: () => {
+            listStore.removeProcessingId(session.id);
+          }
+        });
+      },
+      openPingDialog(session: Session) {
+        patchState(store, {
+          pingSessionId: session.id,
+          pingMessage: '',
+          pingVisible: true
+        });
+      },
+      closePingDialog() {
+        patchState(store, { pingVisible: false });
+      },
+      updatePingMessage(message: string) {
+        patchState(store, { pingMessage: message });
+      },
+      sendPing() {
+        const sessionId = store.pingSessionId();
+        const message = store.pingMessage();
+        if (!message.trim()) return;
+        patchState(store, { isPinging: true });
+        service.pingSession({ sessionId, message }).subscribe({
+          next: (delivered) => {
+            patchState(store, { isPinging: false, pingVisible: false });
+            messageService.add({
+              severity: delivered ? 'success' : 'warn',
+              summary: delivered ? 'Sent' : 'Not delivered',
+              detail: delivered ? 'Message delivered to session' : 'Session is not online — message was not delivered',
+              life: 4000
+            });
+          },
+          error: () => {
+            patchState(store, { isPinging: false });
+          }
+        });
       }
     };
   })
 );
+
+export const sessionsProviders = [
+  TabbedListStore,
+  SessionsStore,
+  { provide: TABBED_LIST_CONFIG, useFactory: sessionsConfigFactory }
+];

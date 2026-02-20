@@ -12,6 +12,7 @@ public class UserSessionDto
     public string? DeviceInfo { get; init; }
     public string? BrowserInfo { get; init; }
     public bool IsActive { get; init; }
+    public bool IsOnline { get; init; }
     public bool IsCurrentSession { get; init; }
     public required SessionUserDto User { get; init; }
 }
@@ -28,6 +29,7 @@ internal static class UserSessionDtoExtensions
             DeviceInfo = s.DeviceInfo,
             BrowserInfo = s.BrowserInfo,
             IsActive = !s.IsTerminated && s.RefreshTokenExpiry > now,
+            IsOnline = s.IsOnline,
             IsCurrentSession = s.Id == currentSessionId,
             User = new SessionUserDto {
                 Id = u.Id,

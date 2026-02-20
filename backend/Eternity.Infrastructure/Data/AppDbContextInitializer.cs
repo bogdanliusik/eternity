@@ -29,9 +29,19 @@ public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, Ap
     public async Task InitialiseAsync() {
         try {
             await context.Database.MigrateAsync();
+            await ResetOnlineStatusAsync();
         } catch (Exception ex) {
             logger.LogError(ex, "An error occurred while initializing the database.");
             throw;
+        }
+    }
+    
+    private async Task ResetOnlineStatusAsync() {
+        var staleCount = await context.UserSessions
+            .Where(s => s.IsOnline)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.IsOnline, false));
+        if (staleCount > 0) {
+            logger.LogInformation("Reset {Count} stale online sessions on startup", staleCount);
         }
     }
     
