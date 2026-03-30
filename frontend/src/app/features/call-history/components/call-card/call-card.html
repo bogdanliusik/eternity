@@ -1,0 +1,37 @@
+<article
+  class="border-surface bg-foreground hover:bg-muted grid cursor-pointer grid-cols-1 items-center gap-3 rounded-lg
+    border px-3 py-3.5 transition-all duration-200 ease-out sm:grid-cols-[auto_minmax(0,1fr)_auto]"
+  [ngClass]="{
+    'border-l-2 border-l-emerald-400/60': isActive(),
+    'border-l-2 border-l-sky-400/40': isCompleted(),
+    'border-l-2 border-l-amber-400/50': isMissed()
+  }">
+  <div class="flex min-w-0 items-center gap-3">
+    <span class="bg-card text-color inline-flex h-8 w-8 items-center justify-center rounded-lg">
+      <lucide-icon [img]="getTypeIcon()" class="h-4 w-4"></lucide-icon>
+    </span>
+    <app-status-pill [status]="call().status"></app-status-pill>
+  </div>
+
+  <div class="min-w-0">
+    <h3 class="text-color truncate text-base font-semibold tracking-tight">{{ call().name }}</h3>
+    <p class="text-muted-foreground mt-1 truncate text-sm">
+      {{ formatDate(call().startedAt) }} · {{ formatDuration(call().durationSeconds) }} · {{ getTypeLabel() }} · by
+      {{ call().initiatedBy.fullName }}
+    </p>
+  </div>
+
+  <div class="flex items-center justify-between gap-3 sm:justify-end">
+    <app-participant-avatar-group [participants]="call().participants" [maxVisible]="3"></app-participant-avatar-group>
+    @if (isActive()) {
+      <button
+        pButton
+        type="button"
+        (click)="onJoin()"
+        class="bg-primary text-primary-contrast h-9 border-0 px-3 text-sm font-medium hover:brightness-110">
+        <lucide-icon [img]="phoneCallIcon" class="mr-2 h-4 w-4"></lucide-icon>
+        Join
+      </button>
+    }
+  </div>
+</article>

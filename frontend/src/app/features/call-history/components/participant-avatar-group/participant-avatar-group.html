@@ -1,0 +1,46 @@
+<div class="flex items-center">
+  @for (participant of visibleParticipants(); track participant.id) {
+    <a
+      [routerLink]="['/profile', participant.id]"
+      class="border-surface bg-card text-color -ml-2 inline-flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border text-xs font-semibold first:ml-0 hover:z-20 hover:scale-105"
+      [attr.title]="participant.fullName">
+      @if (participant.avatarUrl) {
+        <img [src]="participant.avatarUrl" [alt]="participant.fullName" class="h-full w-full object-cover" />
+      } @else {
+        <span>{{ getInitials(participant.fullName) }}</span>
+      }
+    </a>
+  }
+
+  @if (hiddenCount() > 0) {
+    <button
+      type="button"
+      class="border-surface bg-muted text-muted-foreground -ml-2 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border text-xs font-semibold hover:z-20 hover:scale-105"
+      (click)="morePopover.toggle($event)"
+      [attr.title]="hiddenCount() + ' more participants'">
+      +{{ hiddenCount() }}
+    </button>
+
+    <p-popover #morePopover>
+      <div class="min-w-52 py-1">
+        @for (participant of participants().slice(maxVisible()); track participant.id) {
+          <a
+            [routerLink]="['/profile', participant.id]"
+            class="hover:bg-muted flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 transition-colors">
+            <span class="border-surface bg-card text-color inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border text-xs font-semibold">
+              @if (participant.avatarUrl) {
+                <img [src]="participant.avatarUrl" [alt]="participant.fullName" class="h-full w-full object-cover" />
+              } @else {
+                {{ getInitials(participant.fullName) }}
+              }
+            </span>
+            <span class="min-w-0">
+              <span class="text-color block truncate text-sm font-medium">{{ participant.fullName }}</span>
+              <span class="text-muted-foreground block truncate text-xs">@{{ participant.username }}</span>
+            </span>
+          </a>
+        }
+      </div>
+    </p-popover>
+  }
+</div>

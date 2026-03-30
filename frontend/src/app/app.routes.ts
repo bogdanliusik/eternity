@@ -22,6 +22,10 @@ export const routes: Routes = [
       {
         path: 'administration/sessions',
         loadComponent: () => import('./features/administration/sessions/sessions').then((m) => m.Sessions)
+      },
+      {
+        path: 'call-history',
+        loadComponent: () => import('./features/call-history/call-history').then((m) => m.CallHistory)
       }
     ]
   },

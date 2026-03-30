@@ -11,9 +11,9 @@
             <a
               (click)="closeMobileMenu()"
               [routerLink]="sub.route"
-              routerLinkActive="text-primary"
+              routerLinkActive="text-primary bg-primary/5"
               [routerLinkActiveOptions]="{ exact: true }"
-              class="hover:bg-card inline-block w-full px-4 py-2 text-sm">
+              class="hover:bg-card inline-block w-full rounded-lg px-4 py-2 text-base">
               {{ sub.label }}
             </a>
             @if (menuService.isActive(sub.route)) {
@@ -23,7 +23,7 @@
             }
           </ng-template>
           <ng-template #childMenu let-sub="sub">
-            <a class="inline-block w-full cursor-pointer px-4 py-2 text-sm">
+            <a class="inline-block w-full cursor-pointer rounded-lg px-4 py-2 text-base">
               {{ sub.label }}
             </a>
             <button class="text-color opacity-50 flex cursor-pointer items-center justify-end">

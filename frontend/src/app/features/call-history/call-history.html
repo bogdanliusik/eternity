@@ -1,0 +1,80 @@
+<div class="text-color space-y-5">
+  <header class="flex items-start justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight">Calls</h1>
+      <p class="text-muted-foreground mt-1 text-sm">Review recent calls and join active sessions.</p>
+    </div>
+    <div class="flex shrink-0 items-center gap-2">
+      <button
+        pButton
+        type="button"
+        [disabled]="store.isLoading()"
+        (click)="onRefresh()"
+        class="p-button-outlined border-surface text-muted-foreground hover:bg-muted h-9 w-9 rounded-lg bg-transparent"
+        aria-label="Refresh calls">
+        @if (store.isLoading()) {
+          <i class="pi pi-spin pi-spinner text-xs"></i>
+        } @else {
+          <lucide-icon [img]="refreshIcon" class="h-4 w-4"></lucide-icon>
+        }
+      </button>
+      <button
+        pButton
+        type="button"
+        (click)="onNewCall()"
+        label="New call"
+        class="bg-primary text-primary-contrast h-9 whitespace-nowrap rounded-lg border-0 px-3 text-sm font-medium hover:brightness-110 sm:px-4">
+        <lucide-icon [img]="phoneCallIcon" class="mr-1.5 h-4 w-4"></lucide-icon>
+      </button>
+    </div>
+  </header>
+
+  <section class="border-surface flex flex-wrap items-center gap-6 border-b pb-3" aria-label="Calls summary">
+    <div class="min-w-16">
+      <p class="text-muted-foreground text-xs font-medium tracking-wide uppercase">All calls</p>
+      <p class="mt-1 text-xl font-semibold">{{ store.totalCount() }}</p>
+    </div>
+    <div class="min-w-16">
+      <p class="text-muted-foreground text-xs font-medium tracking-wide uppercase">Live now</p>
+      <p class="mt-1 text-xl font-semibold text-emerald-600 dark:text-emerald-300">{{ store.activeCount() }}</p>
+    </div>
+    <div class="min-w-16">
+      <p class="text-muted-foreground text-xs font-medium tracking-wide uppercase">Completed</p>
+      <p class="mt-1 text-xl font-semibold">{{ store.completedCount() }}</p>
+    </div>
+    <div class="min-w-16">
+      <p class="text-muted-foreground text-xs font-medium tracking-wide uppercase">Missed</p>
+      <p class="mt-1 text-xl font-semibold text-amber-600 dark:text-amber-300">{{ store.missedCount() }}</p>
+    </div>
+  </section>
+
+  <section class="bg-foreground inline-flex items-center gap-1 rounded-lg p-1" aria-label="Call filters">
+    <lucide-icon [img]="filterIcon" class="text-muted-foreground mx-1 h-3.5 w-3.5"></lucide-icon>
+    @for (filter of filters; track filter.id) {
+      <button
+        type="button"
+        (click)="onFilterChange(filter.id)"
+        class="text-muted-foreground hover:bg-card hover:text-color cursor-pointer rounded-md px-2.5 py-1 text-sm font-medium transition-colors duration-150"
+        [class.bg-muted]="store.activeFilter() === filter.id"
+        [class.text-color]="store.activeFilter() === filter.id">
+        {{ filter.label }}
+      </button>
+    }
+  </section>
+
+  <section class="border-surface bg-card rounded-lg border p-2">
+    @if (store.isLoading() && store.filteredCalls().length === 0) {
+      <app-call-history-skeleton />
+    } @else if (store.filteredCalls().length === 0) {
+      <app-call-history-empty />
+    } @else {
+      <div class="flex flex-col gap-2">
+        @for (call of store.filteredCalls(); track call.id) {
+          <app-call-card [call]="call" (joinCall)="onJoinCall($event)" />
+        }
+      </div>
+    }
+  </section>
+</div>
+
+<app-new-call-modal />

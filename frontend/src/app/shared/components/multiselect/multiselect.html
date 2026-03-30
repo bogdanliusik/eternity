@@ -1,0 +1,87 @@
+<div class="relative z-20 w-full" (clickOutside)="onClickOutside()">
+  @if (placeholder()) {
+    <label class="text-muted-foreground mb-1 block text-xs font-medium tracking-wide uppercase">
+      {{ placeholder() }}
+    </label>
+  }
+
+  <div
+    class="multiselect-container relative flex min-h-[3.25rem] cursor-text items-center rounded-[10px] border transition-colors"
+    [class.multiselect-container--focused]="isFocused()"
+    (click)="onContainerClick()">
+    <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 px-3 py-2.5">
+      @for (item of store.selectedItems(); track item.id) {
+        <div
+          class="bg-muted text-color hover:bg-muted/80 flex items-center gap-1.5 rounded-[8px] px-2 py-1 text-sm transition-colors">
+          <ng-container
+            *ngTemplateOutlet="selectedItemTpl() || defaultItemTpl; context: { $implicit: item }"></ng-container>
+          @if (!disabled()) {
+            <button
+              type="button"
+              class="text-muted-foreground hover:text-color ml-0.5 flex h-4 w-4 items-center justify-center rounded-full transition-colors"
+              (click)="removeItem($event, item)">
+              <i class="pi pi-times cursor-pointer text-[0.6rem]"></i>
+            </button>
+          }
+        </div>
+      }
+
+      @if (!disabled()) {
+        <input
+          #searchInput
+          type="text"
+          class="text-color placeholder:text-muted-foreground min-w-[60px] flex-1 border-none bg-transparent py-1 text-sm outline-none"
+          [placeholder]="store.selectedCount() === 0 ? searchPlaceholder() : ''"
+          [value]="store.search()"
+          (input)="onSearchInput($event)"
+          (focus)="onInputFocus()" />
+      }
+    </div>
+
+    <div class="flex shrink-0 items-center gap-1 pr-2">
+      @if (store.selectedCount() > 0 && !disabled()) {
+        <button
+          type="button"
+          class="text-muted-foreground hover:text-color flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-colors"
+          (click)="clearAll($event)">
+          <i class="pi pi-times text-xs"></i>
+        </button>
+      }
+      @if (!disabled()) {
+        <button
+          type="button"
+          class="text-muted-foreground hover:text-color flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-colors"
+          (click)="toggleDropdown($event)">
+          <i
+            class="pi pi-chevron-down text-xs transition-transform duration-200"
+            [class.rotate-180]="store.selectionOpened()"></i>
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (store.selectionOpened()) {
+      <div
+        class="multiselect-panel absolute left-0 mt-1 w-full overflow-hidden rounded-[10px] border shadow-lg"
+        style="z-index: 10000; position: absolute">
+      @if (store.availableItems().length > 0) {
+        <ul class="multiselect-dropdown max-h-60 overflow-y-auto py-1">
+          @for (item of store.availableItems(); track item.id) {
+            <li
+              class="hover:bg-muted flex cursor-pointer items-center px-3 py-2 transition-colors"
+              (click)="selectItem(item)">
+              <ng-container
+                *ngTemplateOutlet="dropdownItemTpl() || defaultItemTpl; context: { $implicit: item }"></ng-container>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="text-muted-foreground flex items-center justify-center px-3 py-4 text-sm">No options available</div>
+      }
+    </div>
+  }
+</div>
+
+<ng-template #defaultItemTpl let-item>
+  <span class="text-color text-sm">{{ item.id }}</span>
+</ng-template>

@@ -3,7 +3,7 @@
 @import 'tailwindcss';
 @plugin "tailwindcss-primeui";
 @plugin "tailwind-scrollbar";
-@import "primeicons/primeicons.css";
+@import 'primeicons/primeicons.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -64,3 +64,4 @@
   border-radius: 10px;
   margin-bottom: 1rem;
 }
+

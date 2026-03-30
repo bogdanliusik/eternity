@@ -1,0 +1,23 @@
+.multiselect-container {
+  background: var(--p-inputtext-background);
+  border-color: var(--p-inputtext-border-color);
+}
+
+.multiselect-container--focused {
+  border-color: var(--p-primary-color);
+}
+
+.multiselect-panel {
+  background: var(--p-content-background);
+  border-color: var(--p-inputtext-border-color);
+}
+
+.multiselect-dropdown {
+  &::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: var(--text-disabled);
+  }
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+}

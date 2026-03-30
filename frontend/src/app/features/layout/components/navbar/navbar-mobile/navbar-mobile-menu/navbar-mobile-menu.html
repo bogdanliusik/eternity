@@ -1,7 +1,7 @@
 @for (menu of menuService.pagesMenu; track $index) {
   <div class="pt-4">
     <div class="mx-1 mb-2 flex items-center justify-between">
-      <small class="text-muted-foreground/50 text-xs font-semibold">
+      <small class="text-muted-foreground/60 text-sm font-semibold">
         {{ menu.group }}
       </small>
     </div>
@@ -10,8 +10,9 @@
         <li>
           <div
             (click)="toggleMenu(item)"
-            class="text-muted-foreground hover:text-color group flex grow items-center gap-4">
-            <div class="text-muted-foreground/50" [class.text-primary]="item.active && !menuService.showSideBar">
+            class="group flex grow items-center gap-3 rounded-lg px-2"
+            [ngClass]="{ 'bg-primary/5': item.active }">
+            <div class="text-muted-foreground/60" [class.text-primary]="item.active">
               <lucide-icon [img]="item.icon" class="h-5 w-5"></lucide-icon>
             </div>
             <ng-container
@@ -20,10 +21,10 @@
             <ng-template #parentMenu let-item="item">
               <div
                 routerLink="{{ item.route }}"
-                class="text-muted-foreground hover:text-primary flex h-[36px] grow cursor-pointer items-center justify-start rounded-sm">
+                class="text-muted-foreground hover:text-primary flex h-10 grow cursor-pointer items-center justify-start rounded-lg">
                 <a
                   routerLinkActive="text-primary"
-                  class="truncate text-sm font-semibold tracking-wide focus:outline-hidden">
+                  class="truncate text-base font-semibold focus:outline-hidden">
                   {{ item.label }}
                 </a>
                 @if (item.badgeCount && item.badgeCount > 0) {
@@ -35,9 +36,10 @@
               </div>
             </ng-template>
             <ng-template #childMenu let-item="item">
-              <div class="flex h-9 grow cursor-pointer items-center justify-start rounded-sm">
+              <div class="flex h-10 grow cursor-pointer items-center justify-start rounded-lg">
                 <a
-                  class="text-muted-foreground group-hover:text-primary truncate text-sm font-semibold tracking-wide focus:outline-hidden">
+                  class="text-muted-foreground group-hover:text-primary truncate text-base font-semibold focus:outline-hidden"
+                  [class.text-primary]="item.active">
                   {{ item.label }}
                 </a>
               </div>
