@@ -1,0 +1,92 @@
+<p-dialog
+  header="New call"
+  [(visible)]="modalVisible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [closable]="true"
+  [style]="{ width: '32rem' }"
+  [contentStyle]="{ overflow: 'visible' }"
+  (onHide)="onClose()">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5 pt-1">
+    <div>
+      <label for="callName" class="text-muted-foreground mb-1 block text-xs font-medium tracking-wide uppercase">Call name</label>
+      <input
+        id="callName"
+        type="text"
+        pInputText
+        formControlName="name"
+        placeholder="Sprint planning, design review..."
+        class="w-full" />
+      @if (form.controls.name.touched && form.controls.name.errors?.['required']) {
+        <small class="mt-1 block text-rose-400">Call name is required</small>
+      }
+    </div>
+
+    <div>
+      <app-multiselect
+        [items]="participants()"
+        formControlName="participants"
+        placeholder="Participants"
+        searchPlaceholder="Search users...">
+        <ng-template #selectedItem let-item>
+          <div class="flex items-center gap-2">
+            <div class="relative">
+              @if (item.avatarUrl) {
+                <img [src]="item.avatarUrl" [alt]="item.fullName" class="h-6 w-6 rounded-full object-cover" />
+              } @else {
+                <div
+                  class="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium">
+                  {{ item.fullName.charAt(0) }}
+                </div>
+              }
+            </div>
+            <span class="text-xs">{{ item.fullName }}</span>
+          </div>
+        </ng-template>
+
+        <ng-template #dropdownItem let-item>
+          <div class="flex items-center gap-3">
+            <div class="relative shrink-0">
+              @if (item.avatarUrl) {
+                <img [src]="item.avatarUrl" [alt]="item.fullName" class="h-8 w-8 rounded-full object-cover" />
+              } @else {
+                <div
+                  class="bg-primary/10 text-primary flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium">
+                  {{ item.fullName.charAt(0) }}
+                </div>
+              }
+            </div>
+            <div>
+              <p class="text-color text-sm font-medium">{{ item.fullName }}</p>
+              <p class="text-muted-foreground text-xs">{{ '@' + item.username }}</p>
+            </div>
+          </div>
+        </ng-template>
+      </app-multiselect>
+
+      @if (form.controls.participants.touched && form.controls.participants.errors?.['required']) {
+        <small class="mt-1 block text-rose-400">At least one participant is required</small>
+      }
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex items-center justify-end gap-2">
+      <button pButton type="button" class="text-color p-button-text" label="Cancel" (click)="onClose()"></button>
+      <button
+        pButton
+        type="button"
+        [disabled]="form.invalid || store.isCreatingCall()"
+        (click)="onSubmit()"
+        class="bg-primary text-primary-contrast border-0 hover:brightness-110">
+        @if (store.isCreatingCall()) {
+          <i class="pi pi-spin pi-spinner mr-2"></i>
+        } @else {
+          <lucide-icon [img]="videoIcon" class="mr-2 h-4 w-4"></lucide-icon>
+        }
+        Start
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

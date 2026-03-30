@@ -12,7 +12,8 @@ import {
   Folder,
   UserIcon,
   ClipboardList,
-  Server
+  Server,
+  Phone
 } from 'lucide-angular';
 
 export const MENU_ITEM_IDS = {
@@ -69,6 +70,11 @@ export class Menu {
       group: 'Collaboration',
       separator: true,
       items: [
+        {
+          icon: Phone,
+          label: 'Calls',
+          route: '/call-history'
+        },
         {
           icon: Download,
           label: 'Download',

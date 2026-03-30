@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { NavbarMobileSubmenu } from '../navbar-mobile-submenu/navbar-mobile-submenu';
-import { NgTemplateOutlet } from '@angular/common';
+import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MenuService } from '@/features/layout/services/menu.service';
 import { SubMenuItem } from '@/features/layout/types/sub-menu-item';
@@ -10,7 +10,7 @@ import { LucideAngularModule, Minus, Plus } from 'lucide-angular';
   selector: 'app-navbar-mobile-menu',
   templateUrl: './navbar-mobile-menu.html',
   styleUrl: './navbar-mobile-menu.css',
-  imports: [LucideAngularModule, NgTemplateOutlet, RouterLink, RouterLinkActive, NavbarMobileSubmenu]
+  imports: [LucideAngularModule, NgClass, NgTemplateOutlet, RouterLink, RouterLinkActive, NavbarMobileSubmenu]
 })
 export class NavbarMobileMenu {
   public plusIcon = Plus;
