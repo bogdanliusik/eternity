@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PopoverModule } from 'primeng/popover';
 import { CallParticipant } from '../../models/call-history.model';
@@ -6,7 +6,8 @@ import { CallParticipant } from '../../models/call-history.model';
 @Component({
   selector: 'app-participant-avatar-group',
   imports: [RouterLink, PopoverModule],
-  templateUrl: './participant-avatar-group.html'
+  templateUrl: './participant-avatar-group.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ParticipantAvatarGroup {
   readonly participants = input.required<CallParticipant[]>();

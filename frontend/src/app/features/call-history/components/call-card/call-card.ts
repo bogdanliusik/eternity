@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { LucideAngularModule, Phone, Video, PhoneCall } from 'lucide-angular';
@@ -10,6 +10,7 @@ import { ParticipantAvatarGroup } from '../participant-avatar-group/participant-
   selector: 'app-call-card',
   imports: [NgClass, ButtonModule, LucideAngularModule, StatusPill, ParticipantAvatarGroup],
   templateUrl: './call-card.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'block'
   }

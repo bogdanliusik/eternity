@@ -38,7 +38,8 @@ Repository-wide instructions for coding agents.
 - Example:
   - `feature(call-history): refine mobile menu typography and calls hierarchy`
 - Prefer `feature`, `fix`, `refactor`, `docs`, `chore`, `test`.
-- Keep summaries concise and action-oriented.
+- Commit subject must be specific and descriptive enough to explain the intent and affected area.
+- Add a commit description/body (1-3 short sentences) that explains why the change is needed and any important context.
 
 ## Rule Files Discovery
 

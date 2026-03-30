@@ -1,16 +1,17 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { LucideAngularModule, PhoneOff } from 'lucide-angular';
 
 @Component({
   selector: 'app-call-history-empty',
   imports: [LucideAngularModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex flex-col items-center justify-center rounded-lg py-14">
-      <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-white/5">
-        <lucide-icon [img]="phoneOffIcon" class="h-7 w-7 text-zinc-500"></lucide-icon>
+      <div class="bg-muted mb-4 flex h-14 w-14 items-center justify-center rounded-xl">
+        <lucide-icon [img]="phoneOffIcon" class="text-muted-foreground h-7 w-7"></lucide-icon>
       </div>
-      <h3 class="mb-1 text-base font-semibold text-zinc-100">No calls found</h3>
-      <p class="text-sm text-zinc-400">Try another filter or start a new call.</p>
+      <h3 class="text-color mb-1 text-base font-semibold">No calls found</h3>
+      <p class="text-muted-foreground text-sm">Try another filter or start a new call.</p>
     </div>
   `
 })

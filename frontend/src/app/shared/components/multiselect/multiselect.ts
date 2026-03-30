@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   forwardRef,
   inject,
@@ -37,6 +38,8 @@ export class Multiselect<T extends MultiselectItem> implements ControlValueAcces
   readonly placeholder = input('');
   readonly searchPlaceholder = input('Search...');
   readonly disabled = input(false);
+  readonly isControlDisabled = signal(false);
+  readonly isDisabled = computed(() => this.disabled() || this.isControlDisabled());
 
   readonly selectedItemTpl = contentChild('selectedItem', { read: TemplateRef });
   readonly dropdownItemTpl = contentChild('dropdownItem', { read: TemplateRef });
@@ -65,10 +68,8 @@ export class Multiselect<T extends MultiselectItem> implements ControlValueAcces
   }
 
   // ControlValueAccessor
-  writeValue(value: T[]): void {
-    if (value) {
-      this.store.setSelectedItems(value);
-    }
+  writeValue(value: T[] | null | undefined): void {
+    this.store.setSelectedItems(Array.isArray(value) ? value : []);
   }
 
   registerOnChange(fn: (value: T[]) => void): void {
@@ -79,9 +80,17 @@ export class Multiselect<T extends MultiselectItem> implements ControlValueAcces
     this.onTouched = fn;
   }
 
+  setDisabledState(isDisabled: boolean): void {
+    this.isControlDisabled.set(isDisabled);
+    if (isDisabled) {
+      this.store.hideSelection();
+      this.isFocused.set(false);
+    }
+  }
+
   // Template methods
   onContainerClick(): void {
-    if (!this.disabled()) {
+    if (!this.isDisabled()) {
       this.store.openSelection();
       this.isFocused.set(true);
       setTimeout(() => this.searchInput?.nativeElement?.focus());
@@ -89,7 +98,7 @@ export class Multiselect<T extends MultiselectItem> implements ControlValueAcces
   }
 
   onInputFocus(): void {
-    if (!this.disabled()) {
+    if (!this.isDisabled()) {
       this.store.openSelection();
       this.isFocused.set(true);
       this.onTouched();
@@ -102,6 +111,10 @@ export class Multiselect<T extends MultiselectItem> implements ControlValueAcces
   }
 
   selectItem(item: MultiselectItem): void {
+    if (this.isDisabled()) {
+      return;
+    }
+
     this.store.selectItem(item);
     if (this.searchInput) {
       this.searchInput.nativeElement.value = '';
@@ -111,17 +124,29 @@ export class Multiselect<T extends MultiselectItem> implements ControlValueAcces
 
   removeItem(event: Event, item: MultiselectItem): void {
     event.stopPropagation();
+    if (this.isDisabled()) {
+      return;
+    }
+
     this.store.removeItem(item);
   }
 
   clearAll(event: Event): void {
     event.stopPropagation();
+    if (this.isDisabled()) {
+      return;
+    }
+
     this.store.clearSelected();
     this.onContainerClick();
   }
 
   toggleDropdown(event: Event): void {
     event.stopPropagation();
+    if (this.isDisabled()) {
+      return;
+    }
+
     this.store.toggleSelection();
     if (this.store.selectionOpened()) {
       this.isFocused.set(true);

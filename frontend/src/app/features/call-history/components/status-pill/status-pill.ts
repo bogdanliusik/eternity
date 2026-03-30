@@ -1,9 +1,10 @@
-import { Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { CallStatus } from '../../models/call-history.model';
 
 @Component({
   selector: 'app-status-pill',
-  templateUrl: './status-pill.html'
+  templateUrl: './status-pill.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StatusPill {
   readonly status = input.required<CallStatus>();

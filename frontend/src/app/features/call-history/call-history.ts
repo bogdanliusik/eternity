@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { LucideAngularModule, PhoneCall, RefreshCw, Filter } from 'lucide-angular';
 import { CallHistoryStore } from './store/call-history.store';
@@ -18,6 +18,7 @@ interface FilterOption {
   imports: [ButtonModule, LucideAngularModule, CallCard, CallHistorySkeleton, CallHistoryEmpty, NewCallModal],
   providers: [CallHistoryStore],
   templateUrl: './call-history.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'block'
   }

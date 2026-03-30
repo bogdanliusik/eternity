@@ -1,4 +1,4 @@
-import { computed, Injectable } from '@angular/core';
+import { computed } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { MultiselectItem } from './multiselect.models';
 

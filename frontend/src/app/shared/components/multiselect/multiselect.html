@@ -15,7 +15,7 @@
           class="bg-muted text-color hover:bg-muted/80 flex items-center gap-1.5 rounded-[8px] px-2 py-1 text-sm transition-colors">
           <ng-container
             *ngTemplateOutlet="selectedItemTpl() || defaultItemTpl; context: { $implicit: item }"></ng-container>
-          @if (!disabled()) {
+          @if (!isDisabled()) {
             <button
               type="button"
               class="text-muted-foreground hover:text-color ml-0.5 flex h-4 w-4 items-center justify-center rounded-full transition-colors"
@@ -26,7 +26,7 @@
         </div>
       }
 
-      @if (!disabled()) {
+      @if (!isDisabled()) {
         <input
           #searchInput
           type="text"
@@ -39,7 +39,7 @@
     </div>
 
     <div class="flex shrink-0 items-center gap-1 pr-2">
-      @if (store.selectedCount() > 0 && !disabled()) {
+      @if (store.selectedCount() > 0 && !isDisabled()) {
         <button
           type="button"
           class="text-muted-foreground hover:text-color flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-colors"
@@ -47,7 +47,7 @@
           <i class="pi pi-times text-xs"></i>
         </button>
       }
-      @if (!disabled()) {
+      @if (!isDisabled()) {
         <button
           type="button"
           class="text-muted-foreground hover:text-color flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-colors"

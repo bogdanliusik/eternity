@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
@@ -19,7 +19,8 @@ interface ParticipantOption {
 @Component({
   selector: 'app-new-call-modal',
   imports: [ReactiveFormsModule, DialogModule, ButtonModule, InputTextModule, LucideAngularModule, Multiselect],
-  templateUrl: './new-call-modal.html'
+  templateUrl: './new-call-modal.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NewCallModal implements OnInit {
   readonly store = inject(CallHistoryStore);
