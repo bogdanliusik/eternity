@@ -102,7 +102,7 @@ services:
       - debug
 
   peerjs:
-    image: peerjs/peerjs-server:latest
+    image: peerjs/peerjs-server:1.1.0-rc.2
     container_name: eternity-peerjs
     restart: unless-stopped
     command: ["peerjs", "--port", "9000", "--path", "/", "--key", "peerjs"]

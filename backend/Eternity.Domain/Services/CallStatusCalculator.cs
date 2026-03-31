@@ -32,11 +32,6 @@ public static class CallStatusCalculator
         var invitees = participants.Where(p => p.UserId != initiatorId).ToList();
         var initiator = participants.FirstOrDefault(p => p.UserId == initiatorId);
 
-        // If the initiator hasn't left yet, the call is still active (waiting)
-        if (initiator is { Status: ParticipantStatus.Joined }) {
-            return CallStatus.Active;
-        }
-
         var anyInviteeEverJoined = invitees.Any(p =>
             p.Status == ParticipantStatus.Left || p.JoinedAt != null);
 

@@ -85,21 +85,28 @@ public class CallNotifier(
             userId
         });
 
-        // Also notify the initiator via GeneralHub in case they're still on the ringing screen
-        // (they might not have joined CallHub yet if the call hasn't started)
-        var sessionIds = await dbContext.UserSessions
+        // Notify only the initiator via GeneralHub so they can dismiss the ringing UI
+        // (they might not have joined CallHub yet if the call hasn't connected)
+        var initiatorId = await dbContext.Calls
             .AsNoTracking()
-            .Where(s => s.IsOnline && !s.IsTerminated)
-            .Join(dbContext.CallParticipants.Where(p => p.CallId == callId),
-                s => s.UserId, p => p.UserId, (s, _) => s.Id)
-            .ToListAsync();
+            .Where(c => c.Id == callId)
+            .Select(c => c.InitiatorId)
+            .FirstOrDefaultAsync();
 
-        var sendTasks = sessionIds
-            .Select(sid => generalHubContext.Clients
-                .Group(ConnectionTracker.GetSessionGroup(sid))
-                .SendAsync("CallDeclined", new { callId, userId }));
+        if (initiatorId != default) {
+            var sessionIds = await dbContext.UserSessions
+                .AsNoTracking()
+                .Where(s => s.UserId == initiatorId && s.IsOnline && !s.IsTerminated)
+                .Select(s => s.Id)
+                .ToListAsync();
 
-        await Task.WhenAll(sendTasks);
+            var sendTasks = sessionIds
+                .Select(sid => generalHubContext.Clients
+                    .Group(ConnectionTracker.GetSessionGroup(sid))
+                    .SendAsync("CallDeclined", new { callId, userId }));
+
+            await Task.WhenAll(sendTasks);
+        }
 
         logger.LogInformation("Notified that user {UserId} declined call {CallId}", userId, callId);
     }

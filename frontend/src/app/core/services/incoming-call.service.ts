@@ -5,6 +5,7 @@ import { MessageService } from 'primeng/api';
 import { GeneralHubService } from './general-hub.service';
 import { CallApiService } from './call-api.service';
 import { CallType, IncomingCallNotification } from '@/features/call-history/models/call-history.model';
+import { AuthStore } from '@/core/auth/auth.store';
 
 /**
  * Context object for the pre-join modal.
@@ -34,6 +35,7 @@ export class IncomingCallService {
   private readonly messageService = inject(MessageService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly authStore = inject(AuthStore);
 
   /** The currently incoming call notification, or null if none. */
   readonly incomingCall = signal<IncomingCallNotification | null>(null);
@@ -62,7 +64,8 @@ export class IncomingCallService {
     });
 
     this.generalHub.callDeclined$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
-      if (this.incomingCall()?.callId === event.callId) {
+      const currentUserId = this.authStore.user()?.id;
+      if (this.incomingCall()?.callId === event.callId && event.userId === currentUserId) {
         this.dismiss();
       }
     });

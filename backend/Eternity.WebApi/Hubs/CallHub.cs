@@ -163,18 +163,22 @@ public class CallHub(
 
     /// <summary>
     /// Send a WebRTC signaling message to a specific user in the call.
+    /// Currently unused (PeerJS handles its own signaling), but kept as a fallback mechanism.
     /// </summary>
     public async Task SendSignal(string callId, Guid targetUserId, object signal) {
         if (!currentUser.IsAvailable) return;
 
-        var callGroup = CallConnectionTracker.GetCallGroup(callId);
         var usersInCall = callConnectionTracker.GetUsersInCall(callId);
         if (!usersInCall.Contains(targetUserId)) return;
 
-        await Clients.OthersInGroup(callGroup).SendAsync("SignalReceived", new {
-            fromUserId = currentUser.Id,
-            signal
-        });
+        var targetConnectionIds = callConnectionTracker.GetConnectionIdsForUser(callId, targetUserId);
+        var sendTasks = targetConnectionIds
+            .Select(connId => Clients.Client(connId).SendAsync("SignalReceived", new {
+                fromUserId = currentUser.Id,
+                signal
+            }));
+
+        await Task.WhenAll(sendTasks);
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception) {

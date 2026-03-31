@@ -154,6 +154,21 @@ public class CallConnectionTracker
     public static string GetCallGroup(string callId) => $"call_{callId}";
 
     /// <summary>
+    /// Returns all connection IDs for a specific user in a given call (across all their sessions).
+    /// Used to send targeted signaling messages to a specific participant.
+    /// </summary>
+    public List<string> GetConnectionIdsForUser(string callId, Guid userId) {
+        lock (_lock) {
+            if (!_callSessions.TryGetValue(callId, out var sessions)) return [];
+
+            return sessions
+                .Where(kvp => kvp.Key.UserId == userId)
+                .Select(kvp => kvp.Value.ConnectionId)
+                .ToList();
+        }
+    }
+
+    /// <summary>
     /// Returns all existing peer registrations in a call, excluding a specific user.
     /// Used to send existing peers to a newly joined participant so they can initiate calls.
     /// </summary>
