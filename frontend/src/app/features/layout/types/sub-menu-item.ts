@@ -10,4 +10,6 @@ export interface SubMenuItem {
   badge?: string;
   badgeCount?: number;
   roles?: string[];
+  /** Additional URL prefixes that should also mark this item as active. */
+  additionalActiveRoutes?: string[];
 }

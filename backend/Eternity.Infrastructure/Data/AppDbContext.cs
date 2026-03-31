@@ -17,10 +17,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     public DbSet<UserSession> UserSessions => Set<UserSession>();
 
+    public DbSet<Call> Calls => Set<Call>();
+
+    public DbSet<CallParticipant> CallParticipants => Set<CallParticipant>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfiguration(new UserAccountConfiguration());
         modelBuilder.ApplyConfiguration(new RegistrationRequestConfiguration());
         modelBuilder.ApplyConfiguration(new UserSessionConfiguration());
+        modelBuilder.ApplyConfiguration(new CallConfiguration());
+        modelBuilder.ApplyConfiguration(new CallParticipantConfiguration());
     }
 }

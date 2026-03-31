@@ -73,7 +73,8 @@ export class Menu {
         {
           icon: Phone,
           label: 'Calls',
-          route: '/call-history'
+          route: '/call-history',
+          additionalActiveRoutes: ['/call']
         },
         {
           icon: Download,

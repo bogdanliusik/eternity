@@ -33,5 +33,6 @@ app.UseSwaggerUi(settings => {
 
 app.MapEndpoints();
 app.MapHub<GeneralHub>("/hubs/general");
+app.MapHub<CallHub>("/hubs/call");
 
 app.Run();

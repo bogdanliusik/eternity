@@ -30,7 +30,7 @@ export class MenuService implements OnDestroy {
         this._pagesMenu().forEach((menu) => {
           let activeGroup = false;
           menu.items.forEach((subMenu) => {
-            const active = this.isActive(subMenu.route);
+            const active = this.isActive(subMenu.route) || this.matchesAdditionalRoutes(subMenu);
             subMenu.expanded = active;
             subMenu.active = active;
             if (active) activeGroup = true;
@@ -132,6 +132,12 @@ export class MenuService implements OnDestroy {
       fragment: 'ignored',
       matrixParams: 'ignored'
     });
+  }
+
+  private matchesAdditionalRoutes(item: SubMenuItem): boolean {
+    if (!item.additionalActiveRoutes?.length) return false;
+    const url = this.router.url.split('?')[0];
+    return item.additionalActiveRoutes.some((prefix) => url.startsWith(prefix));
   }
 
   private initializeMenu() {

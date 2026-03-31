@@ -48,6 +48,8 @@ services:
       
       - CorsSettings__AllowedOrigins__0=https://eternity.liusik.com
       - CorsSettings__AllowedOrigins__1=https://api.eternity.liusik.com
+      - CorsSettings__AllowedOrigins__2=${CORS_ADDITIONAL_ORIGIN_1:-}
+      - CorsSettings__AllowedOrigins__3=${CORS_ADDITIONAL_ORIGIN_2:-}
     ports:
       - "5000:8080"
     volumes:
@@ -98,6 +100,20 @@ services:
       - postgres
     profiles:
       - debug
+
+  peerjs:
+    image: peerjs/peerjs-server:1.1.0-rc.2
+    container_name: eternity-peerjs
+    restart: unless-stopped
+    command: ["peerjs", "--port", "9000", "--path", "/", "--key", "peerjs"]
+    ports:
+      - "9000:9000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9000/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 volumes:
   postgres_data:

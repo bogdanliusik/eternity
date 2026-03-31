@@ -10,13 +10,13 @@
     <span class="bg-card text-color inline-flex h-8 w-8 items-center justify-center rounded-lg">
       <lucide-icon [img]="getTypeIcon()" class="h-4 w-4"></lucide-icon>
     </span>
-    <app-status-pill [status]="call().status"></app-status-pill>
+    <app-status-pill [status]="displayStatus()" [direction]="direction()"></app-status-pill>
   </div>
 
   <div class="min-w-0">
     <h3 class="text-color truncate text-base font-semibold tracking-tight">{{ call().name }}</h3>
     <p class="text-muted-foreground mt-1 truncate text-sm">
-      {{ formatDate(call().startedAt) }} · {{ formatDuration(call().durationSeconds) }} · {{ getTypeLabel() }} · by
+      {{ formatDate(call().startedAt ?? call().createdAt) }} · {{ formatDuration(call().durationSeconds) }} · {{ getTypeLabel() }} · by
       {{ call().initiatedBy.fullName }}
     </p>
   </div>

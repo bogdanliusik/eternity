@@ -6,10 +6,11 @@ import { AuthStore } from '@/core/auth/auth.store';
 import { AdministrationStore } from '@/core/administration/administration.store';
 import { MenuService } from './services/menu.service';
 import { ThemeService } from '@/core/themes/theme.service';
+import { IncomingCallHandler } from '@/shared/components/incoming-call-handler/incoming-call-handler';
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, Sidebar, Navbar],
+  imports: [RouterOutlet, Sidebar, Navbar, IncomingCallHandler],
   templateUrl: './layout.html',
   styleUrl: './layout.css'
 })

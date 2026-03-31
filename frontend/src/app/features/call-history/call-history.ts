@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { LucideAngularModule, PhoneCall, RefreshCw, Filter } from 'lucide-angular';
 import { CallHistoryStore } from './store/call-history.store';
@@ -6,7 +7,8 @@ import { CallCard } from './components/call-card/call-card';
 import { CallHistorySkeleton } from './components/call-history-skeleton/call-history-skeleton';
 import { CallHistoryEmpty } from './components/call-history-empty/call-history-empty';
 import { NewCallModal } from './components/new-call-modal/new-call-modal';
-import { CallRecord, CallStatus } from './models/call-history.model';
+import { CallHistoryRecord, CallStatus } from './models/call-history.model';
+import { IncomingCallService } from '@/core/services/incoming-call.service';
 
 interface FilterOption {
   id: 'all' | CallStatus;
@@ -15,7 +17,7 @@ interface FilterOption {
 
 @Component({
   selector: 'app-call-history',
-  imports: [ButtonModule, LucideAngularModule, CallCard, CallHistorySkeleton, CallHistoryEmpty, NewCallModal],
+  imports: [NgClass, ButtonModule, LucideAngularModule, CallCard, CallHistorySkeleton, CallHistoryEmpty, NewCallModal],
   providers: [CallHistoryStore],
   templateUrl: './call-history.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,6 +27,7 @@ interface FilterOption {
 })
 export class CallHistory implements OnInit {
   readonly store = inject(CallHistoryStore);
+  private readonly incomingCallService = inject(IncomingCallService);
 
   readonly phoneCallIcon = PhoneCall;
   readonly refreshIcon = RefreshCw;
@@ -35,7 +38,8 @@ export class CallHistory implements OnInit {
     { id: CallStatus.Active, label: 'Live' },
     { id: CallStatus.Completed, label: 'Completed' },
     { id: CallStatus.Missed, label: 'Missed' },
-    { id: CallStatus.Declined, label: 'Declined' }
+    { id: CallStatus.Declined, label: 'Declined' },
+    { id: CallStatus.Cancelled, label: 'Cancelled' }
   ];
 
   ngOnInit(): void {
@@ -54,8 +58,7 @@ export class CallHistory implements OnInit {
     this.store.openNewCallModal();
   }
 
-  onJoinCall(call: CallRecord): void {
-    // Future: navigate to call room
-    console.log('Joining call:', call.id);
+  onJoinCall(call: CallHistoryRecord): void {
+    this.incomingCallService.openPreJoinForExistingCall(call.id, call.type, call.name ?? 'Call');
   }
 }

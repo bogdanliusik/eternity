@@ -26,6 +26,10 @@ export const routes: Routes = [
       {
         path: 'call-history',
         loadComponent: () => import('./features/call-history/call-history').then((m) => m.CallHistory)
+      },
+      {
+        path: 'call/:callId',
+        loadComponent: () => import('./features/call-room/call-room').then((m) => m.CallRoom)
       }
     ]
   },
