@@ -22,6 +22,105 @@ namespace Eternity.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Eternity.Domain.Entities.Call", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(26)
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("EndedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ended_at");
+
+                    b.Property<Guid>("InitiatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("initiator_id");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_calls");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_calls_created_at");
+
+                    b.HasIndex("InitiatorId")
+                        .HasDatabaseName("ix_calls_initiator_id");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_calls_status");
+
+                    b.HasIndex("Status", "CreatedAt")
+                        .HasDatabaseName("ix_calls_status_created_at");
+
+                    b.ToTable("calls", (string)null);
+                });
+
+            modelBuilder.Entity("Eternity.Domain.Entities.CallParticipant", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(26)
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CallId")
+                        .IsRequired()
+                        .HasMaxLength(26)
+                        .HasColumnType("character varying(26)")
+                        .HasColumnName("call_id");
+
+                    b.Property<DateTimeOffset?>("JoinedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("joined_at");
+
+                    b.Property<DateTimeOffset?>("LeftAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("left_at");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_call_participants");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_call_participants_user_id");
+
+                    b.HasIndex("CallId", "UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_call_participants_call_id_user_id");
+
+                    b.HasIndex("UserId", "Status")
+                        .HasDatabaseName("ix_call_participants_user_id_status");
+
+                    b.ToTable("call_participants", (string)null);
+                });
+
             modelBuilder.Entity("Eternity.Domain.Entities.RegistrationRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -447,6 +546,39 @@ namespace Eternity.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Eternity.Domain.Entities.Call", b =>
+                {
+                    b.HasOne("Eternity.Domain.Entities.UserAccount", "Initiator")
+                        .WithMany()
+                        .HasForeignKey("InitiatorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_calls_user_accounts_initiator_id");
+
+                    b.Navigation("Initiator");
+                });
+
+            modelBuilder.Entity("Eternity.Domain.Entities.CallParticipant", b =>
+                {
+                    b.HasOne("Eternity.Domain.Entities.Call", "Call")
+                        .WithMany("Participants")
+                        .HasForeignKey("CallId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_call_participants_calls_call_id");
+
+                    b.HasOne("Eternity.Domain.Entities.UserAccount", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_call_participants_user_accounts_user_id");
+
+                    b.Navigation("Call");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Eternity.Domain.Entities.UserAccount", b =>
                 {
                     b.HasOne("Eternity.Infrastructure.Identity.ApplicationUser", null)
@@ -512,6 +644,11 @@ namespace Eternity.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_asp_net_user_tokens_asp_net_users_user_id");
+                });
+
+            modelBuilder.Entity("Eternity.Domain.Entities.Call", b =>
+                {
+                    b.Navigation("Participants");
                 });
 
             modelBuilder.Entity("Eternity.Infrastructure.Identity.ApplicationUser", b =>

@@ -46,6 +46,10 @@
       <p class="text-muted-foreground text-xs font-medium tracking-wide uppercase">Missed</p>
       <p class="mt-1 text-xl font-semibold text-amber-600 dark:text-amber-300">{{ store.missedCount() }}</p>
     </div>
+    <div class="min-w-16">
+      <p class="text-muted-foreground text-xs font-medium tracking-wide uppercase">Cancelled</p>
+      <p class="mt-1 text-xl font-semibold text-slate-600 dark:text-slate-300">{{ store.cancelledCount() }}</p>
+    </div>
   </section>
 
   <section class="bg-foreground inline-flex items-center gap-1 rounded-lg p-1" aria-label="Call filters">
@@ -54,9 +58,10 @@
       <button
         type="button"
         (click)="onFilterChange(filter.id)"
-        class="text-muted-foreground hover:bg-card hover:text-color cursor-pointer rounded-md px-2.5 py-1 text-sm font-medium transition-colors duration-150"
-        [class.bg-muted]="store.activeFilter() === filter.id"
-        [class.text-color]="store.activeFilter() === filter.id">
+        class="cursor-pointer rounded-md px-2.5 py-1 text-sm font-medium transition-colors duration-150"
+        [ngClass]="store.activeFilter() === filter.id
+          ? 'bg-muted text-color'
+          : 'text-muted-foreground hover:text-color'">
         {{ filter.label }}
       </button>
     }

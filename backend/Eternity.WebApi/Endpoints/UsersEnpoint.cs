@@ -21,6 +21,7 @@ public sealed class UsersEndpoint : EndpointGroupBase
             .RequireAuthorization(Policies.MemberOnly);
         group.MapGet(GetCurrentUserNameAsAdmin, "getCurrentUserNameAsAdmin")
              .RequireAuthorization(Policies.AdminOnly);
+        group.MapGet(SearchUsers, "search");
     }
     
     private static async Task<IResult> LoginCookie(LoginRequest loginRequest, IIdentityService identityService,
@@ -57,6 +58,11 @@ public sealed class UsersEndpoint : EndpointGroupBase
     
     private static IResult GetCurrentUserNameAsAdmin(ICurrentUser currentUser) {
         return Results.Ok(currentUser.Name);
+    }
+
+    private static async Task<IResult> SearchUsers(string? search, IMediator mediator) {
+        var result = await mediator.Send(new SearchUsersQuery(search));
+        return Results.Ok(result);
     }
     
     private static string? GetClientIpAddress(HttpContext context) {

@@ -10,7 +10,33 @@
   (onHide)="onClose()">
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5 pt-1">
     <div>
-      <label for="callName" class="text-muted-foreground mb-1 block text-xs font-medium tracking-wide uppercase">Call name</label>
+      <label class="text-muted-foreground mb-1.5 block text-xs font-medium tracking-wide uppercase">Call type</label>
+      <div class="bg-card border-surface inline-flex items-center gap-1 rounded-lg border p-1">
+        <button
+          type="button"
+          (click)="setCallType(CallType.Video)"
+          class="flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-150"
+          [class]="selectedCallType() === CallType.Video
+            ? 'bg-primary text-primary-contrast'
+            : 'text-muted-foreground hover:text-color hover:bg-muted'">
+          <lucide-icon [img]="videoIcon" class="h-3.5 w-3.5"></lucide-icon>
+          Video
+        </button>
+        <button
+          type="button"
+          (click)="setCallType(CallType.Audio)"
+          class="flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-150"
+          [class]="selectedCallType() === CallType.Audio
+            ? 'bg-primary text-primary-contrast'
+            : 'text-muted-foreground hover:text-color hover:bg-muted'">
+          <lucide-icon [img]="phoneIcon" class="h-3.5 w-3.5"></lucide-icon>
+          Audio
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <label for="callName" class="text-muted-foreground mb-1 block text-xs font-medium tracking-wide uppercase">Call name (optional)</label>
       <input
         id="callName"
         type="text"
@@ -18,9 +44,6 @@
         formControlName="name"
         placeholder="Sprint planning, design review..."
         class="w-full" />
-      @if (form.controls.name.touched && form.controls.name.errors?.['required']) {
-        <small class="mt-1 block text-rose-400">Call name is required</small>
-      }
     </div>
 
     <div>
@@ -56,6 +79,10 @@
                   {{ item.fullName.charAt(0) }}
                 </div>
               }
+              <span
+                class="absolute -right-0.5 -bottom-0.5 block h-2.5 w-2.5 rounded-full border-2 border-card"
+                [class]="item.isOnline ? 'bg-green-500' : 'bg-gray-400'">
+              </span>
             </div>
             <div>
               <p class="text-color text-sm font-medium">{{ item.fullName }}</p>
@@ -83,9 +110,9 @@
         @if (store.isCreatingCall()) {
           <i class="pi pi-spin pi-spinner mr-2"></i>
         } @else {
-          <lucide-icon [img]="videoIcon" class="mr-2 h-4 w-4"></lucide-icon>
+          <lucide-icon [img]="selectedCallType() === CallType.Video ? videoIcon : phoneIcon" class="mr-2 h-4 w-4"></lucide-icon>
         }
-        Start
+        Start {{ selectedCallType() === CallType.Video ? 'video' : 'audio' }} call
       </button>
     </div>
   </ng-template>

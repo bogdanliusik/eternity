@@ -1,0 +1,99 @@
+<p-dialog
+  [header]="isIncoming() ? 'Incoming call' : 'Join call'"
+  [(visible)]="visible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [closable]="true"
+  [style]="{ width: '28rem' }">
+  @if (context(); as ctx) {
+    <div class="flex flex-col items-center gap-4 py-2">
+      <div class="text-center">
+        <p class="text-color text-lg font-semibold">{{ ctx.callerName }}</p>
+        <p class="text-muted-foreground text-sm">
+          {{ isVideoCall() ? 'Video' : 'Audio' }} call
+        </p>
+      </div>
+
+      @if (isVideoCall()) {
+        <div class="bg-card relative aspect-video w-full overflow-hidden rounded-lg">
+          @if (localStream() && videoEnabled()) {
+            <video
+              autoplay
+              playsinline
+              muted
+              class="h-full w-full object-cover [transform:scaleX(-1)]"
+              [appSrcObject]="localStream()">
+            </video>
+          } @else {
+            <div class="flex h-full min-h-40 items-center justify-center">
+              <span class="text-muted-foreground text-sm">
+                @if (mediaError()) {
+                  {{ mediaError() }}
+                } @else {
+                  Camera off
+                }
+              </span>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="flex items-center gap-3">
+        <button
+          pButton
+          type="button"
+          [class]="audioEnabled()
+            ? 'h-10 w-10 rounded-full bg-surface-100 dark:bg-surface-800 border-0 text-color p-0 flex items-center justify-center'
+            : 'h-10 w-10 rounded-full bg-rose-500/15 border-0 text-rose-500 p-0 flex items-center justify-center'"
+          (click)="toggleAudio()">
+          <lucide-icon [img]="audioEnabled() ? micIcon : micOffIcon" class="h-4 w-4"></lucide-icon>
+        </button>
+
+        @if (isVideoCall()) {
+          <button
+            pButton
+            type="button"
+            [class]="videoEnabled()
+              ? 'h-10 w-10 rounded-full bg-surface-100 dark:bg-surface-800 border-0 text-color p-0 flex items-center justify-center'
+              : 'h-10 w-10 rounded-full bg-rose-500/15 border-0 text-rose-500 p-0 flex items-center justify-center'"
+            (click)="toggleVideo()">
+            <lucide-icon [img]="videoEnabled() ? videoIcon : videoOffIcon" class="h-4 w-4"></lucide-icon>
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <ng-template #footer>
+    <div class="flex items-center justify-end gap-3 pt-2">
+      @if (isIncoming()) {
+        <button
+          pButton
+          type="button"
+          severity="danger"
+          [outlined]="true"
+          (click)="onDecline()">
+          <lucide-icon [img]="phoneOffIcon" class="mr-2 h-4 w-4"></lucide-icon>
+          Decline
+        </button>
+      } @else {
+        <button
+          pButton
+          type="button"
+          severity="secondary"
+          [outlined]="true"
+          (click)="onClose()">
+          Cancel
+        </button>
+      }
+      <button
+        pButton
+        type="button"
+        (click)="onJoin()">
+        <lucide-icon [img]="phoneIcon" class="mr-2 h-4 w-4"></lucide-icon>
+        Join
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

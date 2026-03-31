@@ -1,0 +1,125 @@
+<div class="bg-background flex h-full flex-col">
+  <div class="flex items-center justify-between px-4 py-2">
+    <span class="text-color text-base font-medium sm:text-lg">{{ call()?.name ?? 'Call' }}</span>
+  </div>
+
+  <div class="relative flex min-h-0 grow items-center justify-center overflow-hidden px-2 pb-2">
+    @if (isJoining()) {
+      <div class="flex flex-col items-center gap-3">
+        <i class="pi pi-spin pi-spinner text-muted-foreground text-3xl"></i>
+        <p class="text-muted-foreground text-sm">Joining call...</p>
+      </div>
+    } @else if (callError()) {
+      <div class="flex flex-col items-center gap-4">
+        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-rose-500/20">
+          <i class="pi pi-exclamation-triangle text-2xl text-rose-400"></i>
+        </div>
+        <p class="max-w-md text-center text-sm text-rose-400">{{ callError() }}</p>
+        <button
+          pButton
+          type="button"
+          severity="secondary"
+          [outlined]="true"
+          label="Back to calls"
+          (click)="leaveCall()">
+        </button>
+      </div>
+    } @else {
+      <div class="grid h-full w-full auto-rows-fr gap-2 overflow-hidden" [class]="gridClass()">
+        @for (tile of videoTiles(); track tile.peerId) {
+          <div class="bg-card border-surface relative flex min-h-0 items-center justify-center overflow-hidden rounded-xl border">
+            <!-- Video element (shown when video is active) -->
+            @if (showVideo(tile)) {
+              <video
+                autoplay
+                playsinline
+                [muted]="tile.isLocal"
+                class="h-full w-full object-cover"
+                [class.scale-x-[-1]]="tile.isLocal"
+                [appSrcObject]="tile.stream!">
+              </video>
+            } @else {
+              <!--
+                Hidden audio element for remote tiles so their audio still plays
+                even when the video element is not rendered (camera off / audio-only call).
+              -->
+              @if (!tile.isLocal && tile.stream) {
+                <audio
+                  autoplay
+                  playsinline
+                  [appSrcObject]="tile.stream"
+                  class="hidden">
+                </audio>
+              }
+              <div class="flex flex-col items-center justify-center gap-3">
+                @if (tile.avatarUrl) {
+                  <img
+                    [src]="tile.avatarUrl"
+                    [alt]="tile.label"
+                    class="h-20 w-20 rounded-full object-cover sm:h-24 sm:w-24" />
+                } @else {
+                  <div class="bg-muted text-muted-foreground flex h-20 w-20 items-center justify-center rounded-full text-2xl font-semibold sm:h-24 sm:w-24 sm:text-3xl">
+                    {{ tile.initials }}
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="absolute bottom-0 left-0 right-0 flex items-center gap-2 bg-gradient-to-t from-black/40 to-transparent px-3 py-2">
+              <span class="truncate text-sm font-medium text-white sm:text-base">{{ tile.label }}</span>
+              <div class="ml-auto flex items-center gap-1.5">
+                @if (!tile.audioEnabled) {
+                  <div class="flex h-6 w-6 items-center justify-center rounded-full bg-rose-500/80">
+                    <lucide-icon [img]="micOffIcon" class="h-3.5 w-3.5 text-white"></lucide-icon>
+                  </div>
+                }
+                @if (isVideoCall() && !tile.videoEnabled) {
+                  <div class="flex h-6 w-6 items-center justify-center rounded-full bg-rose-500/80">
+                    <lucide-icon [img]="videoOffIcon" class="h-3.5 w-3.5 text-white"></lucide-icon>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (!isJoining() && !callError()) {
+    <div class="bg-card border-surface flex items-center justify-center gap-3 border-t px-4 py-3">
+      <button
+        pButton
+        type="button"
+        [class]="audioEnabled()
+          ? 'h-12 w-12 rounded-full bg-surface-100 dark:bg-surface-800 border-0 text-color p-0 flex items-center justify-center hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors'
+          : 'h-12 w-12 rounded-full bg-rose-500 border-0 text-white p-0 flex items-center justify-center hover:bg-rose-600 transition-colors'"
+        (click)="toggleAudio()"
+        [title]="audioEnabled() ? 'Mute' : 'Unmute'">
+        <lucide-icon [img]="audioEnabled() ? micIcon : micOffIcon" class="h-5 w-5"></lucide-icon>
+      </button>
+
+      @if (isVideoCall()) {
+        <button
+          pButton
+          type="button"
+          [class]="videoEnabled()
+            ? 'h-12 w-12 rounded-full bg-surface-100 dark:bg-surface-800 border-0 text-color p-0 flex items-center justify-center hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors'
+            : 'h-12 w-12 rounded-full bg-rose-500 border-0 text-white p-0 flex items-center justify-center hover:bg-rose-600 transition-colors'"
+          (click)="toggleVideo()"
+          [title]="videoEnabled() ? 'Turn off camera' : 'Turn on camera'">
+          <lucide-icon [img]="videoEnabled() ? videoIcon : videoOffIcon" class="h-5 w-5"></lucide-icon>
+        </button>
+      }
+
+      <button
+        pButton
+        type="button"
+        class="flex h-12 w-14 items-center justify-center rounded-full border-0 bg-rose-500 p-0 text-white transition-colors hover:bg-rose-600"
+        (click)="leaveCall()"
+        title="Leave call">
+        <lucide-icon [img]="phoneOffIcon" class="h-5 w-5"></lucide-icon>
+      </button>
+    </div>
+  }
+</div>

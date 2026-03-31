@@ -18,7 +18,9 @@ public static class ServicesExtensions
         builder.Services.AddScoped<ICurrentUser, CurrentUser>();
         builder.Services.AddScoped<ICookieAuthService, CookieAuthService>();
         builder.Services.AddSingleton<ConnectionTracker>();
+        builder.Services.AddSingleton<CallConnectionTracker>();
         builder.Services.AddSingleton<IOnlineManager, OnlineManager>();
+        builder.Services.AddScoped<ICallNotifier, CallNotifier>();
         builder.Services.AddSignalR();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddHealthChecks()
@@ -39,7 +41,7 @@ public static class ServicesExtensions
                 var allowedOrigins = builder.Configuration
                     .GetSection("CorsSettings:AllowedOrigins")
                     .Get<string[]>() ?? [];
-                policy.WithOrigins(allowedOrigins)
+                policy.WithOrigins(allowedOrigins.Where(o => !string.IsNullOrWhiteSpace(o)).ToArray())
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();

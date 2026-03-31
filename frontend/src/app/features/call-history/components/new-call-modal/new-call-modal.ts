@@ -3,18 +3,11 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { LucideAngularModule, Video } from 'lucide-angular';
+import { LucideAngularModule, Video, Phone } from 'lucide-angular';
 import { Multiselect } from '@/shared/components/multiselect/multiselect';
 import { CallHistoryService } from '../../services/call-history.service';
 import { CallHistoryStore } from '../../store/call-history.store';
-
-interface ParticipantOption {
-  id: string;
-  fullName: string;
-  username: string;
-  avatarUrl: string | null;
-  isOnline: boolean;
-}
+import { UserSummary, CallType } from '../../models/call-history.model';
 
 @Component({
   selector: 'app-new-call-modal',
@@ -27,8 +20,12 @@ export class NewCallModal implements OnInit {
   private readonly callService = inject(CallHistoryService);
 
   readonly videoIcon = Video;
+  readonly phoneIcon = Phone;
 
-  readonly participants = signal<ParticipantOption[]>([]);
+  readonly CallType = CallType;
+
+  readonly participants = signal<UserSummary[]>([]);
+  readonly selectedCallType = signal<CallType>(CallType.Video);
 
   get modalVisible(): boolean {
     return this.store.newCallModalVisible();
@@ -41,8 +38,8 @@ export class NewCallModal implements OnInit {
   }
 
   readonly form = new FormGroup({
-    name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2)] }),
-    participants: new FormControl<ParticipantOption[]>([], { nonNullable: true, validators: [Validators.required] })
+    name: new FormControl('', { nonNullable: true }),
+    participants: new FormControl<UserSummary[]>([], { nonNullable: true, validators: [Validators.required] })
   });
 
   ngOnInit(): void {
@@ -50,30 +47,28 @@ export class NewCallModal implements OnInit {
   }
 
   loadParticipants(search: string): void {
-    this.callService.getAvailableParticipants(search).subscribe((users) => {
-      this.participants.set(
-        users.map((u) => ({
-          id: u.id,
-          fullName: u.fullName,
-          username: u.username,
-          avatarUrl: u.avatarUrl,
-          isOnline: u.isOnline
-        }))
-      );
+    this.callService.searchUsers(search).subscribe((users) => {
+      this.participants.set(users);
     });
+  }
+
+  setCallType(type: CallType): void {
+    this.selectedCallType.set(type);
   }
 
   onSubmit(): void {
     if (this.form.invalid) return;
     const { name, participants } = this.form.getRawValue();
     this.store.createCall({
-      name,
-      participantIds: participants.map((p) => p.id)
+      inviteeIds: participants.map((p) => p.id),
+      type: this.selectedCallType(),
+      name: name || undefined
     });
   }
 
   onClose(): void {
     this.form.reset();
+    this.selectedCallType.set(CallType.Video);
     this.store.closeNewCallModal();
   }
 }

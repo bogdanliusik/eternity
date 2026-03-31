@@ -8,5 +8,7 @@ public interface IAppDbContext
     DbSet<UserAccount> UserAccounts { get; }
     DbSet<RegistrationRequest> RegistrationRequests { get; }
     DbSet<UserSession> UserSessions { get; }
+    DbSet<Call> Calls { get; }
+    DbSet<CallParticipant> CallParticipants { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

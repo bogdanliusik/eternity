@@ -65,3 +65,11 @@
   margin-bottom: 1rem;
 }
 
+/* Strip PrimeNG wrapper styling from headless incoming-call toast */
+p-toast[key='incoming-call'] .p-toast-message {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+

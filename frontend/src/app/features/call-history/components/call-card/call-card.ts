@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { LucideAngularModule, Phone, Video, PhoneCall } from 'lucide-angular';
-import { CallRecord, CallStatus, CallType } from '../../models/call-history.model';
+import { CallHistoryRecord, CallStatus, CallType, CallDirection, deriveUserDisplayStatus, deriveCallDirection } from '../../models/call-history.model';
 import { StatusPill } from '../status-pill/status-pill';
 import { ParticipantAvatarGroup } from '../participant-avatar-group/participant-avatar-group';
+import { AuthStore } from '@/core/auth/auth.store';
 
 @Component({
   selector: 'app-call-card',
@@ -16,12 +17,24 @@ import { ParticipantAvatarGroup } from '../participant-avatar-group/participant-
   }
 })
 export class CallCard {
-  readonly call = input.required<CallRecord>();
-  readonly joinCall = output<CallRecord>();
+  readonly call = input.required<CallHistoryRecord>();
+  readonly joinCall = output<CallHistoryRecord>();
+
+  private readonly authStore = inject(AuthStore);
 
   readonly phoneIcon = Phone;
   readonly videoIcon = Video;
   readonly phoneCallIcon = PhoneCall;
+
+  /** The display status from the current user's perspective. */
+  readonly displayStatus = computed(() => deriveUserDisplayStatus(this.call()));
+
+  /** Whether the call is incoming or outgoing relative to the current user. */
+  readonly direction = computed(() => {
+    const userId = this.authStore.user()?.id;
+    if (!userId) return CallDirection.Incoming;
+    return deriveCallDirection(this.call(), userId);
+  });
 
   onJoin(): void {
     this.joinCall.emit(this.call());
@@ -67,14 +80,14 @@ export class CallCard {
   }
 
   isActive(): boolean {
-    return this.call().status === CallStatus.Active;
+    return this.displayStatus() === CallStatus.Active;
   }
 
   isCompleted(): boolean {
-    return this.call().status === CallStatus.Completed;
+    return this.displayStatus() === CallStatus.Completed;
   }
 
   isMissed(): boolean {
-    return this.call().status === CallStatus.Missed;
+    return this.displayStatus() === CallStatus.Missed;
   }
 }

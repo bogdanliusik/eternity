@@ -1,0 +1,39 @@
+<p-toast key="incoming-call" position="top-right" [life]="30000">
+  <ng-template #headless let-message>
+    <div class="bg-foreground border-surface flex w-80 flex-col gap-3 rounded-xl border p-4 shadow-lg">
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <div class="bg-muted text-color flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold">
+            {{ message.data?.initiator?.fullName?.charAt(0) ?? '?' }}
+          </div>
+          <span class="absolute -right-0.5 -bottom-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500">
+            <lucide-icon [img]="phoneIcon" class="h-2.5 w-2.5 text-white"></lucide-icon>
+          </span>
+        </div>
+        <div class="min-w-0 grow">
+          <p class="text-color truncate text-sm font-semibold">{{ message.summary }}</p>
+          <p class="text-muted-foreground truncate text-xs">{{ message.detail }}</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          class="flex h-9 grow cursor-pointer items-center justify-center gap-2 rounded-lg bg-rose-500 px-3 text-sm font-medium text-white hover:bg-rose-600"
+          (click)="onDecline()">
+          <lucide-icon [img]="phoneOffIcon" class="h-4 w-4"></lucide-icon>
+          Decline
+        </button>
+        <button
+          type="button"
+          class="bg-primary text-primary-contrast flex h-9 grow cursor-pointer items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium hover:brightness-110"
+          (click)="onAccept()">
+          <lucide-icon [img]="phoneIcon" class="h-4 w-4"></lucide-icon>
+          Accept
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</p-toast>
+
+<app-pre-join-modal />
