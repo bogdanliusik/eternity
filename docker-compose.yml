@@ -48,7 +48,7 @@ services:
       - CorsSettings__AllowedOrigins__2=${CORS_ADDITIONAL_ORIGIN_1:-}
       - CorsSettings__AllowedOrigins__3=${CORS_ADDITIONAL_ORIGIN_2:-}
     ports:
-      - "127.0.0.1:5000:8080"
+      - "5000:8080"
     volumes:
       - backend_logs:/app/logs
     networks:
@@ -72,7 +72,7 @@ services:
       backend:
         condition: service_healthy
     ports:
-      - "127.0.0.1:18080:8080"
+      - "18080:8080"
     networks:
       - eternity_net
     healthcheck:
