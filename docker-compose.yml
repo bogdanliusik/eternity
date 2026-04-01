@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+
   postgres:
     image: postgres:16-alpine
     container_name: eternity-postgres
@@ -13,8 +14,8 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    networks:
+      - eternity_net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-eternitydb}"]
       interval: 10s
@@ -34,26 +35,24 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
-      
       - ConnectionStrings__EternityDb=Host=postgres;Database=${POSTGRES_DB:-eternitydb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
       - JwtSettings__SecretKey=${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}
-
       - AdminSeed__Username=${ADMIN_SEED_USERNAME:-admin}
       - AdminSeed__Email=${ADMIN_SEED_EMAIL:-admin@eternity.com}
       - AdminSeed__Password=${ADMIN_SEED_PASSWORD:?ADMIN_SEED_PASSWORD is required}
       - AdminSeed__FullName=${ADMIN_SEED_FULLNAME:-Administrator}
-
       - CookieSettings__SameSiteMode=${COOKIE_SAME_SITE:-Strict}
-      - CookieSettings__SecurePolicy=${COOKIE_SECURE_POLICY:-SameAsRequest}
-      
+      - CookieSettings__SecurePolicy=${COOKIE_SECURE_POLICY:-Always}
       - CorsSettings__AllowedOrigins__0=https://eternity.liusik.com
       - CorsSettings__AllowedOrigins__1=https://api.eternity.liusik.com
       - CorsSettings__AllowedOrigins__2=${CORS_ADDITIONAL_ORIGIN_1:-}
       - CorsSettings__AllowedOrigins__3=${CORS_ADDITIONAL_ORIGIN_2:-}
     ports:
-      - "5000:8080"
+      - "127.0.0.1:5000:8080"
     volumes:
       - backend_logs:/app/logs
+    networks:
+      - eternity_net
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
       interval: 30s
@@ -72,53 +71,44 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    ports:
+      - "127.0.0.1:18080:8080"
+    networks:
+      - eternity_net
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
-    ports:
-      - "18080:8080"
     labels:
       - "traefik.http.services.eternity-frontend.loadbalancer.server.port=8080"
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: eternity-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@eternity.local}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
-    ports:
-      - "5050:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - postgres
-    profiles:
-      - debug
 
   peerjs:
     image: peerjs/peerjs-server:1.1.0-rc.2
     container_name: eternity-peerjs
     restart: unless-stopped
     command: ["peerjs", "--port", "9000", "--path", "/", "--key", "peerjs"]
-    ports:
-      - "9000:9000"
+    networks:
+      - eternity_net
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9000/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+    labels:
+      - "traefik.http.services.eternity-peerjs.loadbalancer.server.port=9000"
+      - "traefik.http.middlewares.eternity-peerjs-ws.headers.customrequestheaders.Connection=Upgrade"
+      - "traefik.http.middlewares.eternity-peerjs-ws.headers.customrequestheaders.Upgrade=websocket"
 
 volumes:
   postgres_data:
     name: eternity-postgres-data
   backend_logs:
     name: eternity-backend-logs
-  pgadmin_data:
-    name: eternity-pgadmin-data
+
+networks:
+  eternity_net:
+    name: eternity_net
+    driver: bridge
