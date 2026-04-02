@@ -1,52 +1,64 @@
-# Backend Agent Rules
+# Backend AGENTS.md
 
 Instructions for all work in `backend/`.
 
-## Stack and Architecture
+## Stack and Layers
 
 - .NET 9 solution: `Eternity.sln`.
-- Projects:
-  - `Eternity.WebApi` - minimal API and transport.
-  - `Eternity.Application` - CQRS/MediatR, validation, behaviors.
-  - `Eternity.Infrastructure` - EF Core, Identity, persistence, jobs.
-  - `Eternity.Domain` - entities, domain rules/constants/events.
-- Respect layer boundaries (no infrastructure concerns in Domain/Application).
+- `Eternity.WebApi` - minimal API transport, SignalR hubs, and web-layer services.
+- `Eternity.Application` - CQRS, MediatR, validators, behaviors, and application models.
+- `Eternity.Infrastructure` - EF Core, Identity, persistence, migrations, and background jobs.
+- `Eternity.Domain` - entities and domain rules.
+- Respect layer boundaries.
 
-## Build and Run
+## Endpoint Pattern
 
-- Restore: `dotnet restore Eternity.sln`
-- Build: `dotnet build Eternity.sln -c Debug`
-- Run API: `dotnet run --project Eternity.WebApi/Eternity.WebApi.csproj`
-- Tests (when present):
-  - all: `dotnet test Eternity.sln`
-  - single: `dotnet test --filter "FullyQualifiedName~Namespace.Class.Test"`
+- Endpoints are grouped by classes derived from `EndpointGroupBase`.
+- Endpoint groups are auto-discovered and mapped under `/api/{groupName}`.
+- Keep endpoints thin and delegate business logic to Application handlers or dedicated services.
 
-## Coding Rules
+## Application Layer Conventions
 
-- Keep endpoints thin; move logic into Application handlers/services.
-- Prefer `Result`/`Result<T>` for expected failures; avoid exception-driven flow.
-- Use async/await for I/O and DB work.
-- Keep nullability strict (`Nullable` enabled).
-- Use `IAppDbContext` in Application; keep EF configuration in Infrastructure.
-- Follow naming conventions:
-  - `*Command`, `*Query`, `*Dto`, `*Settings`
-- Keep methods focused and explicit.
+- Use MediatR commands and queries.
+- Use `Result` and `Result<T>` for expected failures.
+- Put FluentValidation validators next to the request type.
+- Use `IAppDbContext` from Application instead of `AppDbContext` directly.
+- Keep methods explicit and focused.
+- Use endpoint or hub authorization at the transport layer and request-level authorization when app-layer policy checks matter.
 
-## Validation, Auth, and Errors
+## Auth and Security
 
-- Reuse existing MediatR pipeline behaviors (validation/authorization/response handling).
-- Add FluentValidation validators for new request models.
-- Keep authorization policy checks explicit and consistent.
-- Return clear API errors; do not leak secrets/internal details.
+- JWT authentication is carried in cookies and tied to persisted user sessions.
+- Be careful with cookie refresh, session validity, and hub authentication behavior.
+- Keep API and hub errors clear without leaking internal details.
 
-## Data and Migrations
+## Data and Startup
 
-- Preserve existing DB naming and conventions.
-- Add migrations only when schema changes require it.
-- Do not modify generated migration snapshots manually unless required and understood.
+- PostgreSQL is the database.
+- EF Core uses Npgsql and snake_case naming.
+- Migrations live in `Eternity.Infrastructure/Migrations`.
+- Startup currently applies migrations, resets stale online session flags, and seeds roles plus the admin user.
+- Add migrations only when schema changes require them.
+- Do not hand-edit migration snapshots unless it is necessary and understood.
 
-## Quality Bar
+## Real-Time and Local Dev
 
-- Compile before finishing.
-- Run the narrowest relevant verification first, then broader checks.
-- Avoid unrelated formatting churn.
+- `GeneralHub` and `CallHub` are part of the core backend architecture, not optional extras.
+- Some call flows also depend on PeerJS in the local stack.
+- The root `docker-compose.yml` is the main full-stack local environment, and compose runs the backend with Production settings.
+
+## Verification
+
+- Run `dotnet build Eternity.sln`.
+- Run the narrowest useful verification first, then broader checks.
+- Backend automated test coverage is currently limited; do not assume a test project already exists.
+
+## Skills to Check
+
+- `.agents/skills/backend-development/SKILL.md`
+- `.agents/skills/postgres/SKILL.md`
+- `.agents/skills/docker-local-dev-deploy/SKILL.md`
+- `.agents/skills/debugging-troubleshooting/SKILL.md`
+- `.agents/skills/systematic-debugging/SKILL.md`
+- `.agents/skills/verification-before-completion/SKILL.md`
+- `.agents/skills/full-stack-feature/SKILL.md`
