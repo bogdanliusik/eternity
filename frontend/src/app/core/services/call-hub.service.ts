@@ -1,4 +1,4 @@
-import { DestroyRef, inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
 import { CallRecord } from '@/features/call-history/models/call-history.model';
 
@@ -50,7 +50,6 @@ export interface CallErrorEvent {
 export class CallHubService {
   private static readonly HUB_URL = '/hubs/call';
   private readonly signalR = inject(SignalRService);
-  private readonly destroyRef = inject(DestroyRef);
 
   readonly callJoined$ = this.signalR.on<CallRecord>(CallHubService.HUB_URL, 'CallJoined');
   readonly participantJoined$ = this.signalR.on<ParticipantJoinedEvent>(CallHubService.HUB_URL, 'ParticipantJoined');

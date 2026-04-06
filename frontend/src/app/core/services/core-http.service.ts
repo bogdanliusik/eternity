@@ -103,7 +103,10 @@ function unwrapEnvelope<T>(envelope: ApiEnvelope<T>): T | boolean {
   return true;
 }
 
-function throwEnvelopeError(err: HttpErrorResponse) {
+function throwEnvelopeError(err: HttpErrorResponse | ApiError) {
+  if (err instanceof ApiError) {
+    return throwError(() => err);
+  }
   if (err?.error && typeof err.error === 'object' && 'errors' in err.error) {
     const e = err.error as ApiEnvelope<unknown>;
     return throwError(() => new ApiError(err.status, e.errors, e.errors?.join('; ') || err.message));
