@@ -1,16 +1,17 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { CircleCheckBig, CircleX,Clock, LucideAngularModule, RefreshCw } from 'lucide-angular';
+import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
+import { TabsModule } from 'primeng/tabs';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
-import { TabsModule } from 'primeng/tabs';
-import { BadgeModule } from 'primeng/badge';
-import { LucideAngularModule, RefreshCw, Clock, CircleCheckBig, CircleX } from 'lucide-angular';
+
+import { RequestTable } from './components/request-table/request-table';
 import { RequestsEmptyState } from './components/requests-empty-state/requests-empty-state';
 import { RequestsSkeleton } from './components/requests-skeleton/requests-skeleton';
-import { RequestTable } from './components/request-table/request-table';
-import { RegistrationRequestsStore } from './store/registration-requests.store';
 import { RegistrationRequest, RegistrationRequestStatus } from './models/registration-request.model';
 import { RequestTab } from './models/request-tab.model';
+import { RegistrationRequestsStore } from './store/registration-requests.store';
 
 @Component({
   selector: 'app-registration-requests',

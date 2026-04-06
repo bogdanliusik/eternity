@@ -1,9 +1,10 @@
 import { inject, Injectable } from '@angular/core';
-import { CoreHttpService } from '../services/core-http.service';
-import { LoginRequest } from './models/login.request';
 import { Observable } from 'rxjs';
-import { CurrentUser } from './models/current.user';
+
 import { ApiEnvelope } from '../models/api.envelope';
+import { CoreHttpService } from '../services/core-http.service';
+import { CurrentUser } from './models/current.user';
+import { LoginRequest } from './models/login.request';
 
 export interface RegisterRequest {
   name: string;

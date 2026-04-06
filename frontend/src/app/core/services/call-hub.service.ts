@@ -1,8 +1,8 @@
 import { DestroyRef, inject, Injectable } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, Subject } from 'rxjs';
-import { SignalRService } from './signalr.service';
+
 import { CallRecord } from '@/features/call-history/models/call-history.model';
+
+import { SignalRService } from './signalr.service';
 
 export interface ParticipantJoinedEvent {
   callId: string;

@@ -4,7 +4,7 @@ import { Observable, Subject } from 'rxjs';
 
 interface ManagedHub {
   connection: signalR.HubConnection;
-  subjects: Map<string, Subject<any>>;
+  subjects: Map<string, Subject<unknown>>;
 }
 
 /**
@@ -28,7 +28,7 @@ export class SignalRService implements OnDestroy {
 
     if (!hub.subjects.has(key)) {
       const subject = new Subject<T>();
-      hub.subjects.set(key, subject);
+      hub.subjects.set(key, subject as Subject<unknown>);
       hub.connection.on(eventName, (data: T) => subject.next(data));
     }
 

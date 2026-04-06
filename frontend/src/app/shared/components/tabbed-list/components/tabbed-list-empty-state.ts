@@ -1,5 +1,6 @@
 import { Component, input } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
+
 import { TabDefinition } from '../tabbed-list.models';
 
 @Component({

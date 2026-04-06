@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
+import { LucideAngularModule,Menu } from 'lucide-angular';
+
 import { MenuService } from '../../services/menu.service';
-import { ProfileMenu } from './profile-menu/profile-menu';
-import { Menu, LucideAngularModule } from 'lucide-angular';
 import { NavbarMobile } from './navbar-mobile/navbar-mobile';
+import { ProfileMenu } from './profile-menu/profile-menu';
 
 @Component({
   selector: 'app-navbar',

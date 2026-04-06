@@ -1,12 +1,14 @@
 import { Component, computed, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Sidebar } from './components/sidebar/sidebar';
-import { Navbar } from './components/navbar/navbar';
-import { AuthStore } from '@/core/auth/auth.store';
+
 import { AdministrationStore } from '@/core/administration/administration.store';
-import { MenuService } from './services/menu.service';
+import { AuthStore } from '@/core/auth/auth.store';
 import { ThemeService } from '@/core/themes/theme.service';
 import { IncomingCallHandler } from '@/shared/components/incoming-call-handler/incoming-call-handler';
+
+import { Navbar } from './components/navbar/navbar';
+import { Sidebar } from './components/sidebar/sidebar';
+import { MenuService } from './services/menu.service';
 
 @Component({
   selector: 'app-layout',

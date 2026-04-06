@@ -1,9 +1,11 @@
-import { ThemeService } from '@/core/themes/theme.service';
-import { ClickOutsideDirective } from '@/shared/directives/click-outside.directive';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CircleUserRound, Settings, LogOut, Sun, Moon, LucideAngularModule } from 'lucide-angular';
+import { CircleUserRound, LogOut, LucideAngularModule,Moon, Settings, Sun } from 'lucide-angular';
+
+import { ThemeService } from '@/core/themes/theme.service';
+import { ClickOutsideDirective } from '@/shared/directives/click-outside.directive';
+
 import { ThemeConfigurator } from "./theme-configurator/theme-configurator";
 
 @Component({

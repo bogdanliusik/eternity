@@ -1,11 +1,12 @@
+import { CdkOverlayOrigin, ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
+import { NgClass } from '@angular/common';
 import { Component, inject, QueryList, ViewChildren } from '@angular/core';
-import { SidebarSubmenu } from '../sidebar-submenu/sidebar-submenu';
-import { Plus, Minus, LucideAngularModule } from 'lucide-angular';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { LucideAngularModule,Minus, Plus } from 'lucide-angular';
+
 import { MenuService } from '../../../services/menu.service';
 import { SubMenuItem } from '../../../types/sub-menu-item';
-import { NgClass } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import { CdkOverlayOrigin, ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
+import { SidebarSubmenu } from '../sidebar-submenu/sidebar-submenu';
 
 @Component({
   selector: 'app-sidebar-menu',

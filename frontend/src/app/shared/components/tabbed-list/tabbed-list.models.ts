@@ -22,6 +22,6 @@ export interface TabbedListConfig {
   tabs: TabDefinition[];
   defaultTab: string;
   pageSize: number;
-  itemId: (item: any) => string;
+  itemId: (item: unknown) => string;
   loadFn: (tabId: string, page: number, pageSize: number) => Observable<PaginatedResult<unknown>>;
 }

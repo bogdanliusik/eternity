@@ -1,11 +1,13 @@
-import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { computed, inject } from '@angular/core';
 import { tapResponse } from '@ngrx/operators';
-import { pipe, switchMap, tap, mergeMap } from 'rxjs';
-import { RegistrationRequestsService } from '../services/registration-requests.service';
-import { RegistrationRequest, RegistrationRequestStatus } from '../models/registration-request.model';
+import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { mergeMap,pipe, switchMap, tap } from 'rxjs';
+
 import { AdministrationStore } from '@/core/administration/administration.store';
+
+import { RegistrationRequest, RegistrationRequestStatus } from '../models/registration-request.model';
+import { RegistrationRequestsService } from '../services/registration-requests.service';
 
 interface RegistrationRequestsState {
   // Counts for all tabs (loaded once on init)

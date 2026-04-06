@@ -1,12 +1,14 @@
 import { inject } from '@angular/core';
+import { computed } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { MessageService } from 'primeng/api';
-import { SessionsService } from '../services/sessions.service';
-import { Session, SessionStatus } from '../models/session.model';
 import { Activity, Archive, Wifi } from 'lucide-angular';
+import { MessageService } from 'primeng/api';
+
 import { TabbedListConfig, TabDefinition } from '@/shared/components/tabbed-list/tabbed-list.models';
 import { TABBED_LIST_CONFIG, TabbedListStore } from '@/shared/components/tabbed-list/tabbed-list.store';
-import { computed } from '@angular/core';
+
+import { Session, SessionStatus } from '../models/session.model';
+import { SessionsService } from '../services/sessions.service';
 
 export const SESSION_TABS: TabDefinition[] = [
   {
@@ -47,7 +49,7 @@ function sessionsConfigFactory(): TabbedListConfig {
     tabs: SESSION_TABS,
     defaultTab: SessionStatus.Online,
     pageSize: 30,
-    itemId: (item: any) => item.id,
+    itemId: (item: unknown) => (item as { id: string }).id,
     loadFn: (tabId, page, pageSize) => {
       switch (tabId) {
         case SessionStatus.Online:

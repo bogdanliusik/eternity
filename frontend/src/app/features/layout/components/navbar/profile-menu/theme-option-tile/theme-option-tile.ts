@@ -9,5 +9,5 @@ import { Component, input, output } from '@angular/core';
 export class ThemeOptionTile {
   label = input<string>('');
   active = input<boolean>(false);
-  select = output<void>();
+  optionSelect = output<void>();
 }

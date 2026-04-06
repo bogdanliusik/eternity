@@ -1,5 +1,6 @@
 import { Component, input } from '@angular/core';
-import { LucideAngularModule, Inbox } from 'lucide-angular';
+import { Inbox,LucideAngularModule } from 'lucide-angular';
+
 import { RegistrationRequestStatus } from '../../models/registration-request.model';
 
 export interface EmptyStateMessage {

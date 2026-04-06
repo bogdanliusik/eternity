@@ -1,5 +1,8 @@
 <div
-  (click)="select.emit()"
+  (click)="optionSelect.emit()"
+  (keyup.enter)="optionSelect.emit()"
+  role="button"
+  tabindex="0"
   [ngClass]="{
     'border-muted-foreground bg-muted': active(),
     'border-surface bg-foreground': !active()

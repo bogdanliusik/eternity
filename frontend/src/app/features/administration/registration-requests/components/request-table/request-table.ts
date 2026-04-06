@@ -1,8 +1,9 @@
-import { Component, input, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { TableModule } from 'primeng/table';
+import { Component, input, output } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
+
 import { RegistrationRequest, RegistrationRequestStatus } from '../../models/registration-request.model';
 
 @Component({

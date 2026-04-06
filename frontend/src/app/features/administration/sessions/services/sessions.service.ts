@@ -1,9 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CoreHttpService } from '@/core/services/core-http.service';
+
 import { ApiErrorHandler } from '@/core/operators/handle-api-error';
-import { SessionPage } from '../models/session-page.model';
+import { CoreHttpService } from '@/core/services/core-http.service';
+
 import { PingSessionRequest, PingSessionResponse } from '../models/ping-session.model';
+import { SessionPage } from '../models/session-page.model';
 
 @Injectable({
   providedIn: 'root'

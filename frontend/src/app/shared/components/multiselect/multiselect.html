@@ -1,14 +1,16 @@
-<div class="relative z-20 w-full" (clickOutside)="onClickOutside()">
+<div class="relative z-20 w-full" appClickOutside (clickOutside)="onClickOutside()">
   @if (placeholder()) {
-    <label class="text-muted-foreground mb-1 block text-xs font-medium tracking-wide uppercase">
+    <span class="text-muted-foreground mb-1 block text-xs font-medium tracking-wide uppercase">
       {{ placeholder() }}
-    </label>
+    </span>
   }
 
   <div
     class="multiselect-container relative flex min-h-[3.25rem] cursor-text items-center rounded-[10px] border transition-colors"
     [class.multiselect-container--focused]="isFocused()"
-    (click)="onContainerClick()">
+    (click)="onContainerClick()"
+    (keyup.enter)="onContainerClick()"
+    tabindex="0">
     <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 px-3 py-2.5">
       @for (item of store.selectedItems(); track item.id) {
         <div
@@ -65,11 +67,15 @@
         class="multiselect-panel absolute left-0 mt-1 w-full overflow-hidden rounded-[10px] border shadow-lg"
         style="z-index: 10000; position: absolute">
       @if (store.availableItems().length > 0) {
-        <ul class="multiselect-dropdown max-h-60 overflow-y-auto py-1">
+        <ul class="multiselect-dropdown max-h-60 overflow-y-auto py-1" role="listbox">
           @for (item of store.availableItems(); track item.id) {
             <li
               class="hover:bg-muted flex cursor-pointer items-center px-3 py-2 transition-colors"
-              (click)="selectItem(item)">
+              (click)="selectItem(item)"
+              (keyup.enter)="selectItem(item)"
+              role="option"
+              [attr.aria-selected]="false"
+              tabindex="0">
               <ng-container
                 *ngTemplateOutlet="dropdownItemTpl() || defaultItemTpl; context: { $implicit: item }"></ng-container>
             </li>

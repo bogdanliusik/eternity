@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PopoverModule } from 'primeng/popover';
+
 import { CallParticipant } from '../../models/call-history.model';
 
 @Component({
