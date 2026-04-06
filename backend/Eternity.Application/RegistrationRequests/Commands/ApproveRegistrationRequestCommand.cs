@@ -16,10 +16,10 @@ public record ApproveRegistrationRequestCommand(Guid Id) : IRequest<Result<Regis
 public class ApproveRegistrationRequestCommandHandler(IAppDbContext dbContext, IIdentityService identityService)
     : IRequestHandler<ApproveRegistrationRequestCommand, Result<RegistrationRequestDto>>
 {
-    public async Task<Result<RegistrationRequestDto>> Handle(ApproveRegistrationRequestCommand request, 
+    public async Task<Result<RegistrationRequestDto>> Handle(ApproveRegistrationRequestCommand request,
         CancellationToken cancellationToken) {
-        var registrationRequest = await dbContext.RegistrationRequests
-            .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
+        var registrationRequest =
+            await dbContext.RegistrationRequests.FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
         if (registrationRequest == null) {
             return Result<RegistrationRequestDto>.Failure(["Registration request not found."]);
         }
@@ -39,12 +39,15 @@ public class ApproveRegistrationRequestCommandHandler(IAppDbContext dbContext, I
         if (!addRoleResult.Succeeded) {
             return Result<RegistrationRequestDto>.Failure(addRoleResult.Errors);
         }
-        await dbContext.UserAccounts.AddAsync(new UserAccount {
-            Id = userId,
-            UserName = registrationRequest.UserName,
-            FullName = registrationRequest.Name,
-            Email = registrationRequest.Email
-        }, cancellationToken);
+        await dbContext.UserAccounts.AddAsync(
+            new UserAccount {
+                Id = userId,
+                UserName = registrationRequest.UserName,
+                FullName = registrationRequest.Name,
+                Email = registrationRequest.Email
+            },
+            cancellationToken
+        );
         registrationRequest.Approve();
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result<RegistrationRequestDto>.Success(RegistrationRequestDto.FromEntity(registrationRequest));

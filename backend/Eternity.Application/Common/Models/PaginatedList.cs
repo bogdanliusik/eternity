@@ -1,14 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace Eternity.Application.Common.Models;
 
 public class PaginatedList<T>
 {
-    public IReadOnlyCollection<T> Items { get; }
-    private int PageNumber { get; }
-    private int TotalPages { get; }
-    public int TotalCount { get; }
-
     private PaginatedList(IReadOnlyCollection<T> items, int count, int pageNumber, int pageSize) {
         PageNumber = pageNumber;
         TotalPages = (int)Math.Ceiling(count / (double)pageSize);
@@ -16,10 +11,14 @@ public class PaginatedList<T>
         Items = items;
     }
 
+    public IReadOnlyCollection<T> Items { get; }
+    private int PageNumber { get; }
+    private int TotalPages { get; }
+    public int TotalCount { get; }
     public bool HasPreviousPage => PageNumber > 1;
     public bool HasNextPage => PageNumber < TotalPages;
 
-    public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize, 
+    public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize,
         CancellationToken cancellationToken = default) {
         var count = await source.CountAsync(cancellationToken);
         var items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);

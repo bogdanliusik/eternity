@@ -1,4 +1,4 @@
-﻿namespace Eternity.Application.Common.Models;
+namespace Eternity.Application.Common.Models;
 
 public interface IResult<out TSelf> where TSelf : IResult<TSelf>
 {
@@ -14,15 +14,17 @@ public class Result : IResult<Result>
         Errors = errors;
     }
 
+    public bool IsFailure => !Succeeded;
     public bool Succeeded { get; }
-
     public IReadOnlyList<string> Errors { get; }
 
-    public bool IsFailure => !Succeeded;
+    public static Result Failure(IEnumerable<string> errors) {
+        return new Result(false, errors.ToArray());
+    }
 
-    public static Result Success() => new(true, Array.Empty<string>());
-
-    public static Result Failure(IEnumerable<string> errors) => new(false, errors.ToArray());
+    public static Result Success() {
+        return new Result(true, Array.Empty<string>());
+    }
 }
 
 public class Result<T> : Result, IResult<Result<T>>
@@ -33,7 +35,11 @@ public class Result<T> : Result, IResult<Result<T>>
 
     public T Data { get; }
 
-    public static Result<T> Success(T data) => new(true, data, Array.Empty<string>());
+    public new static Result<T> Failure(IEnumerable<string> errors) {
+        return new Result<T>(false, default!, errors.ToArray());
+    }
 
-    public new static Result<T> Failure(IEnumerable<string> errors) => new(false, default!, errors.ToArray());
+    public static Result<T> Success(T data) {
+        return new Result<T>(true, data, Array.Empty<string>());
+    }
 }

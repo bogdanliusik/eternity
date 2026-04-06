@@ -1,4 +1,4 @@
-﻿using Eternity.Application.Common.Interfaces;
+using Eternity.Application.Common.Interfaces;
 using Eternity.Application.Common.Security;
 using Eternity.Domain.Constants;
 using Eternity.Domain.Entities;
@@ -22,9 +22,13 @@ public static class InitializerExtensions
     }
 }
 
-public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, AppDbContext context, 
-    UserManager<ApplicationUser> userManager, IIdentityService identityService, 
-    RoleManager<IdentityRole<Guid>> roleManager, IOptions<AdminSeedSettings> adminSeedOptions) 
+public class AppDbContextInitializer(
+    ILogger<AppDbContextInitializer> logger,
+    AppDbContext context,
+    UserManager<ApplicationUser> userManager,
+    IIdentityService identityService,
+    RoleManager<IdentityRole<Guid>> roleManager,
+    IOptions<AdminSeedSettings> adminSeedOptions)
 {
     public async Task InitialiseAsync() {
         try {
@@ -35,23 +39,21 @@ public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, Ap
             throw;
         }
     }
-    
+
     private async Task ResetOnlineStatusAsync() {
-        var staleCount = await context.UserSessions
-            .Where(s => s.IsOnline)
+        var staleCount = await context.UserSessions.Where(s => s.IsOnline)
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.IsOnline, false));
         if (staleCount > 0) {
             logger.LogInformation("Reset {Count} stale online sessions on startup", staleCount);
         }
     }
-    
+
     public async Task SeedAsync() {
         try {
             await EnsureRolesAsync(RoleNames.Admin, RoleNames.Member);
             var adminSeed = adminSeedOptions.Value;
             await SeedOrUpdateUserAsync(adminSeed, RoleNames.Admin, RoleNames.Member);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             logger.LogError(ex, "An error occurred while seeding the database.");
             throw;
         }
@@ -62,8 +64,8 @@ public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, Ap
         var email = seed.Email?.Trim();
         var fullName = seed.FullName?.Trim();
         var password = seed.Password;
-        if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(email) 
-            || string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(password)) {
+        if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(email) ||
+            string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(password)) {
             throw new InvalidOperationException("Admin seed values are missing required fields.");
         }
         var identityUser = await userManager.FindByNameAsync(userName);
@@ -97,37 +99,38 @@ public class AppDbContextInitializer(ILogger<AppDbContextInitializer> logger, Ap
             identityUser.Email = email;
             var updateResult = await userManager.UpdateAsync(identityUser);
             if (!updateResult.Succeeded) {
-                throw new AggregateException(updateResult.Errors.Select(
-                    e => new InvalidOperationException(e.Description)));
+                throw new AggregateException(
+                    updateResult.Errors.Select(e => new InvalidOperationException(e.Description))
+                );
             }
         }
         var resetToken = await userManager.GeneratePasswordResetTokenAsync(identityUser);
         var passwordResult = await userManager.ResetPasswordAsync(identityUser, resetToken, password);
         if (!passwordResult.Succeeded) {
-            throw new AggregateException(passwordResult.Errors.Select(
-                e => new InvalidOperationException(e.Description)));
+            throw new AggregateException(
+                passwordResult.Errors.Select(e => new InvalidOperationException(e.Description))
+            );
         }
     }
 
     private async Task UpsertUserAccountAsync(Guid id, string userName, string fullName, string email) {
         var userAccount = await context.UserAccounts.FirstOrDefaultAsync(u => u.Id == id);
         if (userAccount == null) {
-            await context.UserAccounts.AddAsync(new UserAccount {
-                Id = id,
-                UserName = userName,
-                FullName = fullName,
-                Email = email
-            });
+            await context.UserAccounts.AddAsync(
+                new UserAccount { Id = id, UserName = userName, FullName = fullName, Email = email }
+            );
             return;
         }
         userAccount.UserName = userName;
         userAccount.FullName = fullName;
         userAccount.Email = email;
     }
-    
+
     private async Task EnsureRolesAsync(params string[] roles) {
-        foreach (var role in roles)
-            if (!await roleManager.RoleExistsAsync(role))
+        foreach (var role in roles) {
+            if (!await roleManager.RoleExistsAsync(role)) {
                 await roleManager.CreateAsync(new IdentityRole<Guid>(role));
+            }
+        }
     }
 }

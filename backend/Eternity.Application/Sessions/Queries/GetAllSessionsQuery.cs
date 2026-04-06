@@ -10,13 +10,13 @@ using Microsoft.EntityFrameworkCore;
 namespace Eternity.Application.Sessions.Queries;
 
 [Authorize(Policy = Policies.AdminOnly)]
-public record GetAllSessionsQuery(int PageNumber, int PageSize, bool? IsActive = null, bool? IsOnline = null) 
+public record GetAllSessionsQuery(int PageNumber, int PageSize, bool? IsActive = null, bool? IsOnline = null)
     : IRequest<Result<PaginatedList<UserSessionDto>>>, IPaginatedQuery;
 
 public class GetAllSessionsQueryHandler(IAppDbContext dbContext, ICurrentUser currentUser)
     : IRequestHandler<GetAllSessionsQuery, Result<PaginatedList<UserSessionDto>>>
 {
-    public async Task<Result<PaginatedList<UserSessionDto>>> Handle(GetAllSessionsQuery request, 
+    public async Task<Result<PaginatedList<UserSessionDto>>> Handle(GetAllSessionsQuery request,
         CancellationToken cancellationToken) {
         var now = DateTime.UtcNow;
         var query = dbContext.UserSessions.AsNoTracking();
@@ -30,8 +30,7 @@ public class GetAllSessionsQueryHandler(IAppDbContext dbContext, ICurrentUser cu
         if (request.IsOnline.HasValue) {
             query = query.Where(s => s.IsOnline == request.IsOnline.Value);
         }
-        var sessions = await query
-            .ProjectWithUser(dbContext.UserAccounts.AsNoTracking(), currentUser.SessionId, now)
+        var sessions = await query.ProjectWithUser(dbContext.UserAccounts.AsNoTracking(), currentUser.SessionId, now)
             .OrderByDescending(s => s.StartedAt)
             .PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
         return Result<PaginatedList<UserSessionDto>>.Success(sessions);

@@ -13,10 +13,9 @@ public sealed record GetPendingRegistrationRequestsCountQuery : IRequest<Result<
 public sealed class GetPendingRegistrationRequestsCountQueryHandler(IAppDbContext dbContext)
     : IRequestHandler<GetPendingRegistrationRequestsCountQuery, Result<int>>
 {
-    public async Task<Result<int>> Handle(GetPendingRegistrationRequestsCountQuery request, 
+    public async Task<Result<int>> Handle(GetPendingRegistrationRequestsCountQuery request,
         CancellationToken cancellationToken) {
-        var pendingCount = await dbContext.RegistrationRequests
-            .AsNoTracking()
+        var pendingCount = await dbContext.RegistrationRequests.AsNoTracking()
             .CountAsync(r => r.Status == RegistrationRequestStatus.Pending, cancellationToken);
         return Result<int>.Success(pendingCount);
     }

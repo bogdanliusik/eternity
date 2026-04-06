@@ -1,4 +1,4 @@
-﻿using Eternity.Application.Common.Interfaces;
+using Eternity.Application.Common.Interfaces;
 using Eternity.Application.Common.Security;
 using Eternity.Domain.Constants;
 using Eternity.Infrastructure.BackgroundJobs.SessionCleanup;
@@ -19,14 +19,15 @@ public static class DependencyInjection
     public static void AddInfrastructureServices(this IHostApplicationBuilder builder) {
         builder.Services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         builder.Services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
-        builder.Services.Configure<AdminSeedSettings>(
-            builder.Configuration.GetSection(AdminSeedSettings.SectionName));
+        builder.Services.Configure<AdminSeedSettings>(builder.Configuration.GetSection(AdminSeedSettings.SectionName));
         var dbConnectionString = builder.Configuration.GetConnectionString("EternityDb");
         builder.Services.AddDbContext<AppDbContext>((sp, options) => {
             options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
-            options.UseNpgsql(dbConnectionString, dbContextOptionsBuilder => 
-                dbContextOptionsBuilder
-                    .MigrationsAssembly(typeof(AppDbContext).Assembly.FullName))
+            options.UseNpgsql(
+                    dbConnectionString,
+                    dbContextOptionsBuilder =>
+                        dbContextOptionsBuilder.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)
+                )
                 .UseSnakeCaseNamingConvention();
         });
         builder.Services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
@@ -38,15 +39,17 @@ public static class DependencyInjection
             options.Password.RequireUppercase = true;
             options.Password.RequireNonAlphanumeric = true;
             options.Password.RequiredLength = 8;
-            
+
             // Lockout settings
             options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
             options.Lockout.MaxFailedAccessAttempts = 5;
             options.Lockout.AllowedForNewUsers = true;
-            
+
             // User settings
             options.User.RequireUniqueEmail = true;
-        }).AddRoles<IdentityRole<Guid>>().AddEntityFrameworkStores<AppDbContext>();
+        })
+        .AddRoles<IdentityRole<Guid>>()
+        .AddEntityFrameworkStores<AppDbContext>();
         builder.Services.AddTransient<IIdentityService, IdentityService>();
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddAuthorization(options => {
@@ -56,7 +59,8 @@ public static class DependencyInjection
         });
         // Background jobs
         builder.Services.Configure<SessionCleanupSettings>(
-            builder.Configuration.GetSection(SessionCleanupSettings.SectionName));
+            builder.Configuration.GetSection(SessionCleanupSettings.SectionName)
+        );
         builder.Services.AddHostedService<SessionCleanupService>();
     }
 }

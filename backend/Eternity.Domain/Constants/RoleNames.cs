@@ -1,4 +1,4 @@
-﻿namespace Eternity.Domain.Constants;
+namespace Eternity.Domain.Constants;
 
 public class RoleNames
 {

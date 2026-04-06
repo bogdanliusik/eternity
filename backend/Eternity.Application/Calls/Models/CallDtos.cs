@@ -29,18 +29,14 @@ public record CallDto
     public required CallParticipantDto InitiatedBy { get; init; }
 
     /// <summary>
-    /// Returns the explicit call name if set, otherwise generates a display name
-    /// from the participant full names (joined by ", ").
+    ///     Returns the explicit call name if set, otherwise generates a display name
+    ///     from the participant full names (joined by ", ").
     /// </summary>
     public static string? ResolveDisplayName(string? explicitName, IEnumerable<CallParticipant> participants) {
-        if (!string.IsNullOrWhiteSpace(explicitName))
+        if (!string.IsNullOrWhiteSpace(explicitName)) {
             return explicitName;
-
-        var names = participants
-            .Select(p => p.User.FullName)
-            .Where(n => !string.IsNullOrWhiteSpace(n))
-            .ToList();
-
+        }
+        var names = participants.Select(p => p.User.FullName).Where(n => !string.IsNullOrWhiteSpace(n)).ToList();
         return names.Count > 0 ? string.Join(", ", names) : null;
     }
 }
@@ -48,9 +44,9 @@ public record CallDto
 public record CallHistoryDto : CallDto
 {
     /// <summary>
-    /// The participant status of the requesting user within this call.
-    /// Used by the frontend to derive per-user display status
-    /// (e.g., a Completed call can appear as "Missed" for a user who never joined).
+    ///     The participant status of the requesting user within this call.
+    ///     Used by the frontend to derive per-user display status
+    ///     (e.g., a Completed call can appear as "Missed" for a user who never joined).
     /// </summary>
     public required ParticipantStatus UserParticipantStatus { get; init; }
 }

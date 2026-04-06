@@ -1,4 +1,4 @@
-﻿using Eternity.Domain.Common;
+using Eternity.Domain.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -7,26 +7,26 @@ namespace Eternity.Infrastructure.Data.Interceptors;
 
 public class DispatchDomainEventsInterceptor(IMediator mediator) : SaveChangesInterceptor
 {
-    public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result) {
+    public override InterceptionResult<int>
+        SavingChanges(DbContextEventData eventData, InterceptionResult<int> result) {
         DispatchDomainEvents(eventData.Context).GetAwaiter().GetResult();
         return base.SavingChanges(eventData, result);
     }
-    
-    public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, 
+
+    public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData,
         InterceptionResult<int> result, CancellationToken cancellationToken = default) {
         await DispatchDomainEvents(eventData.Context);
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
     private async Task DispatchDomainEvents(DbContext? context) {
-        if (context == null) return;
-        var entities = context.ChangeTracker
-            .Entries()
+        if (context == null) {
+            return;
+        }
+        var entities = context.ChangeTracker.Entries()
             .Where(e => e.Entity is IHasDomainEvents)
             .Select(e => (IHasDomainEvents)e.Entity);
-        var domainEvents = entities
-            .SelectMany(e => e.DomainEvents)
-            .ToList();
+        var domainEvents = entities.SelectMany(e => e.DomainEvents).ToList();
         foreach (var entity in entities) {
             entity.ClearDomainEvents();
         }

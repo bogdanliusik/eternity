@@ -1,4 +1,4 @@
-﻿namespace Eternity.Application.Common.Interfaces;
+namespace Eternity.Application.Common.Interfaces;
 
 public interface ICurrentUser
 {

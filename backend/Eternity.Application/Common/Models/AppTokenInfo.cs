@@ -1,4 +1,4 @@
-﻿namespace Eternity.Application.Common.Models;
+namespace Eternity.Application.Common.Models;
 
 public class AppTokenInfo(string accessToken, Guid sessionId)
 {

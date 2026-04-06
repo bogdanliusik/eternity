@@ -15,10 +15,10 @@ public record RejectRegistrationRequestCommand(Guid Id) : IRequest<Result<Regist
 public class RejectRegistrationRequestCommandHandler(IAppDbContext dbContext, IIdentityService identityService)
     : IRequestHandler<RejectRegistrationRequestCommand, Result<RegistrationRequestDto>>
 {
-    public async Task<Result<RegistrationRequestDto>> Handle(RejectRegistrationRequestCommand request, 
+    public async Task<Result<RegistrationRequestDto>> Handle(RejectRegistrationRequestCommand request,
         CancellationToken cancellationToken) {
-        var registrationRequest = await dbContext.RegistrationRequests
-            .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
+        var registrationRequest =
+            await dbContext.RegistrationRequests.FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
         if (registrationRequest == null) {
             return Result<RegistrationRequestDto>.Failure(["Registration request not found."]);
         }
@@ -30,7 +30,9 @@ public class RejectRegistrationRequestCommandHandler(IAppDbContext dbContext, II
             return Result<RegistrationRequestDto>.Failure(deleteIdentityResult.Errors);
         }
         var userAccount = await dbContext.UserAccounts.FirstOrDefaultAsync(
-            u => u.UserName == registrationRequest.UserName, cancellationToken);
+            u => u.UserName == registrationRequest.UserName,
+            cancellationToken
+        );
         if (userAccount != null) {
             dbContext.UserAccounts.Remove(userAccount);
         }

@@ -14,22 +14,17 @@ public class GetCallQueryHandler(IAppDbContext dbContext, ICurrentUser currentUs
 {
     public async Task<Result<CallDto>> Handle(GetCallQuery request, CancellationToken cancellationToken) {
         var userId = currentUser.Id;
-
-        var call = await dbContext.Calls
-            .AsNoTracking()
+        var call = await dbContext.Calls.AsNoTracking()
             .Include(c => c.Participants)
-                .ThenInclude(p => p.User)
+            .ThenInclude(p => p.User)
             .Include(c => c.Initiator)
             .FirstOrDefaultAsync(c => c.Id == request.CallId, cancellationToken);
-
         if (call == null) {
             return Result<CallDto>.Failure(["Call not found."]);
         }
-
         if (!call.IsParticipant(userId)) {
             return Result<CallDto>.Failure(["You are not a participant of this call."]);
         }
-
         var participants = call.Participants.Select(p => new CallParticipantDto {
             Id = p.Id,
             UserId = p.UserId,
@@ -40,24 +35,24 @@ public class GetCallQueryHandler(IAppDbContext dbContext, ICurrentUser currentUs
             JoinedAt = p.JoinedAt,
             LeftAt = p.LeftAt
         }).ToList();
-
         var initiator = participants.First(p => p.UserId == call.InitiatorId);
-        var duration = call.StartedAt != null && call.EndedAt != null
+        var duration = call is { StartedAt: not null, EndedAt: not null }
             ? (int?)(call.EndedAt.Value - call.StartedAt.Value).TotalSeconds
             : null;
-
-        return Result<CallDto>.Success(new CallDto {
-            Id = call.Id,
-            Name = CallDto.ResolveDisplayName(call.Name, call.Participants),
-            Type = call.Type,
-            Status = call.Status,
-            CreatedAt = call.CreatedAt,
-            StartedAt = call.StartedAt,
-            EndedAt = call.EndedAt,
-            DurationSeconds = duration,
-            Participants = participants,
-            InitiatedBy = initiator
-        });
+        return Result<CallDto>.Success(
+            new CallDto {
+                Id = call.Id,
+                Name = CallDto.ResolveDisplayName(call.Name, call.Participants),
+                Type = call.Type,
+                Status = call.Status,
+                CreatedAt = call.CreatedAt,
+                StartedAt = call.StartedAt,
+                EndedAt = call.EndedAt,
+                DurationSeconds = duration,
+                Participants = participants,
+                InitiatedBy = initiator
+            }
+        );
     }
 }
 

@@ -5,7 +5,6 @@ namespace Eternity.Domain.Entities;
 public class CallParticipant
 {
     public const int MaxParticipantsPerCall = 5;
-
     private CallParticipant() { }
 
     private CallParticipant(string callId, Guid userId, ParticipantStatus status) {
@@ -16,17 +15,11 @@ public class CallParticipant
     }
 
     public string Id { get; private set; } = null!;
-
     public string CallId { get; private set; } = null!;
-
     public Guid UserId { get; private set; }
-
     public ParticipantStatus Status { get; private set; }
-
     public DateTimeOffset? JoinedAt { get; private set; }
-
     public DateTimeOffset? LeftAt { get; private set; }
-
     public Call Call { get; private set; } = null!;
     public UserAccount User { get; private set; } = null!;
 

@@ -1,4 +1,3 @@
-using Eternity.Application.Users.Models;
 using Eternity.Domain.Entities;
 
 namespace Eternity.Application.Sessions.Models;
@@ -20,23 +19,29 @@ public class UserSessionDto
 internal static class UserSessionDtoExtensions
 {
     public static IQueryable<UserSessionDto> ProjectWithUser(this IQueryable<UserSession> sessions,
-        IQueryable<UserAccount> users, Guid currentSessionId, DateTime now) =>
-        sessions.Join(users, s => s.UserId, u => u.Id, (s, u) => new UserSessionDto {
-            Id = s.Id,
-            StartedAt = s.StartedAt,
-            EndedAt = s.EndedAt,
-            IpAddress = s.IpAddress,
-            DeviceInfo = s.DeviceInfo,
-            BrowserInfo = s.BrowserInfo,
-            IsActive = !s.IsTerminated && s.RefreshTokenExpiry > now,
-            IsOnline = s.IsOnline,
-            IsCurrentSession = s.Id == currentSessionId,
-            User = new SessionUserDto {
-                Id = u.Id,
-                Username = u.UserName,
-                FullName = u.FullName,
-                Email = u.Email,
-                AvatarUrl = u.AvatarUrl
+        IQueryable<UserAccount> users, Guid currentSessionId, DateTime now) {
+        return sessions.Join(
+            users,
+            s => s.UserId,
+            u => u.Id,
+            (s, u) => new UserSessionDto {
+                Id = s.Id,
+                StartedAt = s.StartedAt,
+                EndedAt = s.EndedAt,
+                IpAddress = s.IpAddress,
+                DeviceInfo = s.DeviceInfo,
+                BrowserInfo = s.BrowserInfo,
+                IsActive = !s.IsTerminated && s.RefreshTokenExpiry > now,
+                IsOnline = s.IsOnline,
+                IsCurrentSession = s.Id == currentSessionId,
+                User = new SessionUserDto {
+                    Id = u.Id,
+                    Username = u.UserName,
+                    FullName = u.FullName,
+                    Email = u.Email,
+                    AvatarUrl = u.AvatarUrl
+                }
             }
-        });
+        );
+    }
 }

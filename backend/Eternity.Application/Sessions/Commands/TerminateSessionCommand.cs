@@ -13,8 +13,10 @@ public record TerminateSessionCommand(Guid SessionId) : IRequest<Result>;
 public class TerminateSessionCommandHandler(IAppDbContext dbContext) : IRequestHandler<TerminateSessionCommand, Result>
 {
     public async Task<Result> Handle(TerminateSessionCommand request, CancellationToken cancellationToken) {
-        var session = await dbContext.UserSessions
-            .FirstOrDefaultAsync(s => s.Id == request.SessionId, cancellationToken);
+        var session = await dbContext.UserSessions.FirstOrDefaultAsync(
+            s => s.Id == request.SessionId,
+            cancellationToken
+        );
         if (session == null) {
             return Result.Failure(["Session not found"]);
         }

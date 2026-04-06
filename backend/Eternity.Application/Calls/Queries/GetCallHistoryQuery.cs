@@ -1,7 +1,6 @@
 using Eternity.Application.Calls.Models;
 using Eternity.Application.Common.Interfaces;
 using Eternity.Application.Common.Models;
-using Eternity.Domain.Constants;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,16 +14,13 @@ public class GetCallHistoryQueryHandler(IAppDbContext dbContext, ICurrentUser cu
     public async Task<Result<List<CallHistoryDto>>> Handle(GetCallHistoryQuery request,
         CancellationToken cancellationToken) {
         var userId = currentUser.Id;
-
-        var calls = await dbContext.Calls
-            .AsNoTracking()
+        var calls = await dbContext.Calls.AsNoTracking()
             .Include(c => c.Participants)
-                .ThenInclude(p => p.User)
+            .ThenInclude(p => p.User)
             .Include(c => c.Initiator)
             .Where(c => c.Participants.Any(p => p.UserId == userId))
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync(cancellationToken);
-
         var result = calls.Select(call => {
             var participants = call.Participants.Select(p => new CallParticipantDto {
                 Id = p.Id,
@@ -36,14 +32,11 @@ public class GetCallHistoryQueryHandler(IAppDbContext dbContext, ICurrentUser cu
                 JoinedAt = p.JoinedAt,
                 LeftAt = p.LeftAt
             }).ToList();
-
             var initiator = participants.First(p => p.UserId == call.InitiatorId);
             var userParticipant = call.Participants.First(p => p.UserId == userId);
-
-            var duration = call.StartedAt != null && call.EndedAt != null
+            var duration = call is { StartedAt: not null, EndedAt: not null }
                 ? (int?)(call.EndedAt.Value - call.StartedAt.Value).TotalSeconds
                 : null;
-
             return new CallHistoryDto {
                 Id = call.Id,
                 Name = CallDto.ResolveDisplayName(call.Name, call.Participants),
@@ -58,7 +51,6 @@ public class GetCallHistoryQueryHandler(IAppDbContext dbContext, ICurrentUser cu
                 UserParticipantStatus = userParticipant.Status
             };
         }).ToList();
-
         return Result<List<CallHistoryDto>>.Success(result);
     }
 }

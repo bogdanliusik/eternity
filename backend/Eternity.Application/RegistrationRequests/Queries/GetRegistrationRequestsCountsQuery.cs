@@ -14,10 +14,9 @@ public record GetRegistrationRequestsCountsQuery : IRequest<Result<RegistrationR
 public class GetRegistrationRequestsCountsQueryHandler(IAppDbContext dbContext)
     : IRequestHandler<GetRegistrationRequestsCountsQuery, Result<RegistrationRequestsCountsDto>>
 {
-    public async Task<Result<RegistrationRequestsCountsDto>> Handle(GetRegistrationRequestsCountsQuery request, 
+    public async Task<Result<RegistrationRequestsCountsDto>> Handle(GetRegistrationRequestsCountsQuery request,
         CancellationToken cancellationToken) {
-        var groupedCounts = await dbContext.RegistrationRequests
-            .AsNoTracking()
+        var groupedCounts = await dbContext.RegistrationRequests.AsNoTracking()
             .GroupBy(r => r.Status)
             .Select(g => new { Status = g.Key, Count = g.Count() })
             .ToListAsync(cancellationToken);

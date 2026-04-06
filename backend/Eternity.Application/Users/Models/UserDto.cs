@@ -1,4 +1,4 @@
-﻿namespace Eternity.Application.Users.Models;
+namespace Eternity.Application.Users.Models;
 
 public record UserDto
 {

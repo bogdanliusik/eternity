@@ -1,4 +1,4 @@
-﻿namespace Eternity.Domain.Entities;
+namespace Eternity.Domain.Entities;
 
 public class UserAccount
 {

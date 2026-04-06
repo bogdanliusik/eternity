@@ -1,4 +1,4 @@
-﻿using Eternity.Application.Common.Interfaces;
+using Eternity.Application.Common.Interfaces;
 using Eternity.Application.Common.Models;
 using Eternity.Application.Common.Security;
 using Microsoft.AspNetCore.Hosting;
@@ -11,8 +11,7 @@ namespace Eternity.Infrastructure.Identity;
 public class CookieAuthService(
     IOptions<CookieSettings> cookieSettings,
     IOptions<JwtSettings> jwtSettings,
-    IWebHostEnvironment environment)
-    : ICookieAuthService
+    IWebHostEnvironment environment) : ICookieAuthService
 {
     private readonly CookieSettings _cookieSettings = cookieSettings.Value;
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
@@ -33,18 +32,10 @@ public class CookieAuthService(
             Path = "/",
             IsEssential = true
         };
-        response.Cookies.Append(
-            _cookieSettings.AccessTokenCookieName, 
-            tokenInfo.AccessToken, 
-            cookieOptions
-        );
-        response.Cookies.Append(
-            _cookieSettings.SessionIdCookieName, 
-            tokenInfo.SessionId.ToString(), 
-            cookieOptions
-        );
+        response.Cookies.Append(_cookieSettings.AccessTokenCookieName, tokenInfo.AccessToken, cookieOptions);
+        response.Cookies.Append(_cookieSettings.SessionIdCookieName, tokenInfo.SessionId.ToString(), cookieOptions);
     }
-    
+
     public void RemoveAuthenticationCookies(HttpResponse response) {
         response.Cookies.Delete(_cookieSettings.AccessTokenCookieName);
         response.Cookies.Delete(_cookieSettings.SessionIdCookieName);

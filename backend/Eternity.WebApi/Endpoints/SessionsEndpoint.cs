@@ -10,7 +10,7 @@ namespace Eternity.WebApi.Endpoints;
 public class SessionsEndpoint : EndpointGroupBase
 {
     public override string GroupName => "sessions";
-    
+
     public override void Map(RouteGroupBuilder group) {
         group.RequireAuthorization();
         group.MapGet(GetCurrentSession, "current");
@@ -20,8 +20,9 @@ public class SessionsEndpoint : EndpointGroupBase
     }
 
     private static async Task<IResult> GetAllSessions([AsParameters] SessionFilterQuery filter, IMediator mediator) {
-        var result = await mediator.Send(new GetAllSessionsQuery(
-            filter.GetPageNumber(), filter.GetPageSize(), filter.IsActive, filter.IsOnline));
+        var result = await mediator.Send(
+            new GetAllSessionsQuery(filter.GetPageNumber(), filter.GetPageSize(), filter.IsActive, filter.IsOnline)
+        );
         return Results.Ok(result);
     }
 
@@ -29,7 +30,7 @@ public class SessionsEndpoint : EndpointGroupBase
         var result = await mediator.Send(new GetCurrentSessionQuery());
         return Results.Ok(result);
     }
-    
+
     private static async Task<IResult> TerminateSession(Guid id, IMediator mediator) {
         var result = await mediator.Send(new TerminateSessionCommand(id));
         return Results.Ok(result);
@@ -40,7 +41,7 @@ public class SessionsEndpoint : EndpointGroupBase
         return Results.Ok(result);
     }
 
-    private class SessionFilterQuery : PaginationFilter
+    private sealed class SessionFilterQuery : PaginationFilter
     {
         public bool? IsActive { get; init; }
         public bool? IsOnline { get; init; }

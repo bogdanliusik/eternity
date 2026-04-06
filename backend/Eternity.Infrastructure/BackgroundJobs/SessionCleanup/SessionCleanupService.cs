@@ -8,14 +8,13 @@ using Microsoft.Extensions.Options;
 namespace Eternity.Infrastructure.BackgroundJobs.SessionCleanup;
 
 /// <summary>
-/// Background service that periodically marks expired sessions with their EndedAt timestamp.
-/// This ensures that sessions which expire naturally (token expiry) have their EndedAt set correctly.
+///     Background service that periodically marks expired sessions with their EndedAt timestamp.
+///     This ensures that sessions which expire naturally (token expiry) have their EndedAt set correctly.
 /// </summary>
 public class SessionCleanupService(
     IServiceScopeFactory scopeFactory,
     ILogger<SessionCleanupService> logger,
-    IOptions<SessionCleanupSettings> options)
-    : BackgroundService
+    IOptions<SessionCleanupSettings> options) : BackgroundService
 {
     private readonly TimeSpan _interval = TimeSpan.FromMinutes(options.Value.IntervalMinutes);
 
@@ -39,9 +38,7 @@ public class SessionCleanupService(
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var now = DateTime.UtcNow;
         var expiredSessions = await dbContext.UserSessions
-            .Where(s => !s.IsTerminated 
-                        && s.EndedAt == null 
-                        && s.RefreshTokenExpiry <= now)
+            .Where(s => !s.IsTerminated && s.EndedAt == null && s.RefreshTokenExpiry <= now)
             .ToListAsync(cancellationToken);
         if (expiredSessions.Count == 0) {
             logger.LogDebug("No expired sessions to process");

@@ -11,10 +11,12 @@ public record PingSessionCommand(Guid SessionId, string Message) : IRequest<Resu
 [Authorize(Policy = Policies.AdminOnly)]
 public class PingSessionCommandHandler(IOnlineManager onlineManager) : IRequestHandler<PingSessionCommand, Result<bool>>
 {
-    public async Task<Result<bool>> Handle(PingSessionCommand request, 
-        CancellationToken cancellationToken) {
+    public async Task<Result<bool>> Handle(PingSessionCommand request, CancellationToken cancellationToken) {
         var delivered = await onlineManager.SendMessageToSessionAsync(
-            request.SessionId, request.Message, cancellationToken);
+            request.SessionId,
+            request.Message,
+            cancellationToken
+        );
         if (!delivered) {
             return Result<bool>.Failure(["Failed to deliver message to session."]);
         }
