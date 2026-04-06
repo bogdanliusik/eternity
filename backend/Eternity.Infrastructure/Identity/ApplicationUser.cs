@@ -1,4 +1,4 @@
-﻿using Eternity.Domain.Entities;
+using Eternity.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 
 namespace Eternity.Infrastructure.Identity;

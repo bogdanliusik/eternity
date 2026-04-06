@@ -1,4 +1,4 @@
-﻿using Eternity.Application.Common.Models;
+using Eternity.Application.Common.Models;
 
 namespace Eternity.Application.Common.Interfaces;
 

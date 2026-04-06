@@ -9,8 +9,8 @@ namespace Eternity.WebApi.Hubs;
 
 [Authorize]
 public class GeneralHub(
-    ConnectionTracker connectionTracker, 
-    IMediator mediator, 
+    ConnectionTracker connectionTracker,
+    IMediator mediator,
     ICurrentUser currentUser,
     ILogger<GeneralHub> logger) : Hub
 {
@@ -25,8 +25,11 @@ public class GeneralHub(
             await mediator.Send(new SetSessionOnlineCommand(sessionId));
         }
         await Groups.AddToGroupAsync(Context.ConnectionId, ConnectionTracker.GetSessionGroup(sessionId));
-        logger.LogInformation("SignalR connected: session {SessionId}, connection {ConnectionId}", 
-            sessionId, Context.ConnectionId);
+        logger.LogInformation(
+            "SignalR connected: session {SessionId}, connection {ConnectionId}",
+            sessionId,
+            Context.ConnectionId
+        );
         await base.OnConnectedAsync();
     }
 
@@ -38,8 +41,11 @@ public class GeneralHub(
                 await mediator.Send(new SetSessionOfflineCommand(sessionId));
             }
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConnectionTracker.GetSessionGroup(sessionId));
-            logger.LogInformation("SignalR disconnected: session {SessionId}, connection {ConnectionId}", 
-                sessionId, Context.ConnectionId);
+            logger.LogInformation(
+                "SignalR disconnected: session {SessionId}, connection {ConnectionId}",
+                sessionId,
+                Context.ConnectionId
+            );
         }
         await base.OnDisconnectedAsync(exception);
     }

@@ -1,4 +1,4 @@
-﻿using Eternity.Domain.Entities;
+using Eternity.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Eternity.Application.Common.Interfaces;

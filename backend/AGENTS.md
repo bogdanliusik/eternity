@@ -47,8 +47,15 @@ Instructions for all work in `backend/`.
 - Re-check hub behavior when changing auth, session, presence, or other live workflows.
 - The root `docker-compose.yml` is the main full-stack local environment, and compose runs the backend with Production settings.
 
+## Formatting
+
+- `backend/.editorconfig` is the source of truth for backend formatting and analyzer settings.
+- `docs/backend-formatting.md` describes the expected local workflow, Rider usage, and validation commands.
+- `dotnet format Eternity.sln` is the authoritative formatter for backend code.
+
 ## Verification
 
+- Run `dotnet format Eternity.sln --verify-no-changes` when changing backend formatting or analyzer configuration.
 - Run `dotnet build Eternity.sln`.
 - Run the narrowest useful verification first, then broader checks.
 - Backend automated test coverage is currently limited; do not assume a test project already exists.

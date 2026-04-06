@@ -13,27 +13,40 @@ public record SubmitRegistrationRequestCommand(string Name, string UserName, str
     : IRequest<Result<RegistrationRequestDto>>;
 
 public class SubmitRegistrationRequestCommandHandler(IAppDbContext dbContext, IIdentityService identityService)
-    : IRequestHandler<SubmitRegistrationRequestCommand, Result<RegistrationRequestDto>> 
+    : IRequestHandler<SubmitRegistrationRequestCommand, Result<RegistrationRequestDto>>
 {
-    public async Task<Result<RegistrationRequestDto>> Handle(SubmitRegistrationRequestCommand request, 
+    public async Task<Result<RegistrationRequestDto>> Handle(SubmitRegistrationRequestCommand request,
         CancellationToken cancellationToken) {
         var normalizedUserName = request.UserName.Trim();
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
         var existingUser = await dbContext.UserAccounts.AnyAsync(
-            u => u.UserName == normalizedUserName || u.Email == normalizedEmail, cancellationToken);
+            u => u.UserName == normalizedUserName || u.Email == normalizedEmail,
+            cancellationToken
+        );
         if (existingUser) {
-            return Result<RegistrationRequestDto>.Failure([
-                "User with the same username or email already exists."]);
+            return Result<RegistrationRequestDto>.Failure(
+                [
+                    "User with the same username or email already exists."
+                ]
+            );
         }
         var existingPendingRequest = await dbContext.RegistrationRequests.AnyAsync(
-            r => (r.UserName == normalizedUserName || r.Email == normalizedEmail) && 
-                 r.Status == RegistrationRequestStatus.Pending, cancellationToken);
+            r => (r.UserName == normalizedUserName || r.Email == normalizedEmail) &&
+                 r.Status == RegistrationRequestStatus.Pending,
+            cancellationToken
+        );
         if (existingPendingRequest) {
-            return Result<RegistrationRequestDto>.Failure([
-                "A pending registration request already exists for this user."]);
+            return Result<RegistrationRequestDto>.Failure(
+                [
+                    "A pending registration request already exists for this user."
+                ]
+            );
         }
-        var createUserResult = await identityService.CreateUserAsync(normalizedUserName, 
-            normalizedEmail, request.Password);
+        var createUserResult = await identityService.CreateUserAsync(
+            normalizedUserName,
+            normalizedEmail,
+            request.Password
+        );
         if (!createUserResult.Succeeded) {
             return Result<RegistrationRequestDto>.Failure(createUserResult.Errors);
         }

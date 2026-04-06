@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Eternity.Application.Common.Interfaces;
 using Eternity.Application.Common.Security;
@@ -23,79 +23,83 @@ public static class ServicesExtensions
         builder.Services.AddScoped<ICallNotifier, CallNotifier>();
         builder.Services.AddSignalR();
         builder.Services.AddHttpContextAccessor();
-        builder.Services.AddHealthChecks()
-            .AddDbContextCheck<AppDbContext>();
+        builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddOpenApiDocument((configure, _) => {
             configure.Title = "Eternity API";
-            configure.AddSecurity("JWT", [], new OpenApiSecurityScheme {
-                Type = OpenApiSecuritySchemeType.ApiKey,
-                Name = "Authorization",
-                In = OpenApiSecurityApiKeyLocation.Header,
-                Description = "Type into the textbox: Bearer {your JWT token}."
-            });
+            configure.AddSecurity(
+                "JWT",
+                [],
+                new OpenApiSecurityScheme {
+                    Type = OpenApiSecuritySchemeType.ApiKey,
+                    Name = "Authorization",
+                    In = OpenApiSecurityApiKeyLocation.Header,
+                    Description = "Type into the textbox: Bearer {your JWT token}."
+                }
+            );
             configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
         });
         builder.Services.AddCors(options => {
-            options.AddPolicy("AllowAngularApp", policy => {
-                var allowedOrigins = builder.Configuration
-                    .GetSection("CorsSettings:AllowedOrigins")
-                    .Get<string[]>() ?? [];
-                policy.WithOrigins(allowedOrigins.Where(o => !string.IsNullOrWhiteSpace(o)).ToArray())
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials();
-            });
+            options.AddPolicy(
+                "AllowAngularApp",
+                policy => {
+                    var allowedOrigins =
+                        builder.Configuration.GetSection("CorsSettings:AllowedOrigins").Get<string[]>() ?? [];
+                    policy.WithOrigins(allowedOrigins.Where(o => !string.IsNullOrWhiteSpace(o)).ToArray())
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                }
+            );
         });
         builder.AddEternityRateLimiting();
     }
-    
+
     public static void AddEternityAuthentication(this IHostApplicationBuilder builder) {
         var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
         if (jwtSettings == null) {
             throw new InvalidOperationException(
-                "JWT settings are not configured. Please add JwtSettings section to appsettings.json");
+                "JWT settings are not configured. Please add JwtSettings section to appsettings.json"
+            );
         }
         if (string.IsNullOrEmpty(jwtSettings.SecretKey) || jwtSettings.SecretKey.Length < 32) {
             throw new InvalidOperationException(
                 "JWT SecretKey must be at least 32 characters long. " +
-                "Please set it in environment variables or user secrets.");
+                "Please set it in environment variables or user secrets."
+            );
         }
-        builder.Services.Configure<JwtSettings>(
-            builder.Configuration.GetSection(JwtSettings.SectionName));
-        builder.Services.Configure<CookieSettings>(
-            builder.Configuration.GetSection(CookieSettings.SectionName));
-        builder.Services
-            .AddAuthentication(options => {
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options => {
-                var cookieSettings = builder.Configuration
-                    .GetSection(CookieSettings.SectionName)
-                    .Get<CookieSettings>() ?? new CookieSettings();
-                options.TokenValidationParameters = new TokenValidationParameters {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
-                    ValidateIssuer = true,
-                    ValidIssuer = jwtSettings.Issuer,
-                    ValidateAudience = true,
-                    ValidAudience = jwtSettings.Audience,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                };
-                options.Events = new JwtBearerEvents {
-                    OnMessageReceived = context => HandleMessageReceived(context, cookieSettings),
-                    OnAuthenticationFailed = context => {
-                        if (context.Exception is SecurityTokenExpiredException) {
-                            context.Response.Headers.Append("Token-Expired", "true");
-                        }
-                        return Task.CompletedTask;
+        builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
+        builder.Services.Configure<CookieSettings>(builder.Configuration.GetSection(CookieSettings.SectionName));
+        builder.Services.AddAuthentication(options => {
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options => {
+            var cookieSettings =
+                builder.Configuration.GetSection(CookieSettings.SectionName).Get<CookieSettings>() ??
+                new CookieSettings();
+            options.TokenValidationParameters = new TokenValidationParameters {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+                ValidateIssuer = true,
+                ValidIssuer = jwtSettings.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtSettings.Audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+            options.Events = new JwtBearerEvents {
+                OnMessageReceived = context => HandleMessageReceived(context, cookieSettings),
+                OnAuthenticationFailed = context => {
+                    if (context.Exception is SecurityTokenExpiredException) {
+                        context.Response.Headers.Append("Token-Expired", "true");
                     }
-                };
-                options.SaveToken = true;
-            });
+                    return Task.CompletedTask;
+                }
+            };
+            options.SaveToken = true;
+        });
     }
 
     private static async Task HandleMessageReceived(MessageReceivedContext context, CookieSettings cookieSettings) {
@@ -124,7 +128,8 @@ public static class ServicesExtensions
             if (refreshResult.Succeeded) {
                 var isWebSocketRequest = context.HttpContext.Request.Path.StartsWithSegments("/hubs");
                 if (!isWebSocketRequest) {
-                    var cookieAuthService = context.HttpContext.RequestServices.GetRequiredService<ICookieAuthService>();
+                    var cookieAuthService =
+                        context.HttpContext.RequestServices.GetRequiredService<ICookieAuthService>();
                     cookieAuthService.SetAuthenticationCookies(context.HttpContext.Response, refreshResult.Data);
                 }
                 accessToken = refreshResult.Data.AccessToken;
@@ -138,8 +143,7 @@ public static class ServicesExtensions
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
             return jwtToken.ValidTo < DateTime.UtcNow;
-        }
-        catch {
+        } catch {
             return true;
         }
     }

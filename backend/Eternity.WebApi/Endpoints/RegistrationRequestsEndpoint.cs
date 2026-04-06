@@ -10,15 +10,15 @@ namespace Eternity.WebApi.Endpoints;
 public class RegistrationRequestsEndpoint : EndpointGroupBase
 {
     public override string GroupName => "registration-requests";
-    
+
     public override void Map(RouteGroupBuilder group) {
         group.RequireAuthorization(Policies.AdminOnly);
-        group.MapGet(GetRequests, "");
+        group.MapGet(GetRequests);
         group.MapGet(GetCounts, "counts");
         group.MapGet(GetPendingCount, "pending-count");
         group.MapPost(ApproveRequest, "{id}/approve");
         group.MapPost(RejectRequest, "{id}/reject");
-        group.MapPost(SubmitRegistrationRequest, "")
+        group.MapPost(SubmitRegistrationRequest)
             .AllowAnonymous()
             .RequireRateLimiting(RateLimitingExtensions.RegistrationPolicyName);
     }
@@ -48,15 +48,18 @@ public class RegistrationRequestsEndpoint : EndpointGroupBase
         return ToHttpResult(result);
     }
 
-    private static async Task<IResult> SubmitRegistrationRequest(SubmitRegistrationRequestCommand command, 
+    private static async Task<IResult> SubmitRegistrationRequest(SubmitRegistrationRequestCommand command,
         IMediator mediator) {
         var result = await mediator.Send(command);
         return ToHttpResult(result);
     }
 
-    private static IResult ToHttpResult<T>(Result<T> result) => Results.Ok(result);
+    private static IResult ToHttpResult<T>(Result<T> result) {
+        return Results.Ok(result);
+    }
 
-    private class RequestStatusQuery {
-        public RegistrationRequestStatus Status { get; init; } = RegistrationRequestStatus.Pending;
+    private sealed class RequestStatusQuery
+    {
+        public RegistrationRequestStatus Status { get; } = RegistrationRequestStatus.Pending;
     }
 }

@@ -9,16 +9,15 @@ using Microsoft.EntityFrameworkCore;
 namespace Eternity.Application.RegistrationRequests.Queries;
 
 [Authorize(Policy = Policies.AdminOnly)]
-public record GetRegistrationRequestsQuery(RegistrationRequestStatus Status) 
+public record GetRegistrationRequestsQuery(RegistrationRequestStatus Status)
     : IRequest<Result<List<RegistrationRequestDto>>>;
 
 public class GetRegistrationRequestsQueryHandler(IAppDbContext dbContext)
     : IRequestHandler<GetRegistrationRequestsQuery, Result<List<RegistrationRequestDto>>>
 {
-    public async Task<Result<List<RegistrationRequestDto>>> Handle(GetRegistrationRequestsQuery request, 
+    public async Task<Result<List<RegistrationRequestDto>>> Handle(GetRegistrationRequestsQuery request,
         CancellationToken cancellationToken) {
-        var requests = await dbContext.RegistrationRequests
-            .AsNoTracking()
+        var requests = await dbContext.RegistrationRequests.AsNoTracking()
             .Where(r => r.Status == request.Status)
             .OrderByDescending(r => r.RequestedAt)
             .Select(r => new RegistrationRequestDto {

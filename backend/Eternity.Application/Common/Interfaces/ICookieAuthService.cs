@@ -1,4 +1,4 @@
-﻿using Eternity.Application.Common.Models;
+using Eternity.Application.Common.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace Eternity.Application.Common.Interfaces;

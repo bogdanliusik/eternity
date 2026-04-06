@@ -1,4 +1,4 @@
-﻿namespace Eternity.Application.Common.Security;
+namespace Eternity.Application.Common.Security;
 
 public class JwtSettings
 {

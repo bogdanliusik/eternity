@@ -11,8 +11,10 @@ public class SetSessionOfflineCommandHandler(IAppDbContext dbContext)
     : IRequestHandler<SetSessionOfflineCommand, Result>
 {
     public async Task<Result> Handle(SetSessionOfflineCommand request, CancellationToken cancellationToken) {
-        var session = await dbContext.UserSessions
-            .FirstOrDefaultAsync(s => s.Id == request.SessionId, cancellationToken);
+        var session = await dbContext.UserSessions.FirstOrDefaultAsync(
+            s => s.Id == request.SessionId,
+            cancellationToken
+        );
         if (session != null) {
             session.SetOffline();
             await dbContext.SaveChangesAsync(cancellationToken);

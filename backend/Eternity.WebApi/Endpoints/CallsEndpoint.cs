@@ -25,33 +25,31 @@ public class CallsEndpoint : EndpointGroupBase
         if (!result.Succeeded) {
             return Results.Ok(result);
         }
-
         var call = result.Data;
-        var inviteeUserIds = call.Participants
-            .Where(p => p.UserId != call.InitiatedBy.UserId)
+        var inviteeUserIds = call.Participants.Where(p => p.UserId != call.InitiatedBy.UserId)
             .Select(p => p.UserId)
             .ToList();
-
         await callNotifier.NotifyIncomingCallAsync(
-            call.Id, call.InitiatedBy, call.Type, call.Participants, inviteeUserIds);
-
+            call.Id,
+            call.InitiatedBy,
+            call.Type,
+            call.Participants,
+            inviteeUserIds
+        );
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> DeclineCall(string callId, IMediator mediator,
-        ICallNotifier callNotifier, ICurrentUser currentUser) {
+    private static async Task<IResult> DeclineCall(string callId, IMediator mediator, ICallNotifier callNotifier,
+        ICurrentUser currentUser) {
         var result = await mediator.Send(new DeclineCallCommand(callId));
         if (!result.Succeeded) {
             return Results.Ok(result);
         }
-
         var data = result.Data;
         await callNotifier.NotifyCallDeclinedAsync(callId, currentUser.Id);
-
         if (data.CallEnded) {
             await callNotifier.NotifyCallEndedAsync(callId, "All invitees declined.", data.ParticipantUserIds);
         }
-
         return Results.Ok(result);
     }
 
