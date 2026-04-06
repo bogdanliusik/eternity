@@ -2,7 +2,7 @@
   <p>{{ authStore.user()?.username }}</p>
 </div>
 <div class="card">
-  <button pButton label="Refresh user" [disabled]="authStore.isLoading()" (click)="authStore.refreshUser()">
+  <button pButton [disabled]="authStore.isLoading()" (click)="authStore.refreshUser()">
     @if (authStore.isLoading()) {
       <i class="pi pi-spin pi-spinner" pButtonIcon></i>
     } @else {
