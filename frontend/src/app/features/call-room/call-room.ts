@@ -8,26 +8,26 @@ import {
   OnInit,
   signal
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ButtonModule } from 'primeng/button';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   LucideAngularModule,
   Mic,
   MicOff,
-  Video,
-  VideoOff,
+  Monitor,
   PhoneOff,
-  Monitor
-} from 'lucide-angular';
+  Video,
+  VideoOff} from 'lucide-angular';
 import { MessageService } from 'primeng/api';
-import { CallHubService, ParticipantJoinedEvent, ParticipantLeftEvent, ParticipantDeclinedEvent } from '@/core/services/call-hub.service';
-import { PeerService } from '@/core/services/peer.service';
-import { CallApiService } from '@/core/services/call-api.service';
-import { IncomingCallService } from '@/core/services/incoming-call.service';
-import { CallRecord, CallType, CallParticipant } from '@/features/call-history/models/call-history.model';
-import { SrcObjectDirective } from '@/shared/directives/src-object.directive';
+import { ButtonModule } from 'primeng/button';
+
 import { AuthStore } from '@/core/auth/auth.store';
+import { CallApiService } from '@/core/services/call-api.service';
+import { CallHubService, ParticipantJoinedEvent, ParticipantLeftEvent } from '@/core/services/call-hub.service';
+import { IncomingCallService } from '@/core/services/incoming-call.service';
+import { PeerService } from '@/core/services/peer.service';
+import { CallParticipant,CallRecord, CallType } from '@/features/call-history/models/call-history.model';
+import { SrcObjectDirective } from '@/shared/directives/src-object.directive';
 
 export interface VideoTile {
   peerId: string;
@@ -343,14 +343,16 @@ export class CallRoom implements OnInit, OnDestroy {
   private broadcastMediaState(): void {
     const id = this.callId();
     if (id && this.callHub.isConnected) {
-      this.callHub.notifyMediaStateChanged(id, this.audioEnabled(), this.videoEnabled()).catch(() => {});
+      this.callHub.notifyMediaStateChanged(id, this.audioEnabled(), this.videoEnabled()).catch(() => { /* fire-and-forget */ });
     }
   }
 
   async leaveCall(): Promise<void> {
     try {
       await this.callHub.leaveCall(this.callId());
-    } catch {}
+    } catch {
+      // intentionally empty
+    }
     this.leaveAndNavigateBack();
   }
 

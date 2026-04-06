@@ -1,15 +1,16 @@
+import { computed, DOCUMENT, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { AuthService, RegisterRequest } from './auth.service';
-import { CurrentUser } from './models/current.user';
+import { tapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { computed, DOCUMENT, inject } from '@angular/core';
-import { tapResponse } from '@ngrx/operators';
 import { catchError, EMPTY, filter, firstValueFrom, from, pipe, switchMap, tap } from 'rxjs';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { LoginRequest } from './models/login.request';
+
 import { ApiError } from '../models/api.error';
 import { GeneralHubService } from '../services/general-hub.service';
+import { AuthService, RegisterRequest } from './auth.service';
+import { CurrentUser } from './models/current.user';
+import { LoginRequest } from './models/login.request';
 
 export enum AuthStatus {
   Unknown = 'unknown',

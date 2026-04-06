@@ -1,20 +1,21 @@
+import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChild,
+  effect,
   ElementRef,
   forwardRef,
   inject,
   input,
   signal,
-  ViewChild,
-  contentChild,
   TemplateRef,
-  effect
-} from '@angular/core';
+  ViewChild} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NgTemplateOutlet } from '@angular/common';
+
 import { ClickOutsideDirective } from '@/shared/directives/click-outside.directive';
+
 import { MultiselectItem } from './multiselect.models';
 import { MultiselectStore } from './multiselect.store';
 
@@ -50,8 +51,8 @@ export class Multiselect<T extends MultiselectItem> implements ControlValueAcces
 
   readonly store = inject(MultiselectStore);
 
-  private onChange: (value: T[]) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: T[]) => void = () => { /* noop until registerOnChange */ };
+  private onTouched: () => void = () => { /* noop until registerOnTouched */ };
 
   constructor() {
     // Sync input items to store

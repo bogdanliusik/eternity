@@ -1,9 +1,11 @@
-import { Injectable, inject } from '@angular/core';
+import { inject,Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+
 import { CallApiService } from '@/core/services/call-api.service';
+
 import {
-  CallRecord,
   CallHistoryRecord,
+  CallRecord,
   NewCallRequest,
   UserSummary
 } from '../models/call-history.model';

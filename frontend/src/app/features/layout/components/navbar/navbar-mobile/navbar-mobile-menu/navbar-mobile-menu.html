@@ -10,6 +10,9 @@
         <li>
           <div
             (click)="toggleMenu(item)"
+            (keyup.enter)="toggleMenu(item)"
+            role="button"
+            tabindex="0"
             class="group flex grow items-center gap-3 rounded-lg px-2"
             [ngClass]="{ 'bg-primary/5': item.active }">
             <div class="text-muted-foreground/60" [class.text-primary]="item.active">

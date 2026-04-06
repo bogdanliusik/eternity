@@ -2,7 +2,7 @@
   <ul class="border-surface text-muted-foreground flex flex-col border-l border-dashed pl-2">
     @for (sub of submenu.children; track $index) {
       <li>
-        <div class="text-muted-foreground hover:text-primary relative flex rounded-sm" (click)="toggleMenu(sub)">
+        <div class="text-muted-foreground hover:text-primary relative flex rounded-sm" (click)="toggleMenu(sub)" (keyup.enter)="toggleMenu(sub)" role="button" tabindex="0">
           <ng-container
             [ngTemplateOutlet]="sub.children ? childMenu : parentMenu"
             [ngTemplateOutletContext]="{ sub: sub }">

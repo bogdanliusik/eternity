@@ -6,9 +6,10 @@ import {
   inject,
   signal
 } from '@angular/core';
-import { DialogModule } from 'primeng/dialog';
+import { LucideAngularModule, Mic, MicOff, Phone, PhoneOff, Video, VideoOff, X } from 'lucide-angular';
 import { ButtonModule } from 'primeng/button';
-import { LucideAngularModule, Phone, PhoneOff, Video, VideoOff, Mic, MicOff, X } from 'lucide-angular';
+import { DialogModule } from 'primeng/dialog';
+
 import { IncomingCallService } from '@/core/services/incoming-call.service';
 import { CallType } from '@/features/call-history/models/call-history.model';
 import { SrcObjectDirective } from '@/shared/directives/src-object.directive';

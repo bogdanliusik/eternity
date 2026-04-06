@@ -10,7 +10,7 @@
   (onHide)="onClose()">
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5 pt-1">
     <div>
-      <label class="text-muted-foreground mb-1.5 block text-xs font-medium tracking-wide uppercase">Call type</label>
+      <span class="text-muted-foreground mb-1.5 block text-xs font-medium tracking-wide uppercase">Call type</span>
       <div class="bg-card border-surface inline-flex items-center gap-1 rounded-lg border p-1">
         <button
           type="button"
@@ -100,7 +100,7 @@
 
   <ng-template #footer>
     <div class="flex items-center justify-end gap-2">
-      <button pButton type="button" class="text-color p-button-text" label="Cancel" (click)="onClose()"></button>
+      <button pButton type="button" class="text-color p-button-text" label="Cancel" aria-label="Cancel" (click)="onClose()"></button>
       <button
         pButton
         type="button"

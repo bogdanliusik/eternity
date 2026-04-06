@@ -1,9 +1,10 @@
 import { InjectionToken } from '@angular/core';
 import { computed, inject } from '@angular/core';
+import { tapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { tapResponse } from '@ngrx/operators';
 import { map, pipe, switchMap, tap } from 'rxjs';
+
 import { TabbedListConfig } from './tabbed-list.models';
 
 export const TABBED_LIST_CONFIG = new InjectionToken<TabbedListConfig>('TabbedListConfig');

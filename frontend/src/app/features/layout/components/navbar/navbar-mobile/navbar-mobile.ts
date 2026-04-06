@@ -1,9 +1,11 @@
-import { MenuService } from '@/features/layout/services/menu.service';
 import { NgClass } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { NavbarMobileMenu } from './navbar-mobile-menu/navbar-mobile-menu';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { LucideAngularModule, XIcon } from 'lucide-angular';
+
+import { MenuService } from '@/features/layout/services/menu.service';
+
+import { NavbarMobileMenu } from './navbar-mobile-menu/navbar-mobile-menu';
 
 @Component({
   selector: 'app-navbar-mobile',

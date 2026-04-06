@@ -1,5 +1,4 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { AngularSvgIconModule } from 'angular-svg-icon';
 import {
   AbstractControl,
   FormBuilder,
@@ -9,12 +8,15 @@ import {
   ValidationErrors,
   Validators
 } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { AngularSvgIconModule } from 'angular-svg-icon';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+
+import { AuthStore } from '@/core/auth/auth.store';
+
 import { getPasswordErrorMessage, passwordValidator } from '../../validators/password.validator';
 import { RegistrationFormGroup, RegistrationRequest } from './registration-form.types';
-import { AuthStore } from '@/core/auth/auth.store';
-import { RouterModule } from '@angular/router';
 
 function confirmPasswordValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.parent?.get('password');

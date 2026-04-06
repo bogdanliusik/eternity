@@ -1,12 +1,14 @@
-import { Injectable, inject, OnDestroy } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CoreHttpService } from './core-http.service';
+
 import {
-  CallRecord,
   CallHistoryRecord,
+  CallRecord,
   NewCallRequest,
   UserSummary
 } from '@/features/call-history/models/call-history.model';
+
+import { CoreHttpService } from './core-http.service';
 
 /**
  * HTTP service for call-related REST endpoints.

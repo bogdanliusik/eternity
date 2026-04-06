@@ -1,14 +1,16 @@
-import { Component, computed, inject, signal, Signal } from '@angular/core';
-import { ThemeOptionTile } from '../theme-option-tile/theme-option-tile';
+import { Component, computed, inject, Signal,signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ColorScale, updatePreset, updateSurfacePalette } from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
+import { LucideAngularModule,MoonIcon, SunIcon } from 'lucide-angular';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+
+import { THEME_COLORS, THEME_SURFACES } from '@/core/themes/theme.constants';
 import { ThemeColor, ThemeSurface } from '@/core/themes/theme.models';
 import { ThemeService } from '@/core/themes/theme.service';
-import { ColorScale, updatePreset, updateSurfacePalette } from '@primeuix/themes';
-import { THEME_COLORS, THEME_SURFACES } from '@/core/themes/theme.constants';
 import { ThemeColorName, ThemeMode } from '@/core/themes/theme.types';
-import { SunIcon, MoonIcon, LucideAngularModule } from 'lucide-angular';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { FormsModule } from '@angular/forms';
+
+import { ThemeOptionTile } from '../theme-option-tile/theme-option-tile';
 
 @Component({
   selector: 'app-theme-configurator',
@@ -21,7 +23,7 @@ export class ThemeConfigurator {
   readonly moonIcon = MoonIcon;
 
   readonly theme = this.themeService.theme;
-  readonly themeMode: Array<ThemeMode> = ['light', 'dark'];
+  readonly themeMode: ThemeMode[] = ['light', 'dark'];
   readonly primaryColors: Signal<ThemeColor[]> = computed(() => {
     const preset = Aura.primitive as Record<ThemeColorName, Required<ColorScale>>;
     return THEME_COLORS.map((name) => ({

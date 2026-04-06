@@ -13,6 +13,9 @@
           @if (item.children) {
             <div
               (click)="toggleMenu(item)"
+              (keyup.enter)="toggleMenu(item)"
+              role="button"
+              tabindex="0"
               cdkOverlayOrigin
               #trigger="cdkOverlayOrigin"
               [ngClass]="{

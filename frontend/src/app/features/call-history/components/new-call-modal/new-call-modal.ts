@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DialogModule } from 'primeng/dialog';
+import { LucideAngularModule, Phone,Video } from 'lucide-angular';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { LucideAngularModule, Video, Phone } from 'lucide-angular';
+
 import { Multiselect } from '@/shared/components/multiselect/multiselect';
+
+import { CallType,UserSummary } from '../../models/call-history.model';
 import { CallHistoryService } from '../../services/call-history.service';
 import { CallHistoryStore } from '../../store/call-history.store';
-import { UserSummary, CallType } from '../../models/call-history.model';
 
 @Component({
   selector: 'app-new-call-modal',

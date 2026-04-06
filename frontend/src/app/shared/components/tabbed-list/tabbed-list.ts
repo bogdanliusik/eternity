@@ -1,13 +1,14 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { Component, contentChild, inject, OnInit, TemplateRef } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
 import { BadgeModule } from 'primeng/badge';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { TabsModule } from 'primeng/tabs';
-import { LucideAngularModule } from 'lucide-angular';
-import { TabbedListConfig } from './tabbed-list.models';
-import { TABBED_LIST_CONFIG, TabbedListStore } from './tabbed-list.store';
+
 import { TabbedListEmptyState } from './components/tabbed-list-empty-state';
 import { TabbedListSkeleton } from './components/tabbed-list-skeleton';
+import { TabbedListConfig } from './tabbed-list.models';
+import { TABBED_LIST_CONFIG, TabbedListStore } from './tabbed-list.store';
 
 @Component({
   selector: 'app-tabbed-list',

@@ -5,6 +5,6 @@ export interface MenuItem {
   separator?: boolean;
   selected?: boolean;
   active?: boolean;
-  items: Array<SubMenuItem>;
+  items: SubMenuItem[];
   roles?: string[];
 }

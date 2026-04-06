@@ -1,10 +1,12 @@
-import { Component, inject } from '@angular/core';
-import { NavbarMobileSubmenu } from '../navbar-mobile-submenu/navbar-mobile-submenu';
 import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { LucideAngularModule, Minus, Plus } from 'lucide-angular';
+
 import { MenuService } from '@/features/layout/services/menu.service';
 import { SubMenuItem } from '@/features/layout/types/sub-menu-item';
-import { LucideAngularModule, Minus, Plus } from 'lucide-angular';
+
+import { NavbarMobileSubmenu } from '../navbar-mobile-submenu/navbar-mobile-submenu';
 
 @Component({
   selector: 'app-navbar-mobile-menu',

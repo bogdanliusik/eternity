@@ -1,8 +1,10 @@
 import { DestroyRef, inject, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageService } from 'primeng/api';
-import { SignalRService } from './signalr.service';
+
 import { IncomingCallNotification } from '@/features/call-history/models/call-history.model';
+
+import { SignalRService } from './signalr.service';
 
 /**
  * SignalR hub service for the GeneralHub (/hubs/general).

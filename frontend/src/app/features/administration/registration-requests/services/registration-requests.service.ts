@@ -1,8 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RegistrationRequest, RegistrationRequestStatus } from '../models/registration-request.model';
-import { CoreHttpService } from '@/core/services/core-http.service';
+
 import { ApiErrorHandler } from '@/core/operators/handle-api-error';
+import { CoreHttpService } from '@/core/services/core-http.service';
+
+import { RegistrationRequest, RegistrationRequestStatus } from '../models/registration-request.model';
 
 export interface AllRequestsCounts {
   pending: number;

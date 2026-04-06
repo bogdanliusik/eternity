@@ -1,11 +1,13 @@
-import { DestroyRef, inject, Injectable, signal, computed } from '@angular/core';
+import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
-import { GeneralHubService } from './general-hub.service';
-import { CallApiService } from './call-api.service';
-import { CallType, IncomingCallNotification } from '@/features/call-history/models/call-history.model';
+
 import { AuthStore } from '@/core/auth/auth.store';
+import { CallType, IncomingCallNotification } from '@/features/call-history/models/call-history.model';
+
+import { CallApiService } from './call-api.service';
+import { GeneralHubService } from './general-hub.service';
 
 /**
  * Context object for the pre-join modal.

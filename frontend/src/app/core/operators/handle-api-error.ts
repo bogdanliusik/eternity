@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { MessageService } from 'primeng/api';
-import { MonoTypeOperatorFunction, Observable, EMPTY, throwError } from 'rxjs';
+import { EMPTY, MonoTypeOperatorFunction, Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+
 import { ApiError } from '../models/api.error';
 
 export interface HandleApiErrorOptions {

@@ -1,12 +1,14 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
-import { AngularSvgIconModule } from 'angular-svg-icon';
 import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { AngularSvgIconModule } from 'angular-svg-icon';
+import { LoaderCircleIcon, LucideAngularModule } from 'lucide-angular';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { LogInFormGroup } from './log-in-form.types';
+
 import { AuthStore } from '@/core/auth/auth.store';
-import { LoaderCircleIcon, LucideAngularModule } from 'lucide-angular';
-import { RouterModule } from '@angular/router';
+
+import { LogInFormGroup } from './log-in-form.types';
 
 @Component({
   selector: 'app-login',

@@ -1,8 +1,8 @@
-import { DestroyRef, inject, Injectable } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, Subject } from 'rxjs';
-import { SignalRService } from './signalr.service';
+import { inject, Injectable } from '@angular/core';
+
 import { CallRecord } from '@/features/call-history/models/call-history.model';
+
+import { SignalRService } from './signalr.service';
 
 export interface ParticipantJoinedEvent {
   callId: string;
@@ -50,7 +50,6 @@ export interface CallErrorEvent {
 export class CallHubService {
   private static readonly HUB_URL = '/hubs/call';
   private readonly signalR = inject(SignalRService);
-  private readonly destroyRef = inject(DestroyRef);
 
   readonly callJoined$ = this.signalR.on<CallRecord>(CallHubService.HUB_URL, 'CallJoined');
   readonly participantJoined$ = this.signalR.on<ParticipantJoinedEvent>(CallHubService.HUB_URL, 'ParticipantJoined');

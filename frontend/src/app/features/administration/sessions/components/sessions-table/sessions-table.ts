@@ -1,10 +1,11 @@
+import { ClipboardModule } from '@angular/cdk/clipboard';
 import { DatePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
-import { ClipboardModule } from '@angular/cdk/clipboard';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
+
 import { Session, SessionStatus } from '../../models/session.model';
 
 @Component({

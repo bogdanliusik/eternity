@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Toast } from 'primeng/toast';
 import { LucideAngularModule, Phone, PhoneOff } from 'lucide-angular';
+import { Toast } from 'primeng/toast';
+
 import { IncomingCallService } from '@/core/services/incoming-call.service';
 import { PreJoinModal } from '@/shared/components/pre-join-modal/pre-join-modal';
 

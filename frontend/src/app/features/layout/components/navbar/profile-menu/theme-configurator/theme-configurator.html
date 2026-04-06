@@ -11,7 +11,7 @@
       <app-theme-option-tile
         [label]="color.name"
         [active]="color.name === theme().color"
-        (select)="togglePrimaryColor(color.name)">
+        (optionSelect)="togglePrimaryColor(color.name)">
         <span
           [style.backgroundColor]="color.palette['500']"
           class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
@@ -27,7 +27,7 @@
       <app-theme-option-tile
         [label]="surface.name"
         [active]="surface.name === theme().surface"
-        (select)="toggleSurface(surface)">
+        (optionSelect)="toggleSurface(surface)">
         <span
           [style.backgroundColor]="surface.palette['500']"
           class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
@@ -40,7 +40,7 @@
   <span class="text-color text-sm font-semibold">Surface</span>
   <div class="mt-2 grid grid-cols-2 gap-2">
     @for (mode of themeMode; track mode) {
-      <app-theme-option-tile [label]="mode" [active]="mode === theme().mode" (select)="toggleMode(mode)">
+      <app-theme-option-tile [label]="mode" [active]="mode === theme().mode" (optionSelect)="toggleMode(mode)">
         <lucide-icon
           [img]="mode === 'light' ? sunIcon : moonIcon"
           class="text-muted-foreground/50 h-5 w-5"></lucide-icon>

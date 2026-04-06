@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { LucideAngularModule, ArrowUpRight, ArrowDownLeft } from 'lucide-angular';
+import { ArrowDownLeft,ArrowUpRight, LucideAngularModule } from 'lucide-angular';
+
 import { CallDirection, CallStatus } from '../../models/call-history.model';
 
 @Component({

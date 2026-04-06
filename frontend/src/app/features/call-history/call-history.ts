@@ -1,14 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { Filter,LucideAngularModule, PhoneCall, RefreshCw } from 'lucide-angular';
 import { ButtonModule } from 'primeng/button';
-import { LucideAngularModule, PhoneCall, RefreshCw, Filter } from 'lucide-angular';
-import { CallHistoryStore } from './store/call-history.store';
+
+import { IncomingCallService } from '@/core/services/incoming-call.service';
+
 import { CallCard } from './components/call-card/call-card';
-import { CallHistorySkeleton } from './components/call-history-skeleton/call-history-skeleton';
 import { CallHistoryEmpty } from './components/call-history-empty/call-history-empty';
+import { CallHistorySkeleton } from './components/call-history-skeleton/call-history-skeleton';
 import { NewCallModal } from './components/new-call-modal/new-call-modal';
 import { CallHistoryRecord, CallStatus } from './models/call-history.model';
-import { IncomingCallService } from '@/core/services/incoming-call.service';
+import { CallHistoryStore } from './store/call-history.store';
 
 interface FilterOption {
   id: 'all' | CallStatus;

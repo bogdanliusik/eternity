@@ -60,6 +60,6 @@ public class RegistrationRequestsEndpoint : EndpointGroupBase
 
     private sealed class RequestStatusQuery
     {
-        public RegistrationRequestStatus Status { get; } = RegistrationRequestStatus.Pending;
+        public RegistrationRequestStatus Status { get; set; } = RegistrationRequestStatus.Pending;
     }
 }

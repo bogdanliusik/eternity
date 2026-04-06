@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, OnChanges } from '@angular/core';
+import { Directive, ElementRef, inject, Input, OnChanges } from '@angular/core';
 
 /**
  * Binds a MediaStream to the srcObject property of a <video> or <audio> element.
@@ -13,11 +13,7 @@ import { Directive, ElementRef, Input, OnChanges } from '@angular/core';
 export class SrcObjectDirective implements OnChanges {
   @Input('appSrcObject') stream: MediaStream | null = null;
 
-  private readonly el: HTMLMediaElement;
-
-  constructor(elementRef: ElementRef<HTMLMediaElement>) {
-    this.el = elementRef.nativeElement;
-  }
+  private readonly el: HTMLMediaElement = inject(ElementRef<HTMLMediaElement>).nativeElement;
 
   ngOnChanges(): void {
     this.el.srcObject = this.stream ?? null;

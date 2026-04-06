@@ -1,4 +1,5 @@
 import { ColorScale } from '@primeuix/themes';
+
 import { ThemeColorName, ThemeMode, ThemeSurfaceName } from './theme.types';
 
 export interface Theme {

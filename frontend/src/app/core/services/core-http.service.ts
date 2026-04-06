@@ -1,9 +1,10 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, map, throwError } from 'rxjs';
+import { map, Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { ApiError } from '../models/api.error';
+
 import { ApiEnvelope } from '../models/api.envelope';
+import { ApiError } from '../models/api.error';
 import { HttpRequestConfig } from '../models/http-request.config';
 
 function toHttpParams(params?: HttpRequestConfig['params']): HttpParams | undefined {
@@ -102,7 +103,10 @@ function unwrapEnvelope<T>(envelope: ApiEnvelope<T>): T | boolean {
   return true;
 }
 
-function throwEnvelopeError(err: any) {
+function throwEnvelopeError(err: HttpErrorResponse | ApiError) {
+  if (err instanceof ApiError) {
+    return throwError(() => err);
+  }
   if (err?.error && typeof err.error === 'object' && 'errors' in err.error) {
     const e = err.error as ApiEnvelope<unknown>;
     return throwError(() => new ApiError(err.status, e.errors, e.errors?.join('; ') || err.message));

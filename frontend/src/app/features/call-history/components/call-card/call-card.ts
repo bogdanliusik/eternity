@@ -1,11 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { LucideAngularModule, Phone, PhoneCall,Video } from 'lucide-angular';
 import { ButtonModule } from 'primeng/button';
-import { LucideAngularModule, Phone, Video, PhoneCall } from 'lucide-angular';
-import { CallHistoryRecord, CallStatus, CallType, CallDirection, deriveUserDisplayStatus, deriveCallDirection } from '../../models/call-history.model';
-import { StatusPill } from '../status-pill/status-pill';
-import { ParticipantAvatarGroup } from '../participant-avatar-group/participant-avatar-group';
+
 import { AuthStore } from '@/core/auth/auth.store';
+
+import { CallDirection, CallHistoryRecord, CallStatus, CallType, deriveCallDirection,deriveUserDisplayStatus } from '../../models/call-history.model';
+import { ParticipantAvatarGroup } from '../participant-avatar-group/participant-avatar-group';
+import { StatusPill } from '../status-pill/status-pill';
 
 @Component({
   selector: 'app-call-card',

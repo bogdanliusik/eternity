@@ -1,20 +1,20 @@
-import { MenuItem } from '../types/menu-item';
 import {
-  ChartPie,
-  LockKeyhole,
-  TriangleAlert,
-  Box,
-  Download,
-  Gift,
-  Users,
-  Settings,
   Bell,
-  Folder,
-  UserIcon,
+  Box,
+  ChartPie,
   ClipboardList,
+  Download,
+  Folder,
+  Gift,
+  LockKeyhole,
+  Phone,
   Server,
-  Phone
-} from 'lucide-angular';
+  Settings,
+  TriangleAlert,
+  UserIcon,
+  Users} from 'lucide-angular';
+
+import { MenuItem } from '../types/menu-item';
 
 export const MENU_ITEM_IDS = {
   REGISTRATION_REQUESTS: 'registration-requests'
