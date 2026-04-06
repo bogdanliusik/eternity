@@ -10,7 +10,7 @@ Repository-wide instructions for coding agents.
   - `backend/AGENTS.md`
 - When working inside `frontend/` or `backend/`, follow the deeper `AGENTS.md` first, then this file.
 - Use `.agents/skills/` for standardized task-specific skills.
-- Use `docs/` for deeper context, architecture notes, and runbooks.
+- Use `docs/` for deeper context, architecture notes, feature docs, and runbooks.
 - Use `docs/tooling-policy.md` for when subagents, Context7, or MCP are worth using.
 
 ## Repo Map
@@ -19,6 +19,7 @@ Repository-wide instructions for coding agents.
 - `backend/` - .NET 9 solution using WebApi/Application/Infrastructure/Domain layers, MediatR, EF Core, PostgreSQL, and SignalR.
 - `docker-compose.yml` - full local stack for postgres, backend, frontend, and peerjs.
 - `scripts/` - local setup and utility scripts.
+- `docs/features/` - concise docs for the current user-facing capabilities and their backend/frontend surfaces.
 
 ## Always-On Rules
 
@@ -46,8 +47,15 @@ Repository-wide instructions for coding agents.
 ## Guidance Maintenance
 
 - If a change materially alters architecture, conventions, verification, deployment, debugging workflow, or other durable team guidance, update the relevant `.md` files in the same changeset.
-- Update `AGENTS.md` for stable repo rules, `.agents/skills/` for task playbooks, and `docs/` for deeper explanation or runbooks.
+- Update `AGENTS.md` for stable repo rules, `.agents/skills/` for task playbooks, and `docs/` for deeper explanation or current feature behavior.
 - Do not leave important guidance updates as follow-up work when the code change already establishes the new pattern.
+
+## Cross-Layer Changes
+
+- When a change spans frontend and backend, start from the user-facing flow and confirm the contract first.
+- Update both layers in the same changeset when the contract changes.
+- Re-check schema, auth, session, and real-time implications only when they are relevant to the flow.
+- Verify the affected flow end to end when feasible.
 
 ## Verification Baseline
 

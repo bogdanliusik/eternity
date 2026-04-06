@@ -41,8 +41,8 @@ Instructions for all work in `frontend/`.
 ## Real-Time
 
 - SignalR usage should go through the shared hub services built on `SignalRService`.
-- Call features may also require coordination with `PeerService`.
-- Do not add parallel ad hoc real-time patterns without a strong reason.
+- Keep real-time orchestration in shared services rather than feature-local ad hoc clients.
+- When peer or media behavior is needed, extend the existing shared client services instead of creating parallel implementations.
 
 ## Verification
 
@@ -57,4 +57,3 @@ Instructions for all work in `frontend/`.
 - `.agents/skills/debugging-troubleshooting/SKILL.md`
 - `.agents/skills/systematic-debugging/SKILL.md`
 - `.agents/skills/verification-before-completion/SKILL.md`
-- `.agents/skills/full-stack-feature/SKILL.md`

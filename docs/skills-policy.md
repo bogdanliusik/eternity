@@ -1,140 +1,135 @@
 # Skills Policy
 
-This file explains how to keep the repo's AI guidance system useful over time instead of letting it grow into instruction clutter.
+This file keeps the repo's guidance system focused instead of turning it into overlapping instructions.
 
 ## Goal
 
 - Keep `AGENTS.md` files short and stable.
-- Keep `.agents/skills/` focused on high-value workflows.
-- Keep `docs/` for deeper explanation and human-readable context.
+- Keep `.agents/skills/` limited to reusable task workflows.
+- Keep `docs/` for architecture, feature descriptions, and human-readable context.
 
 ## What Belongs Where
 
 ### Put it in `AGENTS.md` when
 
-- the rule should apply almost all the time
+- the rule applies to most tasks
 - it describes stable repo architecture or hard constraints
-- violating it would likely cause incorrect work in many tasks
+- breaking it would likely cause incorrect work across many changes
 
 Examples:
 
 - layer boundaries
-- required verification baseline
+- verification baseline
 - main stack choices
-- skill discovery rules
+- durable cross-layer rules
 
 ### Put it in `.agents/skills/` when
 
 - it is a repeatable workflow or playbook
-- it is only relevant for certain tasks
-- it contains step-by-step guidance, heuristics, or checklists
-- it would make `AGENTS.md` too long or too specific
+- it is task-shaped rather than feature-shaped
+- it contains concrete steps, heuristics, or checklists
+- it is useful across multiple future tasks
 
 Examples:
 
 - debugging workflow
-- full-stack feature implementation flow
+- backend implementation workflow
 - UI quality review checklist
 - migration and query tuning workflow
 
 ### Put it in `docs/` when
 
 - the content is explanatory rather than directive
-- humans need background context or runbooks
-- the content is too long for a skill or rule file
+- humans need background context, architecture, or feature notes
+- the content is too long for a skill or stable rule file
 
 Examples:
 
-- architecture overviews
-- local-dev notes
-- troubleshooting notes
-- real-time flow explanations
+- architecture overview
+- feature docs in `docs/features/`
+- tooling policy
+- deeper design notes
 
-## When to Add a New Skill
+## When to Add a Skill
 
-Add a new skill only if most of these are true:
+Add a skill only if most of these are true:
 
 - the workflow comes up repeatedly
-- it is useful across multiple future tasks
-- it is more procedural than architectural
-- it can stay short and specific
-- it would reduce repeated prompting or repeated agent mistakes
+- it is useful beyond one current feature
+- it gives more value than a short AGENTS rule would
+- it can stay concise and specific
+- it reduces repeated agent mistakes
 
 Good candidates:
 
 - recurring debugging patterns
-- repeated cross-layer implementation flows
-- recurring deployment or migration procedures
+- repeated backend or frontend implementation workflows
+- recurring migration or verification procedures
 
 Bad candidates:
 
-- one-off feature notes
+- current feature walkthroughs
+- notes that mainly describe existing endpoints or screens
 - rules that already belong in `AGENTS.md`
-- long architecture explanations that belong in `docs/`
-- overly generic best-practice dumps not tailored to this repo
+- generic best-practice dumps not tailored to this repo
 
-## When to Update an Existing Skill
+## Feature Guidance Rule
 
-Update an existing skill instead of creating a new one when:
+- Skills should not depend on the existence of a specific current feature.
+- Current feature behavior belongs in `docs/features/`.
+- If a proposed skill mainly explains one feature's endpoints, live flow, or UI, it should be a doc instead.
 
-- the new guidance fits the same workflow
-- agents are making the same mistake within that area
-- the repo pattern changed and the skill is now stale
-- two skills are starting to overlap heavily
+## When to Update, Merge, or Remove Skills
 
-Prefer improving an existing skill before splitting it.
-
-## When to Remove or Merge Skills
+Update an existing skill when the workflow is still valid but the guidance is stale or incomplete.
 
 Remove or merge a skill when:
 
 - it duplicates another skill
-- the underlying workflow is no longer used in the repo
 - it became too generic to be useful
 - it became too narrow to justify its own file
-- agents no longer need it because the guidance moved into stable repo rules
+- the useful parts moved into stable repo rules
+- agents no longer need it to complete tasks correctly
 
-If two skills are usually read together, consider merging them.
+If two skills are usually read together, consider merging them. If a skill no longer adds unique operational value, prefer deleting it.
 
 ## Size and Style Guidelines
 
 - Keep skills short enough to scan quickly.
-- Start with `Purpose`, `Use When`, and `Why This Is a Skill`.
 - Prefer repo-specific guidance over generic advice.
-- Use checklists and sequences when they help.
+- Use sequences and checklists when they improve execution.
 - Avoid copying the same rule into multiple files.
-- Link related skills instead of duplicating content.
+- Link to other skills or docs instead of repeating content.
 
-## How to Evaluate a Proposed External Skill
+## External Skill Check
 
 Before adding an external skill, ask:
 
 - does it fit this stack and architecture?
-- is it better than the local skill we already have?
+- is it better than the local guidance we already have?
 - will it push patterns that conflict with repo conventions?
 - is it specific enough to be useful here?
-- can we adapt the useful parts locally instead of depending on a remote definition?
+- can the useful part be adapted into local guidance instead?
 
 Default stance:
 
-- prefer local repo-owned skills
+- prefer local repo-owned guidance
 - add external skills sparingly
-- only add them when they clearly improve agent behavior in this repo
+- only keep them when they clearly improve agent behavior in this repo
 
-## Lightweight Maintenance Process
+## Maintenance Process
 
 When a skill changes:
 
 1. Update the skill file.
-2. Update `.agents/skills/` discovery references if selection guidance needs to change.
-3. Update `AGENTS.md` references only if the skill should become part of standard task selection.
-4. Update `docs/` only if deeper explanation is needed.
+2. Update `AGENTS.md` references only if selection guidance changed.
+3. Update `docs/` only if deeper explanation is needed.
 
-When a large or durable code change lands:
+When durable project guidance changes:
 
-1. Decide whether it changes stable repo rules, a repeatable workflow, or deeper explanatory context.
-2. Update the relevant `AGENTS.md`, `.agents/skills/`, or `docs/` files in the same changeset.
-3. Prefer same-change guidance updates over creating documentation debt for later.
+1. Decide whether it belongs in `AGENTS.md`, `.agents/skills/`, or `docs/`.
+2. Update the right files in the same changeset.
+3. Prefer deleting weak guidance over leaving overlapping instructions behind.
 
 ## Review Trigger
 
@@ -143,15 +138,15 @@ Review the skill system when any of these happen:
 - agents repeatedly ignore or misuse skills
 - multiple skills begin overlapping
 - the stack or architecture changes materially
-- a new workflow becomes common across tasks
+- a workflow becomes common across many tasks
 - the guidance starts feeling long, repetitive, or hard to scan
 
 ## Success Criteria
 
-The skill system is healthy when:
+The guidance system is healthy when:
 
-- agents can quickly find the right guidance
+- agents can quickly find the right instructions
 - `AGENTS.md` files stay short
-- skills are practical and reused
-- docs hold explanation instead of operational rules
+- skills remain practical and reused
+- docs describe architecture and features without pretending to be workflows
 - new guidance reduces repeated mistakes instead of adding noise
