@@ -41,10 +41,10 @@ Instructions for all work in `backend/`.
 - Add migrations only when schema changes require them.
 - Do not hand-edit migration snapshots unless it is necessary and understood.
 
-## Real-Time and Local Dev
+## Real-Time and Runtime
 
-- `GeneralHub` and `CallHub` are part of the core backend architecture, not optional extras.
-- Some call flows also depend on PeerJS in the local stack.
+- SignalR hubs are a first-class part of the backend architecture, not optional extras.
+- Re-check hub behavior when changing auth, session, presence, or other live workflows.
 - The root `docker-compose.yml` is the main full-stack local environment, and compose runs the backend with Production settings.
 
 ## Verification
@@ -57,8 +57,6 @@ Instructions for all work in `backend/`.
 
 - `.agents/skills/backend-development/SKILL.md`
 - `.agents/skills/postgres/SKILL.md`
-- `.agents/skills/docker-local-dev-deploy/SKILL.md`
 - `.agents/skills/debugging-troubleshooting/SKILL.md`
 - `.agents/skills/systematic-debugging/SKILL.md`
 - `.agents/skills/verification-before-completion/SKILL.md`
-- `.agents/skills/full-stack-feature/SKILL.md`
