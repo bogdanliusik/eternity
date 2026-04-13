@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "lint": "ng lint",
-    "lint:fix": "ng lint --fix"
+    "lint:fix": "ng lint --fix",
+    "test": "echo \"No frontend tests are currently configured.\""
   },
   "private": true,
   "dependencies": {
@@ -37,14 +38,12 @@
   },
   "devDependencies": {
     "@angular/build": "^21.2.7",
-    "@angular/cli": "^21.2.6",
+    "@angular/cli": "^21.2.7",
     "@angular/compiler-cli": "^21.2.7",
-    "@types/jasmine": "~5.1.0",
     "angular-eslint": "21.3.1",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-simple-import-sort": "^13.0.0",
-    "jasmine-core": "~5.8.0",
     "prettier": "^3.6.2",
     "prettier-plugin-classnames": "^0.8.2",
     "prettier-plugin-merge": "^0.10.1",
