@@ -4,7 +4,7 @@ Instructions for all work in `backend/`.
 
 ## Stack and Layers
 
-- .NET 9 solution: `Eternity.sln`.
+- .NET 10 solution: `Eternity.sln`.
 - `Eternity.WebApi` - minimal API transport, SignalR hubs, and web-layer services.
 - `Eternity.Application` - CQRS, MediatR, validators, behaviors, and application models.
 - `Eternity.Infrastructure` - EF Core, Identity, persistence, migrations, and background jobs.

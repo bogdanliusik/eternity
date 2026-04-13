@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <AnalysisLevel>9-recommended</AnalysisLevel>
+        <AnalysisLevel>10-recommended</AnalysisLevel>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     </PropertyGroup>
 </Project>

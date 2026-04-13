@@ -1,7 +1,7 @@
 using Eternity.Application.Common.Models;
 using Microsoft.AspNetCore.Http;
 
-namespace Eternity.Application.Common.Interfaces;
+namespace Eternity.WebApi.Services;
 
 public interface ICookieAuthService
 {

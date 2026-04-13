@@ -4,7 +4,7 @@ Instructions for all work in `frontend/`.
 
 ## Stack
 
-- Angular 20 standalone application.
+- Angular 21 standalone application.
 - The app runs with zoneless change detection.
 - PrimeNG plus TailwindCSS for UI.
 - NgRx Signal Store is the default pattern for non-trivial state.

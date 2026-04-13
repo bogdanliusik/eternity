@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace Eternity.WebApi.Hubs;
 
 [Authorize]
-public class GeneralHub(
+public partial class GeneralHub(
     ConnectionTracker connectionTracker,
     IMediator mediator,
     ICurrentUser currentUser,
@@ -25,11 +25,7 @@ public class GeneralHub(
             await mediator.Send(new SetSessionOnlineCommand(sessionId));
         }
         await Groups.AddToGroupAsync(Context.ConnectionId, ConnectionTracker.GetSessionGroup(sessionId));
-        logger.LogInformation(
-            "SignalR connected: session {SessionId}, connection {ConnectionId}",
-            sessionId,
-            Context.ConnectionId
-        );
+        LogSignalRConnected(logger, sessionId, Context.ConnectionId);
         await base.OnConnectedAsync();
     }
 
@@ -41,12 +37,16 @@ public class GeneralHub(
                 await mediator.Send(new SetSessionOfflineCommand(sessionId));
             }
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConnectionTracker.GetSessionGroup(sessionId));
-            logger.LogInformation(
-                "SignalR disconnected: session {SessionId}, connection {ConnectionId}",
-                sessionId,
-                Context.ConnectionId
-            );
+            LogSignalRDisconnected(logger, sessionId, Context.ConnectionId);
         }
         await base.OnDisconnectedAsync(exception);
     }
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "SignalR connected: session {SessionId}, connection {ConnectionId}")]
+    private static partial void LogSignalRConnected(ILogger logger, Guid sessionId, string connectionId);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "SignalR disconnected: session {SessionId}, connection {ConnectionId}")]
+    private static partial void LogSignalRDisconnected(ILogger logger, Guid sessionId, string connectionId);
 }

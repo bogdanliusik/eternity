@@ -22,7 +22,7 @@ public static class InitializerExtensions
     }
 }
 
-public class AppDbContextInitializer(
+public partial class AppDbContextInitializer(
     ILogger<AppDbContextInitializer> logger,
     AppDbContext context,
     UserManager<ApplicationUser> userManager,
@@ -44,7 +44,7 @@ public class AppDbContextInitializer(
         var staleCount = await context.UserSessions.Where(s => s.IsOnline)
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.IsOnline, false));
         if (staleCount > 0) {
-            logger.LogInformation("Reset {Count} stale online sessions on startup", staleCount);
+            LogStaleSessionsReset(logger, staleCount);
         }
     }
 
@@ -133,4 +133,7 @@ public class AppDbContextInitializer(
             }
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Reset {Count} stale online sessions on startup")]
+    private static partial void LogStaleSessionsReset(ILogger logger, int count);
 }

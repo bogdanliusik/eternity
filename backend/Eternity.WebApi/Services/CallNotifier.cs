@@ -12,7 +12,7 @@ namespace Eternity.WebApi.Services;
 ///     - Incoming call notifications go through GeneralHub (always connected) so users receive them on any page.
 ///     - In-call signaling (participant joined/left/declined, call ended) goes through CallHub groups.
 /// </summary>
-public class CallNotifier(
+public partial class CallNotifier(
     IHubContext<GeneralHub> generalHubContext,
     IHubContext<CallHub> callHubContext,
     IAppDbContext dbContext,
@@ -46,25 +46,20 @@ public class CallNotifier(
                 .SendAsync("IncomingCall", notification)
         );
         await Task.WhenAll(sendTasks);
-        logger.LogInformation(
-            "Sent incoming call notification for call {CallId} to {Count} session(s) of {UserCount} invitee(s)",
-            callId,
-            sessionIds.Count,
-            inviteeUserIds.Count
-        );
+        LogIncomingCallNotification(logger, callId, sessionIds.Count, inviteeUserIds.Count);
     }
 
     public async Task NotifyParticipantJoinedAsync(string callId, Guid userId, string username, string fullName) {
         var callGroup = CallConnectionTracker.GetCallGroup(callId);
         await callHubContext.Clients.Group(callGroup)
             .SendAsync("ParticipantJoined", new { callId, userId, username, fullName });
-        logger.LogInformation("Notified call {CallId} that user {UserId} joined", callId, userId);
+        LogParticipantJoined(logger, callId, userId);
     }
 
     public async Task NotifyParticipantLeftAsync(string callId, Guid userId) {
         var callGroup = CallConnectionTracker.GetCallGroup(callId);
         await callHubContext.Clients.Group(callGroup).SendAsync("ParticipantLeft", new { callId, userId });
-        logger.LogInformation("Notified call {CallId} that user {UserId} left", callId, userId);
+        LogParticipantLeft(logger, callId, userId);
     }
 
     public async Task NotifyCallDeclinedAsync(string callId, Guid userId) {
@@ -85,7 +80,7 @@ public class CallNotifier(
             );
             await Task.WhenAll(sendTasks);
         }
-        logger.LogInformation("Notified that user {UserId} declined call {CallId}", userId, callId);
+        LogCallDeclined(logger, userId, callId);
     }
 
     public async Task NotifyCallEndedAsync(string callId, string reason, List<Guid> participantUserIds) {
@@ -100,6 +95,23 @@ public class CallNotifier(
             generalHubContext.Clients.Group(ConnectionTracker.GetSessionGroup(sid)).SendAsync("CallEnded", payload)
         );
         await Task.WhenAll(sendTasks);
-        logger.LogInformation("Notified all participants that call {CallId} ended: {Reason}", callId, reason);
+        LogCallEnded(logger, callId, reason);
     }
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "Sent incoming call notification for call {CallId} to {Count} session(s) of {UserCount} invitee(s)")]
+    private static partial void LogIncomingCallNotification(ILogger logger, string callId, int count, int userCount);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Notified call {CallId} that user {UserId} joined")]
+    private static partial void LogParticipantJoined(ILogger logger, string callId, Guid userId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Notified call {CallId} that user {UserId} left")]
+    private static partial void LogParticipantLeft(ILogger logger, string callId, Guid userId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Notified that user {UserId} declined call {CallId}")]
+    private static partial void LogCallDeclined(ILogger logger, Guid userId, string callId);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "Notified all participants that call {CallId} ended: {Reason}")]
+    private static partial void LogCallEnded(ILogger logger, string callId, string reason);
 }
