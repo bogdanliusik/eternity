@@ -38,11 +38,14 @@ Repository-wide instructions for coding agents.
 
 ## Skill Usage
 
-- Before non-trivial work, read the smallest relevant skill set from `.agents/skills/`.
-- Prefer reading 1-2 relevant skills over reading the entire skill catalog.
+- Before non-trivial work, load the smallest relevant skill set via the `skill` tool.
+- Prefer loading 1-2 relevant skills over loading the entire catalog.
 - More specific skills override more general skills for that task.
 - `AGENTS.md` rules override skills.
 - Put stable repo rules in `AGENTS.md`, reusable task playbooks in `.agents/skills/`, and longer explanations in `docs/`.
+- Frontend work: load `angular-frontend`, `ui-quality`, or `verification-before-completion` as needed.
+- Backend work: load `backend-development`, `postgres`, or `verification-before-completion` as needed.
+- Debugging: load `systematic-debugging` or `debugging-troubleshooting`.
 
 ## Guidance Maintenance
 
@@ -59,10 +62,34 @@ Repository-wide instructions for coding agents.
 
 ## Verification Baseline
 
-- Frontend-only changes: run `npm run build` in `frontend/`.
-- Backend-only changes: run `dotnet build Eternity.sln` in `backend/`.
+- Frontend-only changes: run `npm run lint` and `npm run build` in `frontend/`.
+- Backend-only changes: run `dotnet format Eternity.sln --verify-no-changes` and `dotnet build Eternity.sln` in `backend/`.
+- Cross-layer changes: run both frontend and backend verification.
 - Schema, auth, real-time, or compose changes: verify the affected end-to-end flow when feasible.
 - Do not claim automated coverage that the repository does not currently have.
+
+## Issue Workflow
+
+When the user references a GitHub issue (by number or URL):
+
+1. **Fetch the issue** using `gh issue view` to read the title, body, and labels.
+2. **Check local state** before branching:
+   - Run `git status` and `git branch --show-current`.
+   - If the current branch is not `develop`, or there are uncommitted/staged changes, **ask the user** how to proceed (e.g. stash, commit, switch anyway) before continuing.
+3. **Create a branch from `develop`**:
+   - Always branch from an up-to-date `develop`: `git checkout develop && git pull origin develop`.
+   - Branch name follows Conventional format: `<type>/<short-description>` (e.g. `feature/user-avatar-upload`, `fix/chat-scroll-jump`).
+   - Derive the type from the issue labels or content (`feature`, `fix`, `refactor`, `chore`, etc.).
+4. **Implement the changes**, following all other rules in this file and the relevant sub-AGENTS.md.
+5. **Run verification** per the Verification Baseline section.
+6. **Ask the user to manually review** the changes before committing. Do not commit or create a PR until the user explicitly confirms.
+7. **Commit and push** after user approval:
+   - Follow the Commit Convention below.
+   - Push the branch to origin.
+8. **Create a PR** using `gh pr create`:
+   - Target branch: `develop`.
+   - Title: matches the commit subject.
+   - Body: include a short summary of what changed and why, and add `Closes #<issue-number>` to auto-close the issue on merge.
 
 ## Commit Convention
 
