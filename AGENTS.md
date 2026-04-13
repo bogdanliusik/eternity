@@ -15,8 +15,8 @@ Repository-wide instructions for coding agents.
 
 ## Repo Map
 
-- `frontend/` - Angular 20 standalone app using PrimeNG, TailwindCSS, SignalR, and PeerJS client integrations.
-- `backend/` - .NET 9 solution using WebApi/Application/Infrastructure/Domain layers, MediatR, EF Core, PostgreSQL, and SignalR.
+- `frontend/` - Angular 21 standalone app using PrimeNG, TailwindCSS, SignalR, and PeerJS client integrations.
+- `backend/` - .NET 10 solution using WebApi/Application/Infrastructure/Domain layers, MediatR, EF Core, PostgreSQL, and SignalR.
 - `docker-compose.yml` - full local stack for postgres, backend, frontend, and peerjs.
 - `scripts/` - local setup and utility scripts.
 - `docs/features/` - concise docs for the current user-facing capabilities and their backend/frontend surfaces.
