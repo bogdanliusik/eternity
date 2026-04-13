@@ -1,4 +1,4 @@
-@for (menu of menuService.pagesMenu; track $index) {
+@for (menu of menuService.pagesMenu; track menu.group) {
   <div class="pt-4">
     <div class="mx-1 mb-2 flex items-center justify-between">
       <small class="text-muted-foreground/60 text-sm font-semibold">
@@ -6,7 +6,7 @@
       </small>
     </div>
     <ul class="flex flex-col">
-      @for (item of menu.items; track $index) {
+      @for (item of menu.items; track item.label) {
         <li>
           <div
             (click)="toggleMenu(item)"

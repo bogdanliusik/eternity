@@ -1,6 +1,6 @@
 <div class="max-h-0 overflow-hidden pt-1 pl-2.5" [class.max-h-screen]="submenu.expanded">
   <ul class="border-surface text-muted-foreground flex flex-col border-l border-dashed pl-2">
-    @for (sub of submenu.children; track $index) {
+    @for (sub of submenu.children; track sub.label) {
       <li>
         <div class="text-muted-foreground hover:text-primary relative flex rounded-sm" (click)="toggleMenu(sub)" (keyup.enter)="toggleMenu(sub)" role="button" tabindex="0">
           <ng-container
