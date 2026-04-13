@@ -132,6 +132,7 @@ export class PeerService implements OnDestroy {
     }
 
     if (this.peer) {
+      this.peer.removeAllListeners();
       this.peer.destroy();
       this.peer = null;
     }

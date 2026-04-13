@@ -12,13 +12,13 @@ public class CallConnectionTracker
     /// <summary>
     ///     callId → { (userId, sessionId) → connection info }
     /// </summary>
-    private readonly ConcurrentDictionary<string, ConcurrentDictionary<CallSessionKey, CallSessionConnection>>
+    private readonly ConcurrentDictionary<Guid, ConcurrentDictionary<CallSessionKey, CallSessionConnection>>
         _callSessions = new();
 
     /// <summary>
     ///     connectionId → callId (for OnDisconnectedAsync lookup)
     /// </summary>
-    private readonly ConcurrentDictionary<string, string> _connectionToCall = new();
+    private readonly ConcurrentDictionary<string, Guid> _connectionToCall = new();
 
     /// <summary>
     ///     connectionId → (userId, sessionId) (for OnDisconnectedAsync lookup)
@@ -27,7 +27,7 @@ public class CallConnectionTracker
 
     private readonly Lock _lock = new();
 
-    public void AddSessionToCall(string callId, Guid userId, Guid sessionId, string connectionId) {
+    public void AddSessionToCall(Guid callId, Guid userId, Guid sessionId, string connectionId) {
         lock (_lock) {
             var sessions = _callSessions.GetOrAdd(
                 callId,
@@ -40,7 +40,7 @@ public class CallConnectionTracker
         }
     }
 
-    public void RemoveSessionFromCall(string callId, Guid userId, Guid sessionId, string connectionId) {
+    public void RemoveSessionFromCall(Guid callId, Guid userId, Guid sessionId, string connectionId) {
         lock (_lock) {
             var key = new CallSessionKey(userId, sessionId);
             if (_callSessions.TryGetValue(callId, out var sessions)) {
@@ -54,7 +54,7 @@ public class CallConnectionTracker
         }
     }
 
-    public void SetPeerId(string callId, Guid userId, Guid sessionId, string peerId) {
+    public void SetPeerId(Guid callId, Guid userId, Guid sessionId, string peerId) {
         lock (_lock) {
             var key = new CallSessionKey(userId, sessionId);
             if (_callSessions.TryGetValue(callId, out var sessions) && sessions.TryGetValue(key, out var connection)) {
@@ -63,7 +63,7 @@ public class CallConnectionTracker
         }
     }
 
-    public void SetMediaState(string callId, Guid userId, Guid sessionId, bool audioEnabled, bool videoEnabled) {
+    public void SetMediaState(Guid callId, Guid userId, Guid sessionId, bool audioEnabled, bool videoEnabled) {
         lock (_lock) {
             var key = new CallSessionKey(userId, sessionId);
             if (_callSessions.TryGetValue(callId, out var sessions) && sessions.TryGetValue(key, out var connection)) {
@@ -75,9 +75,8 @@ public class CallConnectionTracker
     /// <summary>
     ///     Look up which call a given connectionId is associated with.
     /// </summary>
-    public string? GetCallIdByConnection(string connectionId) {
-        _connectionToCall.TryGetValue(connectionId, out var callId);
-        return callId;
+    public Guid? GetCallIdByConnection(string connectionId) {
+        return _connectionToCall.TryGetValue(connectionId, out var callId) ? callId : null;
     }
 
     /// <summary>
@@ -91,7 +90,7 @@ public class CallConnectionTracker
     /// <summary>
     ///     Get all distinct user IDs in a call (across all sessions).
     /// </summary>
-    public List<Guid> GetUsersInCall(string callId) {
+    public List<Guid> GetUsersInCall(Guid callId) {
         lock (_lock) {
             if (_callSessions.TryGetValue(callId, out var sessions)) {
                 return sessions.Keys.Select(k => k.UserId).Distinct().ToList();
@@ -114,7 +113,7 @@ public class CallConnectionTracker
     /// <summary>
     ///     Check if a specific session is in a specific call.
     /// </summary>
-    public bool IsSessionInCall(string callId, Guid userId, Guid sessionId) {
+    public bool IsSessionInCall(Guid callId, Guid userId, Guid sessionId) {
         lock (_lock) {
             var key = new CallSessionKey(userId, sessionId);
             return _callSessions.TryGetValue(callId, out var sessions) && sessions.ContainsKey(key);
@@ -125,7 +124,7 @@ public class CallConnectionTracker
     ///     Get the connectionId for a specific session in a specific call.
     ///     Returns null if the session is not in the call.
     /// </summary>
-    public string? GetConnectionIdForSession(string callId, Guid userId, Guid sessionId) {
+    public string? GetConnectionIdForSession(Guid callId, Guid userId, Guid sessionId) {
         lock (_lock) {
             var key = new CallSessionKey(userId, sessionId);
             if (_callSessions.TryGetValue(callId, out var sessions) && sessions.TryGetValue(key, out var connection)) {
@@ -140,13 +139,13 @@ public class CallConnectionTracker
     ///     Used to decide whether the domain-level Leave should be called
     ///     (only when the last session of a user disconnects from a call).
     /// </summary>
-    public bool IsUserInCall(string callId, Guid userId) {
+    public bool IsUserInCall(Guid callId, Guid userId) {
         lock (_lock) {
             return _callSessions.TryGetValue(callId, out var sessions) && sessions.Keys.Any(k => k.UserId == userId);
         }
     }
 
-    public static string GetCallGroup(string callId) {
+    public static string GetCallGroup(Guid callId) {
         return $"call_{callId}";
     }
 
@@ -154,7 +153,7 @@ public class CallConnectionTracker
     ///     Returns all connection IDs for a specific user in a given call (across all their sessions).
     ///     Used to send targeted signaling messages to a specific participant.
     /// </summary>
-    public List<string> GetConnectionIdsForUser(string callId, Guid userId) {
+    public List<string> GetConnectionIdsForUser(Guid callId, Guid userId) {
         lock (_lock) {
             if (!_callSessions.TryGetValue(callId, out var sessions)) {
                 return [];
@@ -167,7 +166,7 @@ public class CallConnectionTracker
     ///     Returns all existing peer registrations in a call, excluding a specific user.
     ///     Used to send existing peers to a newly joined participant so they can initiate calls.
     /// </summary>
-    public List<(Guid UserId, string PeerId)> GetExistingPeerRegistrations(string callId, Guid excludeUserId) {
+    public List<(Guid UserId, string PeerId)> GetExistingPeerRegistrations(Guid callId, Guid excludeUserId) {
         lock (_lock) {
             if (!_callSessions.TryGetValue(callId, out var sessions)) {
                 return [];
@@ -182,7 +181,7 @@ public class CallConnectionTracker
     ///     Returns the current media state for all participants in a call, excluding a specific user.
     ///     Used to send existing media states to a newly joined participant.
     /// </summary>
-    public List<(Guid UserId, bool AudioEnabled, bool VideoEnabled)> GetExistingMediaStates(string callId,
+    public List<(Guid UserId, bool AudioEnabled, bool VideoEnabled)> GetExistingMediaStates(Guid callId,
         Guid excludeUserId) {
         lock (_lock) {
             if (!_callSessions.TryGetValue(callId, out var sessions)) {

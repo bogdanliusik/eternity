@@ -82,4 +82,6 @@
   </section>
 </div>
 
-<app-new-call-modal />
+@if (store.newCallModalVisible()) {
+  <app-new-call-modal />
+}

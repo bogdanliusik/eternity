@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Eternity.Application.Calls.Queries;
 
-public record GetCallQuery(string CallId) : IRequest<Result<CallDto>>;
+public record GetCallQuery(Guid CallId) : IRequest<Result<CallDto>>;
 
 public class GetCallQueryHandler(IAppDbContext dbContext, ICurrentUser currentUser)
     : IRequestHandler<GetCallQuery, Result<CallDto>>
@@ -59,6 +59,6 @@ public class GetCallQueryHandler(IAppDbContext dbContext, ICurrentUser currentUs
 public class GetCallQueryValidator : AbstractValidator<GetCallQuery>
 {
     public GetCallQueryValidator() {
-        RuleFor(x => x.CallId).NotEmpty().MaximumLength(26);
+        RuleFor(x => x.CallId).NotEmpty();
     }
 }

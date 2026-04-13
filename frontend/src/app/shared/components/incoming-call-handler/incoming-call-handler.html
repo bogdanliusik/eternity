@@ -1,5 +1,5 @@
 <p-toast key="incoming-call" position="top-right" [life]="30000">
-  <ng-template #headless let-message>
+  <ng-template #headless let-message let-closeFn="closeFn">
     <div class="bg-foreground border-surface flex w-80 flex-col gap-3 rounded-xl border p-4 shadow-lg">
       <div class="flex items-center gap-3">
         <div class="relative">
@@ -20,14 +20,14 @@
         <button
           type="button"
           class="flex h-9 grow cursor-pointer items-center justify-center gap-2 rounded-lg bg-rose-500 px-3 text-sm font-medium text-white hover:bg-rose-600"
-          (click)="onDecline()">
+          (click)="onDecline($event, closeFn)">
           <lucide-icon [img]="phoneOffIcon" class="h-4 w-4"></lucide-icon>
           Decline
         </button>
         <button
           type="button"
           class="bg-primary text-primary-contrast flex h-9 grow cursor-pointer items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium hover:brightness-110"
-          (click)="onAccept()">
+          (click)="onAccept($event, closeFn)">
           <lucide-icon [img]="phoneIcon" class="h-4 w-4"></lucide-icon>
           Accept
         </button>

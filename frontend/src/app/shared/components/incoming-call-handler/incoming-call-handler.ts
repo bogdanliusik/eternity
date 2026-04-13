@@ -21,11 +21,13 @@ export class IncomingCallHandler {
   readonly phoneIcon = Phone;
   readonly phoneOffIcon = PhoneOff;
 
-  onAccept(): void {
+  onAccept(event: Event, closeFn: (event: Event) => void): void {
+    closeFn(event);
     this.incomingCallService.openPreJoin();
   }
 
-  onDecline(): void {
+  onDecline(event: Event, closeFn: (event: Event) => void): void {
+    closeFn(event);
     this.incomingCallService.declineCall();
   }
 }

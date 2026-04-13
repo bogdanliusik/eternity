@@ -7,15 +7,15 @@ public class CallParticipant
     public const int MaxParticipantsPerCall = 5;
     private CallParticipant() { }
 
-    private CallParticipant(string callId, Guid userId, ParticipantStatus status) {
-        Id = Ulid.NewUlid().ToString();
+    private CallParticipant(Guid callId, Guid userId, ParticipantStatus status) {
+        Id = Guid.NewGuid();
         CallId = callId;
         UserId = userId;
         Status = status;
     }
 
-    public string Id { get; private set; } = null!;
-    public string CallId { get; private set; } = null!;
+    public Guid Id { get; private set; }
+    public Guid CallId { get; private set; }
     public Guid UserId { get; private set; }
     public ParticipantStatus Status { get; private set; }
     public DateTimeOffset? JoinedAt { get; private set; }
@@ -23,14 +23,14 @@ public class CallParticipant
     public Call Call { get; private set; } = null!;
     public UserAccount User { get; private set; } = null!;
 
-    public static CallParticipant CreateAsInitiator(string callId, Guid userId) {
+    public static CallParticipant CreateAsInitiator(Guid callId, Guid userId) {
         var participant = new CallParticipant(callId, userId, ParticipantStatus.Joined) {
             JoinedAt = DateTimeOffset.UtcNow
         };
         return participant;
     }
 
-    public static CallParticipant CreateAsInvitee(string callId, Guid userId) {
+    public static CallParticipant CreateAsInvitee(Guid callId, Guid userId) {
         return new CallParticipant(callId, userId, ParticipantStatus.Ringing);
     }
 

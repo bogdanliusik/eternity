@@ -18,7 +18,7 @@ public partial class CallHub(
     ///     Called by the client after connecting to join a specific call room.
     ///     Enforces one-active-call-per-session at the hub level, then delegates to JoinCallCommand.
     /// </summary>
-    public async Task JoinCall(string callId) {
+    public async Task JoinCall(Guid callId) {
         if (!currentUser.IsAvailable) {
             await Clients.Caller.SendAsync("CallError", "Unauthorized.");
             return;
@@ -82,7 +82,7 @@ public partial class CallHub(
     /// <summary>
     ///     Client registers its PeerJS peer ID so other participants can establish WebRTC connections.
     /// </summary>
-    public async Task RegisterPeerId(string callId, string peerId) {
+    public async Task RegisterPeerId(Guid callId, string peerId) {
         if (!currentUser.IsAvailable) {
             return;
         }
@@ -97,7 +97,7 @@ public partial class CallHub(
     /// <summary>
     ///     Client broadcasts a change in their media state (mic/camera toggle) to all other participants.
     /// </summary>
-    public async Task NotifyMediaStateChanged(string callId, bool audioEnabled, bool videoEnabled) {
+    public async Task NotifyMediaStateChanged(Guid callId, bool audioEnabled, bool videoEnabled) {
         if (!currentUser.IsAvailable) {
             return;
         }
@@ -112,7 +112,7 @@ public partial class CallHub(
     ///     Client explicitly leaves a call room.
     ///     Only triggers domain-level Leave if no other session of this user is in the call.
     /// </summary>
-    public async Task LeaveCall(string callId) {
+    public async Task LeaveCall(Guid callId) {
         if (!currentUser.IsAvailable) {
             return;
         }
@@ -142,7 +142,7 @@ public partial class CallHub(
     ///     Send a WebRTC signaling message to a specific user in the call.
     ///     Currently unused (PeerJS handles its own signaling), but kept as a fallback mechanism.
     /// </summary>
-    public async Task SendSignal(string callId, Guid targetUserId, object signal) {
+    public async Task SendSignal(Guid callId, Guid targetUserId, object signal) {
         if (!currentUser.IsAvailable) {
             return;
         }
@@ -162,21 +162,22 @@ public partial class CallHub(
             var sessionKey = callConnectionTracker.GetSessionKeyByConnection(Context.ConnectionId);
             var callId = callConnectionTracker.GetCallIdByConnection(Context.ConnectionId);
             if (callId != null && sessionKey != null) {
+                var cid = callId.Value;
                 var userId = sessionKey.UserId;
                 var sessionId = sessionKey.SessionId;
-                var callGroup = CallConnectionTracker.GetCallGroup(callId);
-                callConnectionTracker.RemoveSessionFromCall(callId, userId, sessionId, Context.ConnectionId);
+                var callGroup = CallConnectionTracker.GetCallGroup(cid);
+                callConnectionTracker.RemoveSessionFromCall(cid, userId, sessionId, Context.ConnectionId);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, callGroup);
-                if (!callConnectionTracker.IsUserInCall(callId, userId)) {
-                    var result = await mediator.Send(new LeaveCallCommand(callId));
-                    await Clients.Group(callGroup).SendAsync("ParticipantLeft", new { callId, userId });
+                if (!callConnectionTracker.IsUserInCall(cid, userId)) {
+                    var result = await mediator.Send(new LeaveCallCommand(cid));
+                    await Clients.Group(callGroup).SendAsync("ParticipantLeft", new { callId = cid, userId });
                     if (result.Succeeded && result.Data.CallEnded) {
                         await Clients.Group(callGroup)
                             .SendAsync("CallEnded",
-                                new { callId, reason = "All participants disconnected." });
+                                new { callId = cid, reason = "All participants disconnected." });
                     }
                 }
-                LogUserDisconnectedFromCall(logger, userId, sessionId, callId);
+                LogUserDisconnectedFromCall(logger, userId, sessionId, cid);
             }
         }
         await base.OnDisconnectedAsync(exception);
@@ -184,18 +185,18 @@ public partial class CallHub(
 
     [LoggerMessage(Level = LogLevel.Information,
         Message = "User {UserId} (session {SessionId}) joined call {CallId}, connection {ConnectionId}")]
-    private static partial void LogUserJoinedCall(ILogger logger, Guid userId, Guid sessionId, string callId,
+    private static partial void LogUserJoinedCall(ILogger logger, Guid userId, Guid sessionId, Guid callId,
         string connectionId);
 
     [LoggerMessage(Level = LogLevel.Information,
         Message = "User {UserId} registered peerId {PeerId} in call {CallId}")]
-    private static partial void LogPeerIdRegistered(ILogger logger, Guid userId, string peerId, string callId);
+    private static partial void LogPeerIdRegistered(ILogger logger, Guid userId, string peerId, Guid callId);
 
     [LoggerMessage(Level = LogLevel.Information,
         Message = "User {UserId} (session {SessionId}) left call {CallId}")]
-    private static partial void LogUserLeftCall(ILogger logger, Guid userId, Guid sessionId, string callId);
+    private static partial void LogUserLeftCall(ILogger logger, Guid userId, Guid sessionId, Guid callId);
 
     [LoggerMessage(Level = LogLevel.Information,
         Message = "User {UserId} (session {SessionId}) disconnected from call {CallId}")]
-    private static partial void LogUserDisconnectedFromCall(ILogger logger, Guid userId, Guid sessionId, string callId);
+    private static partial void LogUserDisconnectedFromCall(ILogger logger, Guid userId, Guid sessionId, Guid callId);
 }

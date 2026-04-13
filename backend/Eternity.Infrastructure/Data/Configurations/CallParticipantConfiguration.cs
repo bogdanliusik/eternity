@@ -9,9 +9,8 @@ public sealed class CallParticipantConfiguration : IEntityTypeConfiguration<Call
     public void Configure(EntityTypeBuilder<CallParticipant> builder) {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id)
-            .HasMaxLength(26) // ULID is 26 characters
             .IsRequired();
-        builder.Property(x => x.CallId).HasMaxLength(26).IsRequired();
+        builder.Property(x => x.CallId).IsRequired();
         builder.Property(x => x.UserId).IsRequired();
         builder.Property(x => x.Status).IsRequired();
         builder.Property(x => x.JoinedAt).IsRequired(false);

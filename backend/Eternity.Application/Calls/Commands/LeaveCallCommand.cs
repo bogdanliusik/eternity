@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Eternity.Application.Calls.Commands;
 
-public record LeaveCallCommand(string CallId) : IRequest<Result<LeaveCallResult>>;
+public record LeaveCallCommand(Guid CallId) : IRequest<Result<LeaveCallResult>>;
 
 public record LeaveCallResult(CallStatus CallStatus, bool CallEnded, List<Guid> ParticipantUserIds);
 
@@ -41,6 +41,6 @@ public class LeaveCallCommandHandler(IAppDbContext dbContext, ICurrentUser curre
 public class LeaveCallCommandValidator : AbstractValidator<LeaveCallCommand>
 {
     public LeaveCallCommandValidator() {
-        RuleFor(x => x.CallId).NotEmpty().MaximumLength(26);
+        RuleFor(x => x.CallId).NotEmpty();
     }
 }

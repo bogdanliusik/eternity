@@ -39,7 +39,7 @@ public class CallsEndpoint : EndpointGroupBase
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> DeclineCall(string callId, IMediator mediator, ICallNotifier callNotifier,
+    private static async Task<IResult> DeclineCall(Guid callId, IMediator mediator, ICallNotifier callNotifier,
         ICurrentUser currentUser) {
         var result = await mediator.Send(new DeclineCallCommand(callId));
         if (!result.Succeeded) {
@@ -58,7 +58,7 @@ public class CallsEndpoint : EndpointGroupBase
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> GetCall(string callId, IMediator mediator) {
+    private static async Task<IResult> GetCall(Guid callId, IMediator mediator) {
         var result = await mediator.Send(new GetCallQuery(callId));
         return Results.Ok(result);
     }
