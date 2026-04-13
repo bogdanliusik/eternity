@@ -31,8 +31,8 @@ RUN apt-get update && \
 # =========================================
 
 # Create non-root user for security
-RUN addgroup --system --gid 1000 appuser && \
-    adduser --system --uid 1000 --ingroup appuser --shell /bin/sh appuser
+RUN groupadd --system --gid 1000 appuser && \
+    useradd --system --uid 1000 --gid appuser --shell /bin/sh appuser
 
 # Copy published app
 COPY --from=publish /app/publish .
