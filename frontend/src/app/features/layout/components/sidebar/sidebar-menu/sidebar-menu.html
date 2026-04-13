@@ -12,17 +12,18 @@
         <li class="relative">
           @if (item.children) {
             @if (!menuService.showSideBar) {
-              <div
+              <button
+                type="button"
                 [cdkMenuTriggerFor]="flyoutMenu"
                 [cdkMenuPosition]="menuPositions"
                 [ngClass]="{ 'bg-primary/5': item.active, 'hover:bg-primary/10': item.active }"
-                class="group text-muted-foreground relative flex h-[36px] grow cursor-pointer items-center justify-center rounded-lg px-2"
+                class="group text-muted-foreground relative flex h-[36px] w-full grow cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent px-2"
                 [attr.title]="item.label"
                 [attr.aria-label]="item.label">
                 <div class="group-hover:text-primary">
                   <lucide-icon [img]="item.icon" class="h-5 w-5"></lucide-icon>
                 </div>
-              </div>
+              </button>
               <ng-template #flyoutMenu>
                 <div cdkMenu class="bg-card border-surface w-48 rounded-lg border shadow-lg">
                   <div class="border-surface border-b px-3 py-2">
