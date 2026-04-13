@@ -86,38 +86,6 @@ export class MenuService implements OnDestroy {
     this._pagesMenu.set(updatedMenu);
   }
 
-  public toggleDropdown(menu: SubMenuItem) {
-    const updatedMenu = this._pagesMenu().map((menuGroup) => {
-      return {
-        ...menuGroup,
-        items: menuGroup.items.map((item) => {
-          if (item === menu) {
-            return { ...item, expanded: !item.expanded };
-          } else if (item.children) {
-            return { ...item, expanded: false };
-          }
-          return item;
-        })
-      };
-    });
-    this._pagesMenu.set(updatedMenu);
-  }
-
-  public closeAllDropdowns() {
-    const updatedMenu = this._pagesMenu().map((menuGroup) => {
-      return {
-        ...menuGroup,
-        items: menuGroup.items.map((item) => {
-          if (item.children) {
-            return { ...item, expanded: false };
-          }
-          return item;
-        })
-      };
-    });
-    this._pagesMenu.set(updatedMenu);
-  }
-
   public toggleSubMenu(submenu: SubMenuItem) {
     submenu.expanded = !submenu.expanded;
   }

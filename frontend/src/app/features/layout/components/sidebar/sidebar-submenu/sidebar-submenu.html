@@ -3,7 +3,7 @@
   [class.hidden]="!menuService.showSideBar"
   [class.max-h-screen]="submenu.expanded">
   <ul class="border-surface text-muted-foreground flex flex-col border-l border-dashed pl-2">
-    @for (sub of submenu.children; track sub) {
+    @for (sub of submenu.children; track sub.label) {
       <li>
         <div class="text-muted-foreground hover:text-primary relative flex" (click)="toggleMenu(sub)" (keyup.enter)="toggleMenu(sub)" role="button" tabindex="0">
           <ng-container
