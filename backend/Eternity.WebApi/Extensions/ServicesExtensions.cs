@@ -5,6 +5,7 @@ using Eternity.Application.Common.Security;
 using Eternity.Infrastructure.Data;
 using Eternity.WebApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.Generation.Processors.Security;
@@ -14,6 +15,9 @@ namespace Eternity.WebApi.Extensions;
 public static class ServicesExtensions
 {
     public static void AddWebServices(this IHostApplicationBuilder builder) {
+        var keysDirectory = Path.Combine(builder.Environment.ContentRootPath, "data-protection-keys");
+        builder.Services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo(keysDirectory));
         builder.Services.AddScoped<ICurrentUser, CurrentUser>();
         builder.Services.AddScoped<ICookieAuthService, CookieAuthService>();
         builder.Services.AddSingleton<ConnectionTracker>();

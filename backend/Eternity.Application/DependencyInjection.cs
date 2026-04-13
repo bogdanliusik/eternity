@@ -18,6 +18,10 @@ public static class DependencyInjection
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ResponseHandlingBehavior<,>));
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehaviour<,>));
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+            var licenseKey = builder.Configuration["MediatR:LicenseKey"];
+            if (!string.IsNullOrWhiteSpace(licenseKey)) {
+                cfg.LicenseKey = licenseKey;
+            }
         });
     }
 

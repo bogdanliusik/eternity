@@ -33,6 +33,9 @@ RUN apt-get update && \
 # Copy published app
 COPY --from=publish /app/publish .
 
+# Create data protection keys directory so volume mount inherits correct ownership
+RUN mkdir -p /app/data-protection-keys
+
 # Change ownership to built-in non-root user and switch to it
 RUN chown -R app:app /app
 USER app
