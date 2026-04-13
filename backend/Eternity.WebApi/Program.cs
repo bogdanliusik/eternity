@@ -16,7 +16,6 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction()) {
 app.UseForwardedHeaders();
 app.UseRateLimiter();
 app.UseHealthChecks("/health");
-app.UseHttpsRedirection();
 app.UseCors("AllowAngularApp");
 app.UseOpenApi(o => o.Path = "/api/specification.json");
 app.UseSwaggerUi(settings => {

@@ -269,3 +269,6 @@ MigrationBackup/
 .ionide/
 FodyWeavers.xsd
 .idea/
+
+# ASP.NET Data Protection keys (generated at runtime)
+**/data-protection-keys/
