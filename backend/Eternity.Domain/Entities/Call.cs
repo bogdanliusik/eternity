@@ -9,7 +9,7 @@ public class Call
     private Call() { }
 
     private Call(Guid initiatorId, CallType type, string? name) {
-        Id = Ulid.NewUlid().ToString();
+        Id = Guid.NewGuid();
         InitiatorId = initiatorId;
         Type = type;
         Name = name;
@@ -17,7 +17,7 @@ public class Call
         CreatedAt = DateTimeOffset.UtcNow;
     }
 
-    public string Id { get; } = null!;
+    public Guid Id { get; }
     public Guid InitiatorId { get; }
     public string? Name { get; private set; }
     public CallType Type { get; private set; }

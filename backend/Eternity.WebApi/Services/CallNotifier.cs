@@ -18,7 +18,7 @@ public partial class CallNotifier(
     IAppDbContext dbContext,
     ILogger<CallNotifier> logger) : ICallNotifier
 {
-    public async Task NotifyIncomingCallAsync(string callId, CallParticipantDto initiator, CallType callType,
+    public async Task NotifyIncomingCallAsync(Guid callId, CallParticipantDto initiator, CallType callType,
         List<CallParticipantDto> participants, List<Guid> inviteeUserIds) {
         var notification = new {
             callId,
@@ -49,20 +49,20 @@ public partial class CallNotifier(
         LogIncomingCallNotification(logger, callId, sessionIds.Count, inviteeUserIds.Count);
     }
 
-    public async Task NotifyParticipantJoinedAsync(string callId, Guid userId, string username, string fullName) {
+    public async Task NotifyParticipantJoinedAsync(Guid callId, Guid userId, string username, string fullName) {
         var callGroup = CallConnectionTracker.GetCallGroup(callId);
         await callHubContext.Clients.Group(callGroup)
             .SendAsync("ParticipantJoined", new { callId, userId, username, fullName });
         LogParticipantJoined(logger, callId, userId);
     }
 
-    public async Task NotifyParticipantLeftAsync(string callId, Guid userId) {
+    public async Task NotifyParticipantLeftAsync(Guid callId, Guid userId) {
         var callGroup = CallConnectionTracker.GetCallGroup(callId);
         await callHubContext.Clients.Group(callGroup).SendAsync("ParticipantLeft", new { callId, userId });
         LogParticipantLeft(logger, callId, userId);
     }
 
-    public async Task NotifyCallDeclinedAsync(string callId, Guid userId) {
+    public async Task NotifyCallDeclinedAsync(Guid callId, Guid userId) {
         var callGroup = CallConnectionTracker.GetCallGroup(callId);
         await callHubContext.Clients.Group(callGroup).SendAsync("ParticipantDeclined", new { callId, userId });
         var initiatorId = await dbContext.Calls.AsNoTracking()
@@ -83,7 +83,7 @@ public partial class CallNotifier(
         LogCallDeclined(logger, userId, callId);
     }
 
-    public async Task NotifyCallEndedAsync(string callId, string reason, List<Guid> participantUserIds) {
+    public async Task NotifyCallEndedAsync(Guid callId, string reason, List<Guid> participantUserIds) {
         var payload = new { callId, reason };
         var callGroup = CallConnectionTracker.GetCallGroup(callId);
         await callHubContext.Clients.Group(callGroup).SendAsync("CallEnded", payload);
@@ -100,18 +100,18 @@ public partial class CallNotifier(
 
     [LoggerMessage(Level = LogLevel.Information,
         Message = "Sent incoming call notification for call {CallId} to {Count} session(s) of {UserCount} invitee(s)")]
-    private static partial void LogIncomingCallNotification(ILogger logger, string callId, int count, int userCount);
+    private static partial void LogIncomingCallNotification(ILogger logger, Guid callId, int count, int userCount);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Notified call {CallId} that user {UserId} joined")]
-    private static partial void LogParticipantJoined(ILogger logger, string callId, Guid userId);
+    private static partial void LogParticipantJoined(ILogger logger, Guid callId, Guid userId);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Notified call {CallId} that user {UserId} left")]
-    private static partial void LogParticipantLeft(ILogger logger, string callId, Guid userId);
+    private static partial void LogParticipantLeft(ILogger logger, Guid callId, Guid userId);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Notified that user {UserId} declined call {CallId}")]
-    private static partial void LogCallDeclined(ILogger logger, Guid userId, string callId);
+    private static partial void LogCallDeclined(ILogger logger, Guid userId, Guid callId);
 
     [LoggerMessage(Level = LogLevel.Information,
         Message = "Notified all participants that call {CallId} ended: {Reason}")]
-    private static partial void LogCallEnded(ILogger logger, string callId, string reason);
+    private static partial void LogCallEnded(ILogger logger, Guid callId, string reason);
 }

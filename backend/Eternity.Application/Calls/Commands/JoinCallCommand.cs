@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Eternity.Application.Calls.Commands;
 
-public record JoinCallCommand(string CallId) : IRequest<Result<CallDto>>;
+public record JoinCallCommand(Guid CallId) : IRequest<Result<CallDto>>;
 
 public class JoinCallCommandHandler(IAppDbContext dbContext, ICurrentUser currentUser)
     : IRequestHandler<JoinCallCommand, Result<CallDto>>
@@ -88,6 +88,6 @@ public class JoinCallCommandHandler(IAppDbContext dbContext, ICurrentUser curren
 public class JoinCallCommandValidator : AbstractValidator<JoinCallCommand>
 {
     public JoinCallCommandValidator() {
-        RuleFor(x => x.CallId).NotEmpty().MaximumLength(26);
+        RuleFor(x => x.CallId).NotEmpty();
     }
 }

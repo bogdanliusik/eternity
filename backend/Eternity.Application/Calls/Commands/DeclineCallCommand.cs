@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Eternity.Application.Calls.Commands;
 
-public record DeclineCallCommand(string CallId) : IRequest<Result<DeclineCallResult>>;
+public record DeclineCallCommand(Guid CallId) : IRequest<Result<DeclineCallResult>>;
 
 public record DeclineCallResult(CallStatus CallStatus, bool CallEnded, List<Guid> ParticipantUserIds);
 
@@ -45,6 +45,6 @@ public class DeclineCallCommandHandler(IAppDbContext dbContext, ICurrentUser cur
 public class DeclineCallCommandValidator : AbstractValidator<DeclineCallCommand>
 {
     public DeclineCallCommandValidator() {
-        RuleFor(x => x.CallId).NotEmpty().MaximumLength(26);
+        RuleFor(x => x.CallId).NotEmpty();
     }
 }

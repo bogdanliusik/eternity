@@ -5,7 +5,7 @@ namespace Eternity.Application.Calls.Models;
 
 public record CallParticipantDto
 {
-    public required string Id { get; init; }
+    public required Guid Id { get; init; }
     public required Guid UserId { get; init; }
     public required string Username { get; init; }
     public required string FullName { get; init; }
@@ -17,7 +17,7 @@ public record CallParticipantDto
 
 public record CallDto
 {
-    public required string Id { get; init; }
+    public required Guid Id { get; init; }
     public string? Name { get; init; }
     public required CallType Type { get; init; }
     public required CallStatus Status { get; init; }
