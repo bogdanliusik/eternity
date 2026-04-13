@@ -20,6 +20,9 @@ public partial class MigrateCallIdsToGuid : Migration
         // -----------------------------------------------------------------
 
         migrationBuilder.Sql("""
+            -- Ensure gen_random_uuid() is available (built-in since PG 13, pgcrypto fallback for older versions).
+            CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
             -- Step 1: Drop FK and indexes that depend on the old columns.
             ALTER TABLE call_participants DROP CONSTRAINT IF EXISTS fk_call_participants_calls_call_id;
             ALTER TABLE call_participants DROP CONSTRAINT IF EXISTS pk_call_participants;
@@ -80,8 +83,8 @@ public partial class MigrateCallIdsToGuid : Migration
 
     /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder) {
-        // Reverse: convert uuid columns back to varchar(26) ULID strings.
-        // Note: original ULID values are lost; new string representations of UUIDs are used.
+        // Reverse: convert uuid columns back to varchar strings.
+        // Note: original ULID values are lost; UUID text representations (36 chars) are stored instead.
         migrationBuilder.Sql("""
             ALTER TABLE call_participants DROP CONSTRAINT IF EXISTS fk_call_participants_calls_call_id;
             ALTER TABLE call_participants DROP CONSTRAINT IF EXISTS pk_call_participants;
@@ -91,15 +94,15 @@ public partial class MigrateCallIdsToGuid : Migration
             DROP INDEX IF EXISTS ix_call_participants_user_id;
             DROP INDEX IF EXISTS ix_call_participants_user_id_status;
 
-            ALTER TABLE calls ADD COLUMN old_id character varying(26);
-            UPDATE calls SET old_id = SUBSTRING(id::text, 1, 26);
+            ALTER TABLE calls ADD COLUMN old_id character varying(36);
+            UPDATE calls SET old_id = id::text;
             ALTER TABLE calls ALTER COLUMN old_id SET NOT NULL;
 
-            ALTER TABLE call_participants ADD COLUMN old_id character varying(26);
-            UPDATE call_participants SET old_id = SUBSTRING(id::text, 1, 26);
+            ALTER TABLE call_participants ADD COLUMN old_id character varying(36);
+            UPDATE call_participants SET old_id = id::text;
             ALTER TABLE call_participants ALTER COLUMN old_id SET NOT NULL;
 
-            ALTER TABLE call_participants ADD COLUMN old_call_id character varying(26);
+            ALTER TABLE call_participants ADD COLUMN old_call_id character varying(36);
             UPDATE call_participants cp
             SET old_call_id = c.old_id
             FROM calls c
