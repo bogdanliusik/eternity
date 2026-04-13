@@ -30,18 +30,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 # =========================================
 
-# Create non-root user for security
-RUN groupadd --system --gid 1000 appuser && \
-    useradd --system --uid 1000 --gid appuser --shell /bin/sh appuser
-
 # Copy published app
 COPY --from=publish /app/publish .
 
-# Change ownership to non-root user
-RUN chown -R appuser:appuser /app
-
-# Switch to non-root user
-USER appuser
+# Change ownership to built-in non-root user and switch to it
+RUN chown -R app:app /app
+USER app
 
 # Expose port
 EXPOSE 8080
