@@ -1,12 +1,8 @@
-using Eternity.Application.Common.Interfaces;
 using Eternity.Application.Common.Models;
 using Eternity.Application.Common.Security;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
-namespace Eternity.Infrastructure.Identity;
+namespace Eternity.WebApi.Services;
 
 public class CookieAuthService(
     IOptions<CookieSettings> cookieSettings,
@@ -23,11 +19,14 @@ public class CookieAuthService(
             "SameAsRequest" => response.HttpContext.Request.IsHttps,
             _ => !environment.IsDevelopment()
         };
+        var sameSiteMode = Enum.TryParse<SameSiteMode>(_cookieSettings.SameSiteMode, ignoreCase: true, out var parsed)
+            ? parsed
+            : SameSiteMode.Strict;
         var cookieExpiration = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.RefreshTokenExpirationMinutes);
         var cookieOptions = new CookieOptions {
             HttpOnly = true,
             Secure = isSecure,
-            SameSite = _cookieSettings.SameSiteMode,
+            SameSite = sameSiteMode,
             Expires = cookieExpiration,
             Path = "/",
             IsEssential = true

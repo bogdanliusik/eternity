@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace Eternity.WebApi.Hubs;
 
 [Authorize]
-public class CallHub(
+public partial class CallHub(
     CallConnectionTracker callConnectionTracker,
     IMediator mediator,
     ICurrentUser currentUser,
@@ -76,13 +76,7 @@ public class CallHub(
                 new { userId = mediaUserId, audioEnabled, videoEnabled }
             );
         }
-        logger.LogInformation(
-            "User {UserId} (session {SessionId}) joined call {CallId}, connection {ConnectionId}",
-            userId,
-            sessionId,
-            callId,
-            Context.ConnectionId
-        );
+        LogUserJoinedCall(logger, userId, sessionId, callId, Context.ConnectionId);
     }
 
     /// <summary>
@@ -97,7 +91,7 @@ public class CallHub(
         callConnectionTracker.SetPeerId(callId, userId, sessionId, peerId);
         var callGroup = CallConnectionTracker.GetCallGroup(callId);
         await Clients.OthersInGroup(callGroup).SendAsync("PeerIdRegistered", new { userId, peerId });
-        logger.LogInformation("User {UserId} registered peerId {PeerId} in call {CallId}", userId, peerId, callId);
+        LogPeerIdRegistered(logger, userId, peerId, callId);
     }
 
     /// <summary>
@@ -141,7 +135,7 @@ public class CallHub(
             }
         }
         await Clients.Caller.SendAsync("CallLeft", new { callId });
-        logger.LogInformation("User {UserId} (session {SessionId}) left call {CallId}", userId, sessionId, callId);
+        LogUserLeftCall(logger, userId, sessionId, callId);
     }
 
     /// <summary>
@@ -182,14 +176,26 @@ public class CallHub(
                                 new { callId, reason = "All participants disconnected." });
                     }
                 }
-                logger.LogInformation(
-                    "User {UserId} (session {SessionId}) disconnected from call {CallId}",
-                    userId,
-                    sessionId,
-                    callId
-                );
+                LogUserDisconnectedFromCall(logger, userId, sessionId, callId);
             }
         }
         await base.OnDisconnectedAsync(exception);
     }
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "User {UserId} (session {SessionId}) joined call {CallId}, connection {ConnectionId}")]
+    private static partial void LogUserJoinedCall(ILogger logger, Guid userId, Guid sessionId, string callId,
+        string connectionId);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "User {UserId} registered peerId {PeerId} in call {CallId}")]
+    private static partial void LogPeerIdRegistered(ILogger logger, Guid userId, string peerId, string callId);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "User {UserId} (session {SessionId}) left call {CallId}")]
+    private static partial void LogUserLeftCall(ILogger logger, Guid userId, Guid sessionId, string callId);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "User {UserId} (session {SessionId}) disconnected from call {CallId}")]
+    private static partial void LogUserDisconnectedFromCall(ILogger logger, Guid userId, Guid sessionId, string callId);
 }

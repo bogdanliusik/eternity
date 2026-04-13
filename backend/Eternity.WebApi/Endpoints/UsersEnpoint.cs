@@ -4,6 +4,7 @@ using Eternity.Application.Sessions.Commands;
 using Eternity.Application.Users.Queries;
 using Eternity.Domain.Constants;
 using Eternity.WebApi.Extensions;
+using Eternity.WebApi.Services;
 using MediatR;
 
 namespace Eternity.WebApi.Endpoints;

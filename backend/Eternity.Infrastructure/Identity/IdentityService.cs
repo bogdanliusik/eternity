@@ -16,7 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Eternity.Infrastructure.Identity;
 
-public class IdentityService(
+public partial class IdentityService(
     UserManager<ApplicationUser> userManager,
     IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
     IAuthorizationService authorizationService,
@@ -28,13 +28,9 @@ public class IdentityService(
         var user = new ApplicationUser { UserName = userName, Email = email };
         var result = await userManager.CreateAsync(user, password);
         if (result.Succeeded) {
-            logger.LogInformation("User {UserName} created successfully", userName);
+            LogUserCreated(logger, userName);
         } else {
-            logger.LogWarning(
-                "Failed to create user {UserName}: {Errors}",
-                userName,
-                string.Join(", ", result.Errors.Select(e => e.Description))
-            );
+            LogUserCreationFailed(logger, userName, string.Join(", ", result.Errors.Select(e => e.Description)));
         }
         return result.ToApplicationResult(user.Id);
     }
@@ -60,7 +56,7 @@ public class IdentityService(
         string? userAgent) {
         var identityUser = await userManager.FindByNameAsync(userName);
         if (identityUser == null) {
-            logger.LogWarning("Login attempt failed: User {UserName} not found", userName);
+            LogLoginUserNotFound(logger, userName);
             return Result<AppTokenInfo>.Failure(["Invalid credentials"]);
         }
         var lockoutCheck = CheckLockout(identityUser);
@@ -69,39 +65,35 @@ public class IdentityService(
         }
         var isValidPassword = await userManager.CheckPasswordAsync(identityUser, password);
         if (!isValidPassword) {
-            logger.LogWarning("Login attempt failed: Invalid password for user {UserName}", userName);
+            LogLoginInvalidPassword(logger, userName);
             return Result<AppTokenInfo>.Failure(["Invalid credentials"]);
         }
-        logger.LogInformation("User {UserName} logged in successfully", userName);
+        LogUserLoggedIn(logger, userName);
         return await GenerateAppTokenInfo(identityUser, ipAddress, userAgent);
     }
 
     public async Task<Result<AppTokenInfo>> RefreshTokenAsync(Guid sessionId) {
         var session = await dbContext.UserSessions.FirstOrDefaultAsync(s => s.Id == sessionId && !s.IsTerminated);
         if (session == null) {
-            logger.LogWarning("Refresh token attempt failed: Session {SessionId} not found or terminated", sessionId);
+            LogRefreshSessionNotFound(logger, sessionId);
             return Result<AppTokenInfo>.Failure(["Invalid session"]);
         }
         if (session.RefreshTokenExpiry < DateTime.UtcNow) {
-            logger.LogWarning("Refresh token attempt failed: Expired refresh token for session {SessionId}", sessionId);
+            LogRefreshTokenExpired(logger, sessionId);
             session.Terminate();
             await dbContext.SaveChangesAsync(CancellationToken.None);
             return Result<AppTokenInfo>.Failure(["Refresh token expired"]);
         }
         var identityUser = await userManager.FindByIdAsync(session.UserId.ToString());
         if (identityUser == null) {
-            logger.LogWarning("Refresh token attempt failed: User {UserId} not found", session.UserId);
+            LogRefreshUserNotFound(logger, session.UserId);
             return Result<AppTokenInfo>.Failure(["User not found"]);
         }
         var lockoutCheck = CheckLockout(identityUser);
         if (!lockoutCheck.Succeeded) {
             return lockoutCheck;
         }
-        logger.LogInformation(
-            "Token refreshed successfully for user {UserName}, session {SessionId}",
-            identityUser.UserName,
-            sessionId
-        );
+        LogTokenRefreshed(logger, identityUser.UserName, sessionId);
         return await GenerateAppTokenInfoForExistingSession(identityUser, session);
     }
 
@@ -127,7 +119,7 @@ public class IdentityService(
         }
         var result = await userManager.DeleteAsync(user);
         if (result.Succeeded) {
-            logger.LogInformation("User {UserId} deleted successfully", userId);
+            LogUserDeleted(logger, userId);
         }
         return result.ToApplicationResult();
     }
@@ -149,7 +141,7 @@ public class IdentityService(
         var result = await userManager.SetLockoutEndDateAsync(user, lockoutEnd);
         if (result.Succeeded) {
             await userManager.SetLockoutEnabledAsync(user, lockoutEnd.HasValue);
-            logger.LogInformation("Lockout for user {UserId} set to {Lockout}", userId, lockoutEnd);
+            LogLockoutSet(logger, userId, lockoutEnd);
             return Result.Success();
         }
         return result.ToApplicationResult();
@@ -167,11 +159,7 @@ public class IdentityService(
     private Result<AppTokenInfo> CheckLockout(ApplicationUser identityUser) {
         if (identityUser is { LockoutEnabled: true, LockoutEnd: not null } &&
             identityUser.LockoutEnd > DateTimeOffset.UtcNow) {
-            logger.LogWarning(
-                "User {UserName} is locked out until {LockoutEnd}",
-                identityUser.UserName,
-                identityUser.LockoutEnd
-            );
+            LogUserLockedOut(logger, identityUser.UserName, identityUser.LockoutEnd);
             return Result<AppTokenInfo>.Failure(["User is not approved or is locked."]);
         }
         return Result<AppTokenInfo>.Success(null!);
@@ -250,4 +238,43 @@ public class IdentityService(
         );
         return Result<AppTokenInfo>.Success(new AppTokenInfo(accessToken, session.Id));
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "User {UserName} created successfully")]
+    private static partial void LogUserCreated(ILogger logger, string userName);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to create user {UserName}: {Errors}")]
+    private static partial void LogUserCreationFailed(ILogger logger, string userName, string errors);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Login attempt failed: User {UserName} not found")]
+    private static partial void LogLoginUserNotFound(ILogger logger, string userName);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Login attempt failed: Invalid password for user {UserName}")]
+    private static partial void LogLoginInvalidPassword(ILogger logger, string userName);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "User {UserName} logged in successfully")]
+    private static partial void LogUserLoggedIn(ILogger logger, string userName);
+
+    [LoggerMessage(Level = LogLevel.Warning,
+        Message = "Refresh token attempt failed: Session {SessionId} not found or terminated")]
+    private static partial void LogRefreshSessionNotFound(ILogger logger, Guid sessionId);
+
+    [LoggerMessage(Level = LogLevel.Warning,
+        Message = "Refresh token attempt failed: Expired refresh token for session {SessionId}")]
+    private static partial void LogRefreshTokenExpired(ILogger logger, Guid sessionId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Refresh token attempt failed: User {UserId} not found")]
+    private static partial void LogRefreshUserNotFound(ILogger logger, Guid userId);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "Token refreshed successfully for user {UserName}, session {SessionId}")]
+    private static partial void LogTokenRefreshed(ILogger logger, string? userName, Guid sessionId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "User {UserId} deleted successfully")]
+    private static partial void LogUserDeleted(ILogger logger, string userId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Lockout for user {UserId} set to {Lockout}")]
+    private static partial void LogLockoutSet(ILogger logger, Guid userId, DateTimeOffset? lockout);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "User {UserName} is locked out until {LockoutEnd}")]
+    private static partial void LogUserLockedOut(ILogger logger, string? userName, DateTimeOffset? lockoutEnd);
 }

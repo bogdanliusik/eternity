@@ -3,7 +3,6 @@ using System.Text;
 using Eternity.Application.Common.Interfaces;
 using Eternity.Application.Common.Security;
 using Eternity.Infrastructure.Data;
-using Eternity.Infrastructure.Identity;
 using Eternity.WebApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;

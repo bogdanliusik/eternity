@@ -11,7 +11,7 @@ namespace Eternity.Infrastructure.BackgroundJobs.SessionCleanup;
 ///     Background service that periodically marks expired sessions with their EndedAt timestamp.
 ///     This ensures that sessions which expire naturally (token expiry) have their EndedAt set correctly.
 /// </summary>
-public class SessionCleanupService(
+public partial class SessionCleanupService(
     IServiceScopeFactory scopeFactory,
     ILogger<SessionCleanupService> logger,
     IOptions<SessionCleanupSettings> options) : BackgroundService
@@ -44,11 +44,17 @@ public class SessionCleanupService(
             logger.LogDebug("No expired sessions to process");
             return;
         }
-        logger.LogInformation("Processing {Count} expired sessions", expiredSessions.Count);
+        LogProcessingExpiredSessions(logger, expiredSessions.Count);
         foreach (var session in expiredSessions) {
             session.MarkExpired();
         }
         await dbContext.SaveChangesAsync(cancellationToken);
-        logger.LogInformation("Successfully marked {Count} sessions as expired", expiredSessions.Count);
+        LogSessionsMarkedExpired(logger, expiredSessions.Count);
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Processing {Count} expired sessions")]
+    private static partial void LogProcessingExpiredSessions(ILogger logger, int count);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Successfully marked {Count} sessions as expired")]
+    private static partial void LogSessionsMarkedExpired(ILogger logger, int count);
 }
