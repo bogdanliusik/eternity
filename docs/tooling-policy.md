@@ -41,9 +41,9 @@ This document explains when AI agents working in this repository should rely on 
 
 ### Good use cases
 
-- Angular 20 framework details not already shown in repo code
+- Angular 21 framework details not already shown in repo code
 - PrimeNG API details not obvious from local usage
-- .NET 9 or EF Core API questions where repo examples are insufficient
+- .NET 10 or EF Core API questions where repo examples are insufficient
 - upgrade or compatibility work
 
 ### Avoid when

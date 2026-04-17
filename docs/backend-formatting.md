@@ -47,9 +47,9 @@ dotnet format Eternity.sln
 
 ## Analyzer Baseline
 
-- The backend uses the analyzers built into the .NET 9 SDK.
+- The backend uses the analyzers built into the .NET 10 SDK.
 - No `Microsoft.CodeAnalysis.NetAnalyzers` package is required.
-- `AnalysisLevel` is pinned to `9-recommended` for stable CI behavior.
+- `AnalysisLevel` is pinned to `10-recommended` for stable CI behavior.
 - `EnforceCodeStyleInBuild` is enabled so practical style diagnostics are visible during build.
 
 ## Migrations
