@@ -13,7 +13,7 @@ At runtime, the frontend communicates with the backend through the server's publ
 
 ## Frontend Architecture
 
-- The frontend is an Angular 20 standalone application.
+- The frontend is an Angular 21 standalone application.
 - App-wide providers are configured in `frontend/src/app/app.config.ts`.
 - Routes are centralized in `frontend/src/app/app.routes.ts`.
 - `core/` contains app-wide infrastructure, theme, HTTP, and shared client integrations.
@@ -27,7 +27,7 @@ This structure keeps cross-cutting concerns centralized while allowing user-faci
 
 ## Backend Architecture
 
-The backend is a .NET 9 solution split into four layers:
+The backend is a .NET 10 solution split into four layers:
 
 - `Eternity.WebApi` handles HTTP transport, endpoint groups, hubs, and web-facing services.
 - `Eternity.Application` contains commands, queries, validators, DTOs, and application-layer interfaces.
