@@ -5,32 +5,84 @@ description: Follow the repo's Angular frontend patterns. Use when changing rout
 
 # Angular Frontend Patterns
 
-## Goal
+## File and naming conventions
 
-Implement frontend changes using the architecture and patterns this Angular app already uses.
+- Components: `kebab-case.ts` (no `.component` suffix). Class: `PascalCase` (no `Component` suffix). Selector: `app-kebab-case`.
+- Stores: `kebab-case.store.ts`. Exported as `const XxxStore = signalStore(...)`.
+- Services: `kebab-case.service.ts`. Class: `XxxService`.
+- Models: `kebab-case.model.ts`. Interfaces and enums.
+- Guards/interceptors: exported as functions, not classes.
+- Path alias: `@/` maps to `src/app/`.
 
-## Use this when
+## Where things go
 
-- Adding or changing routes, components, stores, forms, services, shared UI, or real-time client behavior.
+- `core/` -- app-wide singletons: auth (`auth.store.ts`, `auth.service.ts`, `auth.guard.ts`, `auth.interceptor.ts`), theme, HTTP (`CoreHttpService`), SignalR (`SignalRService`, hub services), PeerJS client.
+- `shared/` -- reusable standalone components and directives (e.g. `multiselect/`, `tabbed-list/`, `click-outside.directive.ts`).
+- `features/` -- screen-level pages with co-located `components/`, `models/`, `services/`, `store/` subdirectories.
 
-## Workflow
+## Component pattern
 
-1. Confirm where the change belongs: `core/`, `shared/`, or `features/`.
-2. Reuse the existing standalone component and route structure.
-3. Use NgRx Signal Store for non-trivial state.
-4. Keep orchestration in stores or services rather than inflating components.
-5. Use shared SignalR and PeerJS services for real-time work.
-6. Run `npm run build` and manually validate the touched flow.
+```typescript
+@Component({
+  selector: 'app-example',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './example.html',
+  host: { class: 'block' },
+  imports: [/* ... */],
+  providers: [ExampleStore], // feature stores provided here
+})
+export class Example {
+  readonly store = inject(ExampleStore);
+}
+```
 
-## Project patterns
+## Signal Store pattern
 
-- Routes are centralized in `src/app/app.routes.ts`.
-- App-wide providers live in `src/app/app.config.ts`.
-- Non-trivial state should follow the existing `signalStore`, `withState`, `withComputed`, `withMethods`, `rxMethod`, and `tapResponse` style.
-- Use typed reactive forms for non-trivial forms.
+```typescript
+export const ExampleStore = signalStore(
+  // { providedIn: 'root' } for global stores, omit for feature stores
+  withState(initialState),
+  withComputed((store) => ({
+    derived: computed(() => store.items().length),
+  })),
+  withMethods((store, service = inject(ExampleService)) => ({
+    load: rxMethod<void>(pipe(
+      tap(() => patchState(store, { isLoading: true })),
+      switchMap(() => service.getAll().pipe(
+        tapResponse({
+          next: (data) => patchState(store, { data, isLoading: false }),
+          error: () => patchState(store, { isLoading: false }),
+        })
+      ))
+    )),
+  }))
+);
+```
+
+## HTTP and error handling
+
+- All HTTP goes through `CoreHttpService` which wraps `HttpClient`.
+- Responses are `ApiEnvelope<T>` (`{ succeeded, errors, data }`). `CoreHttpService` unwraps or throws `ApiError`.
+- `authInterceptor` catches 401 on non-auth endpoints and triggers logout.
+- In stores, always handle errors via `tapResponse` -- never let them bubble.
+
+## Routes
+
+- Centralized in `src/app/app.routes.ts`.
+- Authenticated routes live under the `Layout` shell with `canActivate: [authenticationGuard]`.
+- All feature pages lazy-load: `loadComponent: () => import('./features/example/example').then(m => m.Example)`.
+
+## Real-time
+
+- `SignalRService` manages hub connections with auto-reconnect.
+- Hub-specific services (`GeneralHubService`, `CallHubService`) wrap it with typed event observables and invoke methods.
+- Never create ad-hoc `HubConnection` instances in features.
 
 ## Avoid
 
-- Introducing Angular Material.
-- Moving feature-specific code into `core/`.
-- Replacing store-based flows with scattered component state when the feature already fits the store pattern.
+- Angular Material.
+- Feature code in `core/`.
+- Scattered component state when a store fits.
+- New `any` types when a precise type is practical.
+- Weakening ESLint rules to suppress warnings.
