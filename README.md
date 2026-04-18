@@ -61,3 +61,13 @@ Near-term direction:
 - expand the built-in collaboration surface from the current core
 - introduce the separate design-time services
 - start rendering designed pages, flows, and runtime-managed entities inside the core experience
+
+## AI agent setup
+
+This repo is configured for AI coding agents. The guidance lives in three layers:
+
+- **`AGENTS.md`** (root, `frontend/`, `backend/`) -- always-on rules, verification commands, git conventions. Deeper files override the root where they conflict.
+- **`.agents/skills/`** -- task-specific playbooks loaded on demand. Available skills: `angular-frontend`, `frontend-linting`, `backend-development`, `backend-formatting`, `ui-quality`, `debugging`, `issue-workflow`.
+- **Skills are loaded via the `skill` tool** before non-trivial work. Load the smallest relevant set (1-2 skills). `AGENTS.md` rules always take precedence over skills.
+
+To start working on a GitHub issue, reference it by number (e.g. "start working on issue #42") and the `issue-workflow` skill handles branching, implementation, and PR creation.

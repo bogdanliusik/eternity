@@ -43,7 +43,6 @@
     "angular-eslint": "21.3.1",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-simple-import-sort": "^13.0.0",
     "prettier": "^3.6.2",
     "prettier-plugin-classnames": "^0.8.2",
     "prettier-plugin-merge": "^0.10.1",
